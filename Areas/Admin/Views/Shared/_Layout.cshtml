@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ecommerce Admin</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/Admin/css/admin-layout.css" asp-append-version="true" />
+    <style>
+        .swal2-popup { font-family: 'Outfit', sans-serif !important; border-radius: 20px !important; }
+        .swal2-confirm { border-radius: 12px !important; padding: 12px 30px !important; font-weight: 500 !important; }
+        .swal2-cancel { border-radius: 12px !important; padding: 12px 30px !important; font-weight: 500 !important; }
+    </style>
+</head>
+<body class="admin-body">
+    
+    <div class="admin-layout">
+        <!-- Mobile Overlay -->
+        <div class="admin-layout__overlay" id="sidebarOverlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="admin-layout__sidebar" id="sidebar">
+            <div class="admin-layout__brand">
+                <i class="fa-solid fa-bag-shopping admin-layout__brand-icon"></i>
+                <span class="admin-layout__brand-text">E-Shop Admin</span>
+            </div>
+            
+            <nav class="admin-layout__nav">
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                    <i class="fa-solid fa-chart-line admin-layout__nav-icon"></i>
+                    <span>Bảng điều khiển</span>
+                </a>
+                
+                <div class="admin-layout__nav-label">Quản lý cửa hàng</div>
+                
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Category" asp-action="Index">
+                    <i class="fa-solid fa-list admin-layout__nav-icon"></i>
+                    <span>Danh mục</span>
+                </a>
+                
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Product" asp-action="Index">
+                    <i class="fa-solid fa-box admin-layout__nav-icon"></i>
+                    <span>Sản phẩm</span>
+                </a>
+                
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Order" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Order" asp-action="Index">
+                    <i class="fa-solid fa-cart-shopping admin-layout__nav-icon"></i>
+                    <span>Đơn hàng</span>
+                </a>
+                
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="User" asp-action="Index">
+                    <i class="fa-solid fa-users admin-layout__nav-icon"></i>
+                    <span>Người dùng</span>
+                </a>
+
+                <div class="admin-layout__nav-label">Nội dung & Phản hồi</div>
+                
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "BlogPost" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="BlogPost" asp-action="Index">
+                    <i class="fa-solid fa-newspaper admin-layout__nav-icon"></i>
+                    <span>Bài viết</span>
+                </a>
+                
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Review" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Review" asp-action="Index">
+                    <i class="fa-solid fa-star admin-layout__nav-icon"></i>
+                    <span>Đánh giá</span>
+                </a>
+                
+                <div class="admin-layout__nav-label">Cấu hình</div>
+                <a class="admin-layout__nav-link" href="#">
+                    <i class="fa-solid fa-gear admin-layout__nav-icon"></i>
+                    <span>Cài đặt hệ thống</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="admin-layout__wrapper" id="contentWrapper">
+            <!-- Header -->
+            <header class="admin-layout__header">
+                <div class="admin-layout__header-left">
+                    <button class="admin-layout__toggle-btn" id="sidebarToggle">
+                        <i class="fa-solid fa-bars-staggered"></i>
+                    </button>
+                    <h1 class="admin-layout__page-title">@ViewData["Title"]</h1>
+                </div>
+                
+                <div class="admin-layout__header-right">
+                    <div class="admin-layout__search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Tìm kiếm nhanh...">
+                    </div>
+                    
+                    <div class="admin-layout__notification">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="admin-layout__notification-badge"></span>
+                    </div>
+                    
+                    <div class="admin-layout__user">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff" alt="Admin" class="admin-layout__user-avatar">
+                        <span class="admin-layout__user-name">Quản trị viên</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Body -->
+            <main class="admin-layout__main">
+                <div class="admin-layout__container">
+                    @RenderBody()
+                </div>
+            </main>
+            
+            <footer class="admin-layout__footer">
+                <p>&copy; @DateTime.Now.Year EcommerceApp - Modern Admin Dashboard</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            const $sidebar = $('#sidebar');
+            const $wrapper = $('#contentWrapper');
+            const $overlay = $('#sidebarOverlay');
+
+            $('#sidebarToggle, #sidebarOverlay').click(function() {
+                $sidebar.toggleClass('admin-layout__sidebar--collapsed');
+                $wrapper.toggleClass('admin-layout__wrapper--expanded');
+                
+                if ($(window).width() <= 1024) {
+                    $overlay.toggleClass('admin-layout__overlay--visible');
+                    $('body').toggleClass('overflow-hidden');
+                }
+            });
+
+            // Handle window resize
+            $(window).resize(function() {
+                if ($(window).width() > 1024) {
+                    $overlay.removeClass('admin-layout__overlay--visible');
+                    $('body').removeClass('overflow-hidden');
+                }
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

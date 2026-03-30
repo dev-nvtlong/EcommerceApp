@@ -1,0 +1,233 @@
+@model EcommerceApp.Areas.Admin.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Admin Login";
+    Layout = null;
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --glass-bg: rgba(255, 255, 255, 0.15);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --text-color: #ffffff;
+        --input-bg: rgba(255, 255, 255, 0.1);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+        margin: 0;
+        overflow: hidden;
+    }
+
+    /* BLOCK: login-page */
+    .login-page {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: url('/Admin/images/image_background_login.png') no-repeat center center/cover;
+        position: relative;
+    }
+
+    .login-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(2px);
+    }
+
+    /* ELEMENT: login-page__card */
+    .login-page__card {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 420px;
+        padding: 48px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ELEMENT: login-page__header */
+    .login-page__header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .login-page__title {
+        color: var(--text-color);
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+    }
+
+    .login-page__subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 15px;
+        font-weight: 300;
+    }
+
+    /* ELEMENT: login-page__form */
+    .login-page__form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* ELEMENT: login-page__field */
+    .login-page__field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .login-page__label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        font-weight: 400;
+        margin-left: 4px;
+    }
+
+    /* ELEMENT: login-page__input-wrapper */
+    .login-page__input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .login-page__icon {
+        position: absolute;
+        left: 16px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 16px;
+        transition: var(--transition);
+    }
+
+    /* ELEMENT: login-page__input */
+    .login-page__input {
+        width: 100%;
+        padding: 14px 16px 14px 46px;
+        background: var(--input-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 15px;
+        outline: none;
+        transition: var(--transition);
+    }
+
+    .login-page__input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .login-page__input:focus {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+    }
+
+    .login-page__input:focus + .login-page__icon,
+    .login-page__input-wrapper:focus-within .login-page__icon {
+        color: #ffffff;
+        transform: scale(1.1);
+    }
+
+    /* ELEMENT: login-page__button */
+    .login-page__button {
+        margin-top: 12px;
+        padding: 14px;
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 12px;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .login-page__button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        filter: brightness(1.1);
+    }
+
+    .login-page__button:active {
+        transform: translateY(0);
+    }
+
+    /* Validation styles */
+    .text-danger {
+        color: #ff6b6b;
+        font-size: 12px;
+        margin-top: 4px;
+        margin-left: 4px;
+    }
+</style>
+
+<div class="login-page">
+    <div class="login-page__card">
+        <div class="login-page__header">
+            <h2 class="login-page__title">Chào mừng bạn quay lại!</h2>
+            <p class="login-page__subtitle">Vui lòng nhập thông tin của bạn.</p>
+        </div>
+
+        <form asp-action="Login" method="post" class="login-page__form">
+            <div class="login-page__field">
+                <label class="login-page__label" asp-for="Email">Email Address</label>
+                <div class="login-page__input-wrapper">
+                    <i class="fa-regular fa-envelope login-page__icon"></i>
+                    <input asp-for="Email" class="login-page__input" placeholder="admin@ecommerce.com" autocomplete="off" />
+                </div>
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="login-page__field">
+                <label class="login-page__label" asp-for="Password">Password</label>
+                <div class="login-page__input-wrapper">
+                    <i class="fa-solid fa-lock login-page__icon"></i>
+                    <input asp-for="Password" type="password" class="login-page__input" placeholder="••••••••" />
+                </div>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="login-page__button">
+                Đăng nhập
+            </button>
+        </form>
+    </div>
+</div>

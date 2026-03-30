@@ -1,0 +1,184 @@
+@{
+    ViewData["Title"] = "Trang chủ";
+    var categories = ViewBag.Categories as List<EcommerceApp.Application.DTOs.Category.CategoryDto>;
+    var products = ViewBag.FeaturedProducts as List<EcommerceApp.Application.DTOs.Product.ProductDto>;
+}
+
+<!-- Hero Section -->
+<section class="hero" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+    <div class="hero__container">
+        <div class="hero__content">
+            <span class="text-primary fw-bold mb-2 d-block">CHUYÊN GIA CÂY CẢNH & THIẾT BỊ VƯỜN</span>
+            <h1 class="hero__title">Khơi Nguồn Sống Xanh</h1>
+            <p class="hero__description">
+                Chúng tôi cung cấp giải pháp xanh toàn diện từ cây giống, cây cảnh nghệ thuật đến các sản phẩm chăm sóc thực vật cao cấp.
+            </p>
+            <div class="d-flex gap-3 mt-4">
+                <a asp-controller="Shop" asp-action="Index" class="hero__btn">Mua Sắm Ngay</a>
+                <a href="#featured" class="btn btn-outline-success rounded-pill px-4 py-3 fw-bold">Xem khuyến mãi</a>
+            </div>
+        </div>
+        <div class="hero__image-wrap d-none d-lg-block">
+            <img src="~/images/hero-plants.png" alt="Green Life Hero" class="hero__image shadow-lg">
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Khám phá Danh mục</h2>
+            <div class="mx-auto bg-primary" style="height: 3px; width: 50px;"></div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="position-relative overflow-hidden rounded-4 shadow-sm h-100" style="min-height: 400px;">
+                    <img src="~/images/cat-indoor.png" class="w-100 h-100 object-fit-cover transition-transform" style="transition: 0.5s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div class="position-absolute bottom-0 start-0 p-4 w-100 border-top bg-white bg-opacity-75 backdrop-blur-sm">
+                        <h3 class="h4 fw-bold mb-1">Cây Trong Nhà</h3>
+                        <a href="#" class="text-success text-decoration-none small fw-bold">Khám phá <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="position-relative overflow-hidden rounded-4 shadow-sm h-100" style="min-height: 400px;">
+                    <img src="~/images/cat-bonsai.png" class="w-100 h-100 object-fit-cover transition-transform" style="transition: 0.5s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div class="position-absolute bottom-0 start-0 p-4 w-100 border-top bg-white bg-opacity-75 backdrop-blur-sm">
+                        <h3 class="h4 fw-bold mb-1">Cây Cảnh Nghệ Thuật</h3>
+                        <a href="#" class="text-success text-decoration-none small fw-bold">Khám phá <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products Section -->
+<section id="featured" class="py-5">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-end mb-5">
+            <div>
+                <h2 class="fw-bold mb-0">Sản phẩm Được yêu thích</h2>
+                <p class="text-muted mb-0">Tuyển chọn những loài cây và vật tư tốt nhất cho khu vườn của bạn</p>
+            </div>
+            <a asp-controller="Shop" asp-action="Index" class="text-success fw-bold text-decoration-none">Xem tất cả <i class="fa-solid fa-chevron-right ms-1"></i></a>
+        </div>
+        
+        <div class="row g-4">
+            @if (products != null && products.Any())
+            {
+                @foreach (var p in products)
+                {
+                    <div class="col-6 col-lg-3">
+                        <div class="card border-0 bg-transparent h-100 group">
+                            <div class="position-relative overflow-hidden rounded-4 mb-3" style="aspect-ratio: 1/1;">
+                                @if (p.ImageUrls != null && p.ImageUrls.Any())
+                                {
+                                    <img src="@p.ImageUrls[0]" class="w-100 h-100 object-fit-cover" alt="@p.Name">
+                                }
+                                else
+                                {
+                                    <div class="w-100 h-100 bg-secondary-subtle d-flex align-items-center justify-content-center">
+                                        <i class="fa-solid fa-image text-white opacity-50 h1"></i>
+                                    </div>
+                                }
+                                <div class="position-absolute top-0 end-0 p-3 opacity-0 group-hover-opacity-100 transition-all">
+                                    <button class="btn btn-white btn-sm rounded-circle shadow-sm" title="Yêu thích">
+                                        <i class="fa-regular fa-heart"></i>
+                                    </button>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 w-100 p-3 translate-y-100 group-hover-translate-y-0 transition-all">
+                                    <button onclick="addToCart(@p.ProductId)" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">
+                                        Thêm vào giỏ
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="px-2">
+                                <h3 class="h6 fw-semibold mb-1 text-truncate">@p.Name</h3>
+                                <div class="text-primary fw-bold">@p.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Chưa có sản phẩm nào được hiển thị.</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Kinh nghiệm Làm vườn</h2>
+            <p class="text-muted">Chia sẻ bí quyết chăm sóc từ những chuyên gia hàng đầu</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 h-100 bg-transparent">
+                    <div class="position-relative rounded-4 overflow-hidden mb-3" style="aspect-ratio: 16/9;">
+                        <img src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1000&auto=format&fit=crop" class="w-100 h-100 object-fit-cover" alt="Blog">
+                    </div>
+                    <div class="px-2">
+                        <span class="text-success small fw-bold mb-2 d-block">BÍ QUYẾT</span>
+                        <h3 class="h5 fw-bold mb-2">Cách chăm sóc Monstera xanh tốt quanh năm</h3>
+                        <p class="text-muted small text-truncate-2">Tìm hiểu lượng ánh sáng và nước tưới lý tưởng cho loài cây "quốc dân" này...</p>
+                        <a href="#" class="text-dark fw-bold text-decoration-none small">Đọc thêm <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 h-100 bg-transparent">
+                    <div class="position-relative rounded-4 overflow-hidden mb-3" style="aspect-ratio: 16/9;">
+                        <img src="https://images.unsplash.com/photo-1524486361537-8ad15938e1a3?q=80&w=1000&auto=format&fit=crop" class="w-100 h-100 object-fit-cover" alt="Blog">
+                    </div>
+                    <div class="px-2">
+                        <span class="text-success small fw-bold mb-2 d-block">VẬT TƯ</span>
+                        <h3 class="h5 fw-bold mb-2">Sử dụng thuốc bảo vệ thực vật hữu cơ</h3>
+                        <p class="text-muted small text-truncate-2">Giải pháp an toàn cho vườn rau sạch ngay tại ban công nhà bạn...</p>
+                        <a href="#" class="text-dark fw-bold text-decoration-none small">Đọc thêm <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 h-100 bg-transparent">
+                    <div class="position-relative rounded-4 overflow-hidden mb-3" style="aspect-ratio: 16/9;">
+                        <img src="https://images.unsplash.com/photo-1533038590840-1cde6e56f40f?q=80&w=1000&auto=format&fit=crop" class="w-100 h-100 object-fit-cover" alt="Blog">
+                    </div>
+                    <div class="px-2">
+                        <span class="text-success small fw-bold mb-2 d-block">DỰ ÁN</span>
+                        <h3 class="h5 fw-bold mb-2">Tạo "khu rừng nhỏ" trong phòng khách</h3>
+                        <p class="text-muted small text-truncate-2">Hướng dẫn chi tiết cách bố trí cây cảnh để giải tỏa căng thẳng sau giờ làm việc...</p>
+                        <a href="#" class="text-dark fw-bold text-decoration-none small">Đọc thêm <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .transition-all { transition: all 0.3s ease; }
+    .transition-transform { transition: transform 0.3s ease; }
+    .object-fit-cover { object-fit: cover; }
+    .backdrop-blur-sm { backdrop-filter: blur(5px); }
+    .group:hover .group-hover-opacity-100 { opacity: 1 !important; }
+    .group:hover .group-hover-translate-y-0 { transform: translateY(0) !important; }
+    .translate-y-100 { transform: translateY(100%); }
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .btn-white { background: white; color: var(--dark); border: none; }
+    .btn-white:hover { background: var(--primary); color: white; }
+</style>

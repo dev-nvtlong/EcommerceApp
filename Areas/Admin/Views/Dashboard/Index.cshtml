@@ -1,0 +1,258 @@
+@{
+    ViewData["Title"] = "Thống kê tổng quan";
+}
+
+<style>
+    /* Dashboard specific styles using BEM within the layout container */
+    
+    .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .dashboard-card {
+        background: white;
+        padding: 24px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .dashboard-card__icon-wrapper {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .dashboard-card__icon-wrapper--blue { background: #eff6ff; color: #3b82f6; }
+    .dashboard-card__icon-wrapper--green { background: #f0fdf4; color: #22c55e; }
+    .dashboard-card__icon-wrapper--purple { background: #faf5ff; color: #a855f7; }
+    .dashboard-card__icon-wrapper--orange { background: #fff7ed; color: #f97316; }
+
+    .dashboard-card__content {
+        flex: 1;
+    }
+
+    .dashboard-card__title {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+        font-weight: 500;
+    }
+
+    .dashboard-card__value {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .dashboard-card__trend {
+        font-size: 12px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .dashboard-card__trend--up { color: #22c55e; }
+    .dashboard-card__trend--down { color: #ef4444; }
+
+    /* Section styling */
+    .dashboard-section {
+        background: white;
+        padding: 24px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .dashboard-section__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .dashboard-section__title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    /* Table styling */
+    .dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .dashboard-table th {
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 500;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .dashboard-table td {
+        padding: 16px;
+        font-size: 14px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .dashboard-table__user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .dashboard-table__avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+
+    .dashboard-table__status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .dashboard-table__status--success { background: #f0fdf4; color: #22c55e; }
+    .dashboard-table__status--pending { background: #fff7ed; color: #f97316; }
+
+</style>
+
+<div class="dashboard">
+    <!-- Stats Grid -->
+    <div class="dashboard-stats">
+        <div class="dashboard-card">
+            <div class="dashboard-card__icon-wrapper dashboard-card__icon-wrapper--blue">
+                <i class="fa-solid fa-dollar-sign"></i>
+            </div>
+            <div class="dashboard-card__content">
+                <p class="dashboard-card__title">Tổng doanh thu</p>
+                <h3 class="dashboard-card__value">128.450.000₫</h3>
+                <p class="dashboard-card__trend dashboard-card__trend--up">
+                    <i class="fa-solid fa-arrow-up"></i> 12.5% so với tháng trước
+                </p>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card__icon-wrapper dashboard-card__icon-wrapper--green">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div class="dashboard-card__content">
+                <p class="dashboard-card__title">Đơn hàng mới</p>
+                <h3 class="dashboard-card__value">+456</h3>
+                <p class="dashboard-card__trend dashboard-card__trend--up">
+                    <i class="fa-solid fa-arrow-up"></i> 8.2% so với hôm qua
+                </p>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card__icon-wrapper dashboard-card__icon-wrapper--purple">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="dashboard-card__content">
+                <p class="dashboard-card__title">Khách hàng mới</p>
+                <h3 class="dashboard-card__value">+1.234</h3>
+                <p class="dashboard-card__trend dashboard-card__trend--up">
+                    <i class="fa-solid fa-arrow-up"></i> 5.4% so với tuần trước
+                </p>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card__icon-wrapper dashboard-card__icon-wrapper--orange">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <div class="dashboard-card__content">
+                <p class="dashboard-card__title">Sản phẩm đang bán</p>
+                <h3 class="dashboard-card__value">892</h3>
+                <p class="dashboard-card__trend dashboard-card__trend--down">
+                    <i class="fa-solid fa-arrow-down"></i> 2.1% (hết hàng)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="dashboard-section">
+        <div class="dashboard-section__header">
+            <h2 class="dashboard-section__title">Đơn hàng gần đây</h2>
+            <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+        </div>
+
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Khách hàng</th>
+                    <th>Sản phẩm</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="dashboard-table__user">
+                            <img src="https://ui-avatars.com/api/?name=Nguyen+An&background=random" alt="User" class="dashboard-table__avatar">
+                            <span>Nguyễn Văn An</span>
+                        </div>
+                    </td>
+                    <td>iPhone 15 Pro Max</td>
+                    <td>24/03/2026</td>
+                    <td>34.990.000₫</td>
+                    <td><span class="dashboard-table__status dashboard-table__status--success">Đã giao</span></td>
+                    <td><i class="fa-solid fa-ellipsis-vertical cursor-pointer"></i></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="dashboard-table__user">
+                            <img src="https://ui-avatars.com/api/?name=Tran+Binh&background=random" alt="User" class="dashboard-table__avatar">
+                            <span>Trần Thị Bình</span>
+                        </div>
+                    </td>
+                    <td>MacBook Air M2</td>
+                    <td>23/03/2026</td>
+                    <td>28.450.000₫</td>
+                    <td><span class="dashboard-table__status dashboard-table__status--pending">Đang xử lý</span></td>
+                    <td><i class="fa-solid fa-ellipsis-vertical cursor-pointer"></i></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="dashboard-table__user">
+                            <img src="https://ui-avatars.com/api/?name=Le+Cuong&background=random" alt="User" class="dashboard-table__avatar">
+                            <span>Lê Văn Cường</span>
+                        </div>
+                    </td>
+                    <td>Sony WH-1000XM5</td>
+                    <td>22/03/2026</td>
+                    <td>8.490.000₫</td>
+                    <td><span class="dashboard-table__status dashboard-table__status--success">Đã giao</span></td>
+                    <td><i class="fa-solid fa-ellipsis-vertical cursor-pointer"></i></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

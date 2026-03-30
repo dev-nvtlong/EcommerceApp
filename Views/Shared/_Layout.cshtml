@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - E-Shop</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="main-header">
+        <div class="main-header__container">
+            <a class="main-header__logo" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fa-solid fa-seedling"></i>
+                <span>Green Life</span>
+            </a>
+            
+            <nav class="main-header__nav">
+                <a class="main-header__link" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                <a class="main-header__link" asp-area="" asp-controller="Shop" asp-action="Index">Cây & Sản phẩm</a>
+                <a class="main-header__link" asp-area="" asp-controller="Blog" asp-action="Index">Kinh nghiệm</a>
+                <a class="main-header__link" asp-area="" asp-controller="Home" asp-action="Privacy">Về chúng tôi</a>
+            </nav>
+            
+            <div class="main-header__actions">
+                <div class="main-header__action">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <a asp-controller="Cart" asp-action="Index" class="main-header__action text-decoration-none">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cart-badge" class="main-header__badge">0</span>
+                </a>
+                <div class="dropdown main-header__user">
+                    <a href="#" class="main-header__action text-decoration-none" data-bs-toggle="dropdown">
+                        <i class="fa-regular fa-user"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 mt-3 p-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="px-3 py-2 border-bottom mb-2">
+                                <span class="d-block fw-bold small">Chào, @User.Identity.Name</span>
+                            </li>
+                            <li><a class="dropdown-item rounded-3 py-2 small" href="#"><i class="fa-solid fa-circle-user me-2"></i> Hồ sơ</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 small" href="#"><i class="fa-solid fa-clock-rotate-left me-2"></i> Đơn hàng</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item rounded-3 py-2 small text-danger">
+                                        <i class="fa-solid fa-right-from-bracket me-2"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li><a class="dropdown-item rounded-3 py-2 small" asp-controller="Account" asp-action="Auth" asp-route-mode="login"><i class="fa-solid fa-right-to-bracket me-2"></i> Đăng nhập</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 small fw-bold text-primary" asp-controller="Account" asp-action="Auth" asp-route-mode="register"><i class="fa-solid fa-user-plus me-2"></i> Đăng ký</a></li>
+                        }
+                    </ul>
+                </div>
+                <a class="btn btn-sm btn-outline-primary rounded-pill d-none d-md-inline-block px-3" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin</a>
+            </div>
+        </div>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="main-footer">
+        <div class="main-footer__container">
+            <div>
+                <span class="main-footer__brand-title">GREEN LIFE</span>
+                <p class="main-footer__description">
+                    Mang hơi thở thiên nhiên vào không gian sống của bạn. Chuyên cung cấp cây cảnh, cây công trình và các sản phẩm chăm sóc thực vật chuyên nghiệp.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="main-footer__link"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="#" class="main-footer__link"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="main-footer__link"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div>
+                <h4 class="main-footer__links-title">Mua sắm</h4>
+                <ul class="main-footer__list">
+                    <li class="main-footer__list-item"><a class="main-footer__link" asp-controller="Shop" asp-action="Index">Tất cả sản phẩm</a></li>
+                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Nam</a></li>
+                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Nữ</a></li>
+                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Phụ kiện</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="main-footer__links-title">Thông tin</h4>
+                <ul class="main-footer__list">
+                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Về chúng tôi</a></li>
+                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Chính sách bảo mật</a></li>
+                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Điều khoản sử dụng</a></li>
+                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Tuyển dụng</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="main-footer__links-title">Liên hệ</h4>
+                <ul class="main-footer__list">
+                    <li class="main-footer__list-item"><i class="fa-solid fa-location-dot me-2"></i> 123 Đường ABC, Hà Nội</li>
+                    <li class="main-footer__list-item"><i class="fa-solid fa-phone me-2"></i> +(84) 123 456 789</li>
+                    <li class="main-footer__list-item"><i class="fa-solid fa-envelope me-2"></i> contact@eshop.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="main-footer__bottom">
+            <p>&copy; @DateTime.Now.Year E-SHOP - Designed for excellence.</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function updateCartBadge() {
+            $.get('/Cart/GetCartSummary', function(res) {
+                $('#cart-badge').text(res.totalItems);
+            });
+        }
+
+        function addToCart(productId, quantity = 1) {
+            $.post('/Cart/AddToCart', { productId: productId, quantity: quantity }, function(res) {
+                if (res.success) {
+                    updateCartBadge();
+                    Swal.fire({
+                        title: 'Thành công!',
+                        text: 'Sản phẩm đã được thêm vào giỏ hàng.',
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
+            }).fail(function() {
+                window.location.href = '/Account/Login';
+            });
+        }
+
+        $(document).ready(function() {
+            updateCartBadge();
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

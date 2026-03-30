@@ -1,0 +1,275 @@
+@model EcommerceApp.Models.ViewModels.AuthViewModel
+@{
+    ViewData["Title"] = "Xác thực tài khoản";
+}
+
+<div class="auth-section py-5 min-vh-100 d-flex align-items-center">
+    <div class="container d-flex justify-content-center">
+        <div class="auth-container @(Model.IsRegisterActive ? "right-panel-active" : "")" id="auth-container">
+            <!-- Sign Up Form -->
+            <div class="form-container sign-up-container">
+                <form asp-action="Register" method="post">
+                    <h2 class="fw-bold mb-4">Đăng ký thành viên</h2>
+                    <div class="social-container mb-3">
+                        <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
+                        <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <span class="text-muted small mb-3">Sử dụng Email để đăng ký</span>
+                    <input asp-for="RegisterModel.FullName" placeholder="Họ và tên" />
+                    <span asp-validation-for="RegisterModel.FullName" class="text-danger tiny"></span>
+                    
+                    <input asp-for="RegisterModel.Email" placeholder="Email" />
+                    <span asp-validation-for="RegisterModel.Email" class="text-danger tiny"></span>
+                    
+                    <input asp-for="RegisterModel.Password" type="password" placeholder="Mật khẩu" />
+                    <span asp-validation-for="RegisterModel.Password" class="text-danger tiny"></span>
+                    
+                    <input asp-for="RegisterModel.ConfirmPassword" type="password" placeholder="Xác nhận mật khẩu" />
+                    <span asp-validation-for="RegisterModel.ConfirmPassword" class="text-danger tiny"></span>
+
+                    @if (Model.IsRegisterActive) {
+                        <div asp-validation-summary="All" class="text-danger tiny mt-2"></div>
+                    }
+
+                    <button type="submit" class="mt-4">ĐĂNG KÝ</button>
+                </form>
+            </div>
+
+            <!-- Sign In Form -->
+            <div class="form-container sign-in-container">
+                <form asp-action="Login" method="post">
+                    <h2 class="fw-bold mb-4">Đăng nhập</h2>
+                    <div class="social-container mb-3">
+                        <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social"><i class="fab fa-google-plus-g"></i></a>
+                        <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <span class="text-muted small mb-3">Sử dụng tài khoản của bạn</span>
+                    <input asp-for="LoginModel.Email" placeholder="Email" />
+                    <span asp-validation-for="LoginModel.Email" class="text-danger tiny"></span>
+                    
+                    <input asp-for="LoginModel.Password" type="password" placeholder="Mật khẩu" />
+                    <span asp-validation-for="LoginModel.Password" class="text-danger tiny"></span>
+                    
+                    <div class="d-flex justify-content-between w-100 mt-2 mb-3 px-2">
+                        <div class="form-check">
+                            <input asp-for="LoginModel.RememberMe" class="form-check-input">
+                            <label asp-for="LoginModel.RememberMe" class="form-check-label text-muted tiny">Ghi nhớ</label>
+                        </div>
+                        <a href="#" class="text-muted tiny text-decoration-none">Quên mật khẩu?</a>
+                    </div>
+
+                    @if (!Model.IsRegisterActive) {
+                        <div asp-validation-summary="All" class="text-danger tiny mt-2"></div>
+                    }
+
+                    <button type="submit">ĐĂNG NHẬP</button>
+                </form>
+            </div>
+
+            <!-- Overlay -->
+            <div class="overlay-container">
+                <div class="overlay">
+                    <div class="overlay-panel overlay-left">
+                        <h2 class="fw-bold text-white mb-3">Đã có tài khoản?</h2>
+                        <p class="text-white small mb-4">Hãy đăng nhập để tiếp tục hành trình chăm sóc không gian xanh của bạn.</p>
+                        <button class="ghost" id="signIn">ĐĂNG NHẬP</button>
+                    </div>
+                    <div class="overlay-panel overlay-right">
+                        <h2 class="fw-bold text-white mb-3">Gia nhập cộng đồng!</h2>
+                        <p class="text-white small mb-4">Tham gia cùng Green Life để nhận được những tư vấn tốt nhất về cây trồng.</p>
+                        <button class="ghost" id="signUp">ĐĂNG KÝ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-section { background: #f6f5f7; }
+    
+    .auth-container {
+        background-color: #fff;
+        border-radius: 20px;
+        box-shadow: 0 14px 28px rgba(0,0,0,0.1), 0 10px 10px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+        width: 850px;
+        max-width: 100%;
+        min-height: 580px;
+    }
+
+    form {
+        background-color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 50px;
+        height: 100%;
+        text-align: center;
+    }
+
+    input {
+        background-color: #eee;
+        border: none;
+        padding: 12px 15px;
+        margin: 8px 0;
+        width: 100%;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .tiny { font-size: 11px; }
+
+    button {
+        border-radius: 30px;
+        border: 1px solid var(--primary);
+        background-color: var(--primary);
+        color: #FFFFFF;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 12px 45px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        transition: transform 80ms ease-in;
+        cursor: pointer;
+    }
+
+    button:active { transform: scale(0.95); }
+    button:focus { outline: none; }
+    button.ghost {
+        background-color: transparent;
+        border-color: #FFFFFF;
+    }
+
+    .form-container {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        transition: all 0.6s ease-in-out;
+    }
+
+    .sign-in-container {
+        left: 0;
+        width: 50%;
+        z-index: 2;
+    }
+
+    .auth-container.right-panel-active .sign-in-container {
+        transform: translateX(100%);
+    }
+
+    .sign-up-container {
+        left: 0;
+        width: 50%;
+        opacity: 0;
+        z-index: 1;
+    }
+
+    .auth-container.right-panel-active .sign-up-container {
+        transform: translateX(100%);
+        opacity: 1;
+        z-index: 5;
+        animation: show 0.6s;
+    }
+
+    @@keyframes show {
+        0%, 49.99% { opacity: 0; z-index: 1; }
+        50%, 100% { opacity: 1; z-index: 5; }
+    }
+
+    .overlay-container {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        transition: transform 0.6s ease-in-out;
+        z-index: 100;
+    }
+
+    .auth-container.right-panel-active .overlay-container {
+        transform: translateX(-100%);
+    }
+
+    .overlay {
+        background: var(--primary);
+        background: linear-gradient(to right, #16a34a, #15803d);
+        background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1200&q=80');
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        color: #FFFFFF;
+        position: relative;
+        left: -100%;
+        height: 100%;
+        width: 200%;
+        transform: translateX(0);
+        transition: transform 0.6s ease-in-out;
+    }
+    
+    .overlay::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(22, 163, 74, 0.7);
+    }
+
+    .auth-container.right-panel-active .overlay {
+        transform: translateX(50%);
+    }
+
+    .overlay-panel {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 0 40px;
+        text-align: center;
+        top: 0;
+        height: 100%;
+        width: 50%;
+        transform: translateX(0);
+        transition: transform 0.6s ease-in-out;
+    }
+
+    .overlay-left { transform: translateX(-20%); }
+    .auth-container.right-panel-active .overlay-left { transform: translateX(0); }
+    .overlay-right { right: 0; transform: translateX(0); }
+    .auth-container.right-panel-active .overlay-right { transform: translateX(20%); }
+
+    .social-container { margin: 20px 0; }
+    .social-container a {
+        border: 1px solid #DDDDDD;
+        border-radius: 50%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 5px;
+        height: 40px;
+        width: 40px;
+        text-decoration: none;
+        color: #333;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        const signUpButton = document.getElementById('signUp');
+        const signInButton = document.getElementById('signIn');
+        const container = document.getElementById('auth-container');
+
+        signUpButton.addEventListener('click', () => {
+            container.classList.add("right-panel-active");
+        });
+
+        signInButton.addEventListener('click', () => {
+            container.classList.remove("right-panel-active");
+        });
+    </script>
+}
