@@ -4,85 +4,169 @@
     var categories = ViewBag.Categories as List<EcommerceApp.Application.DTOs.Category.CategoryDto>;
 }
 
-<div class="py-5 bg-white border-bottom">
-    <div class="container">
-        <h1 class="fw-bold mb-0">Cửa hàng</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 mt-2">
-                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-                <li class="breadcrumb-item active">Cửa hàng</li>
-            </ol>
-        </nav>
+<style>
+    .shop-banner {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        border-radius: 30px;
+        position: relative;
+        overflow: hidden;
+        margin-top: 2rem;
+        padding: 4rem;
+        color: white;
+    }
+    .shop-banner__img {
+        position: absolute;
+        right: 0;
+        top: 0;
+        height: 100%;
+        opacity: 0.3;
+        z-index: 1;
+    }
+    .shop-banner__content {
+        position: relative;
+        z-index: 2;
+        max-width: 600px;
+    }
+</style>
+
+<div class="container mb-4">
+    <div class="shop-banner shadow-sm">
+        <img src="https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=1200&auto=format&fit=crop" class="shop-banner__img" alt="Plant Decoration">
+        <div class="shop-banner__content animate__animated animate__fadeInLeft">
+            <span class="badge bg-emerald-400 bg-opacity-25 text-emerald-300 px-3 py-2 rounded-pill mb-3 fw-bold">
+                <i class="fa-solid fa-leaf me-2"></i> BỘ SƯU TẬP MÙA XUÂN
+            </span>
+            <h1 class="display-5 fw-bold mb-3">TẬN HƯỞNG KHÔNG GIAN SỐNG <span class="text-emerald-300">TRONG LÀNH</span></h1>
+            <p class="mb-4 opacity-75 lead">Lựa chọn những loài cây phong thủy tốt nhất cho phòng làm việc và ngôi nhà của bạn. Giảm ngay 20% khi mua combo!</p>
+            <div class="d-flex gap-3">
+                <a href="#filterForm" class="btn btn-emerald-400 rounded-pill px-4 fw-bold">Khám phá ngay</a>
+                <a href="#" class="btn btn-outline-light rounded-pill px-4 fw-bold">Xem ưu đãi</a>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    .bg-emerald-400 { background-color: #34d399 !important; }
+    .text-emerald-300 { color: #6ee7b7 !important; }
+    .btn-emerald-400 { background-color: #34d399; border-color: #34d399; color: #064e3b; }
+    .btn-emerald-400:hover { background-color: #10b981; border-color: #10b981; color: white; }
+</style>
 
 <div class="container py-5">
     <div class="row g-4">
         <!-- Sidebar Filters -->
         <aside class="col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <h3 class="h5 fw-bold mb-4">Danh mục</h3>
-                <div class="list-group list-group-flush">
-                    <a asp-action="Index" asp-route-categoryId="" 
-                       class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center @(ViewBag.CurrentCategory == null ? "text-primary fw-bold" : "text-muted")">
-                        Tất cả sản phẩm
-                    </a>
-                    @foreach (var cat in categories)
-                    {
-                        <a asp-action="Index" asp-route-categoryId="@cat.Id" 
-                           class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center @(ViewBag.CurrentCategory == (int?)cat.Id ? "text-primary fw-bold" : "text-muted")">
-                            @cat.Name
+            <form method="get" action="@Url.Action("Index")" id="filterForm">
+                <input type="hidden" name="categoryId" value="@ViewBag.CurrentCategory" />
+                <input type="hidden" name="sortOrder" id="sortOrderInput" value="@ViewBag.SortOrder" />
+
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h3 class="h5 fw-bold mb-4">Danh mục</h3>
+                    <div class="list-group list-group-flush">
+                        <a asp-action="Index" asp-route-categoryId="" 
+                           asp-route-minPrice="@ViewBag.MinPrice" asp-route-maxPrice="@ViewBag.MaxPrice" asp-route-sortOrder="@ViewBag.SortOrder"
+                           class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center @(ViewBag.CurrentCategory == null ? "text-primary fw-bold" : "text-muted")">
+                            Tất cả sản phẩm
                         </a>
+                        @foreach (var cat in categories)
+                        {
+                            <a asp-action="Index" asp-route-categoryId="@cat.Id" 
+                               asp-route-minPrice="@ViewBag.MinPrice" asp-route-maxPrice="@ViewBag.MaxPrice" asp-route-sortOrder="@ViewBag.SortOrder"
+                               class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center @(ViewBag.CurrentCategory == (int?)cat.Id ? "text-primary fw-bold" : "text-muted")">
+                                @cat.Name
+                            </a>
+                        }
+                    </div>
+                    
+                    <hr class="my-4 text-muted opacity-25">
+                    
+                    <h3 class="h5 fw-bold mb-4">Khoảng giá</h3>
+                    <div class="mb-3">
+                        <div class="d-flex gap-2 align-items-center mb-2">
+                            <input type="number" name="minPrice" value="@ViewBag.MinPrice" class="form-control form-control-sm border-0 bg-light rounded-3" placeholder="Từ">
+                            <span class="text-muted">-</span>
+                            <input type="number" name="maxPrice" value="@ViewBag.MaxPrice" class="form-control form-control-sm border-0 bg-light rounded-3" placeholder="Đến">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill btn-sm fw-bold py-2 shadow-sm">
+                        Áp dụng lọc
+                    </button>
+                    @if (ViewBag.MinPrice != null || ViewBag.MaxPrice != null)
+                    {
+                        <a asp-action="Index" asp-route-categoryId="@ViewBag.CurrentCategory" class="btn btn-link btn-sm text-muted w-100 mt-2 text-decoration-none">Xóa lọc</a>
                     }
                 </div>
-                
-                <hr class="my-4 text-muted opacity-25">
-                
-                <h3 class="h5 fw-bold mb-4">Lọc theo giá</h3>
-                <input type="range" class="form-range mb-3" min="0" max="10000000" step="100000">
-                <div class="d-flex justify-content-between text-muted small">
-                    <span>0đ</span>
-                    <span>10.000.000đ</span>
-                </div>
-            </div>
+            </form>
         </aside>
 
         <!-- Product Grid -->
         <main class="col-lg-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <p class="text-muted mb-0">Hiển thị @Model.Count() sản phẩm</p>
-                <select class="form-select w-auto border-0 shadow-sm rounded-pill px-4">
-                    <option>Sắp xếp theo: Mới nhất</option>
-                    <option>Giá: Thấp đến Cao</option>
-                    <option>Giá: Cao đến Thấp</option>
-                </select>
+            <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+                <p class="text-muted mb-0 small"><i class="fa-solid fa-layer-group me-2"></i>Tìm thấy <strong>@Model.Count()</strong> sản phẩm</p>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="small text-muted d-none d-sm-inline">Sắp xếp:</span>
+                    <select class="form-select form-select-sm w-auto border-0 bg-light rounded-pill px-3 shadow-none fw-semibold" onchange="applySort(this.value)">
+                        <!option value="newest" @(ViewBag.SortOrder == "newest" ? "selected" : "")>Mới nhất</!option>
+                        <!option value="price_asc" @(ViewBag.SortOrder == "price_asc" ? "selected" : "")>Giá: Thấp đến Cao</!option>
+                        <!option value="price_desc" @(ViewBag.SortOrder == "price_desc" ? "selected" : "")>Giá: Cao đến Thấp</!option>
+                    </select>
+                </div>
             </div>
 
             <div class="row g-4">
                 @foreach (var p in Model)
                 {
                     <div class="col-6 col-md-4">
-                        <div class="card border-0 bg-white shadow-sm rounded-4 h-100 group overflow-hidden">
+                        <div class="card border-0 bg-white shadow-sm rounded-4 h-100 group overflow-hidden product-card">
                             <div class="position-relative overflow-hidden" style="aspect-ratio: 1/1;">
-                                @if (p.ImageUrls != null && p.ImageUrls.Any())
+                                <a asp-action="Details" asp-route-id="@p.ProductId">
+                                    @if (p.ImageUrls != null && p.ImageUrls.Any())
+                                    {
+                                        <img src="@p.ImageUrls[0]" class="w-100 h-100 object-fit-cover transition-all duration-500" alt="@p.Name">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                                            <i class="fa-solid fa-image text-muted opacity-50 h1"></i>
+                                        </div>
+                                    }
+                                </a>
+                                @if (p.Price <= 0)
                                 {
-                                    <img src="@p.ImageUrls[0]" class="w-100 h-100 object-fit-cover transition-transform duration-500" alt="@p.Name">
-                                }
-                                else
-                                {
-                                    <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
-                                        <i class="fa-solid fa-image text-muted opacity-50 h1"></i>
+                                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex align-items-center justify-content-center">
+                                        <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold shadow">HẾT HÀNG</span>
                                     </div>
                                 }
-                                <div class="position-absolute bottom-0 start-0 w-100 p-3 translate-y-100 group-hover-translate-y-0 transition-all opacity-0 group-hover-opacity-100">
-                                    <button onclick="addToCart(@p.ProductId)" class="btn btn-primary w-100 rounded-pill fw-bold shadow">
-                                        Thêm vào giỏ
+                            </div>
+                            <div class="card-body p-3 d-flex flex-column">
+                                <h3 class="h6 fw-bold mb-1 text-truncate">
+                                    <a asp-action="Details" asp-route-id="@p.ProductId" class="text-dark text-decoration-none hover-text-primary">@p.Name</a>
+                                </h3>
+                                <div class="text-primary fw-bold mb-3">@p.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                
+                                <div class="mt-auto pt-3 border-top">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <div class="input-group input-group-sm bg-light rounded-pill overflow-hidden border-0" style="width: 100px;">
+                                            <button class="btn btn-link text-primary border-0 shadow-none px-2 py-0" onclick="const input = document.getElementById('qty-@p.ProductId'); input.value = Math.max(1, parseInt(input.value) - 1)">
+                                                <i class="fa-solid fa-minus"></i>
+                                            </button>
+                                            <input type="number" id="qty-@p.ProductId" value="1" min="1" class="form-control border-0 bg-transparent text-center fw-bold shadow-none p-0" style="font-size: 0.85rem;">
+                                            <button class="btn btn-link text-primary border-0 shadow-none px-2 py-0" onclick="const input = document.getElementById('qty-@p.ProductId'); input.value = parseInt(input.value) + 1">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <button onclick="addToCart(@p.ProductId, parseInt(document.getElementById('qty-@p.ProductId').value))" 
+                                                class="btn btn-primary rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center" 
+                                                style="width: 32px; height: 32px; flex-shrink: 0;" title="Thêm vào giỏ">
+                                            <i class="fa-solid fa-cart-shopping" style="font-size: 0.8rem;"></i>
+                                        </button>
+                                    </div>
+                                    <button onclick="buyNow(@p.ProductId, parseInt(document.getElementById('qty-@p.ProductId').value))" 
+                                            class="btn btn-outline-dark rounded-pill btn-sm fw-bold w-100 py-1 shadow-none" style="font-size: 0.75rem;">
+                                        MUA NGAY
                                     </button>
                                 </div>
-                            </div>
-                            <div class="card-body p-3">
-                                <h3 class="h6 fw-semibold mb-1 text-truncate">@p.Name</h3>
-                                <div class="text-primary fw-bold">@p.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
                             </div>
                         </div>
                     </div>
@@ -101,6 +185,26 @@
 </div>
 
 <style>
-    .group:hover img { transform: scale(1.1); }
+    .product-card:hover { transform: translateY(-5px); }
+    .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid transparent !important; }
+    .product-card:hover { border-color: rgba(116, 180, 155, 0.2) !important; }
+    .group:hover img { transform: scale(1.05); }
+    .transition-all { transition: all 0.3s ease; }
     .duration-500 { transition-duration: 500ms; }
+    .hover-text-primary:hover { color: #2d6a4f !important; }
+    
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
 </style>
+
+@section Scripts {
+    <script>
+        function applySort(val) {
+            document.getElementById('sortOrderInput').value = val;
+            document.getElementById('filterForm').submit();
+        }
+    </script>
+}

@@ -1,0 +1,132 @@
+@model IEnumerable<EcommerceApp.Application.DTOs.Order.OrderDto>
+@using EcommerceApp.Enums
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 fw-bold mb-0">Quản lý đơn hàng</h1>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Mã ĐH</th>
+                    <th>Khách hàng</th>
+                    <th>Ngày đặt</th>
+                    <th>Tổng tiền</th>
+                    <th>Thanh toán</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end pe-4">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td class="ps-4 fw-bold">#@order.Id</td>
+                        <td>
+                            <div class="fw-semibold">@order.CustomerName</div>
+                            <div class="text-muted small">@order.CustomerEmail</div>
+                        </td>
+                        <td class="text-muted">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="fw-bold text-primary">@order.TotalAmount.ToString("N0") ₫</td>
+                        <td>
+                            <span class="badge bg-light @(order.PaymentMethod == PaymentMethod.Banking ? "text-info" : "text-dark") border">
+                                @(order.PaymentMethod == PaymentMethod.Banking ? "Chuyển khoản" : "Tiền mặt")
+                            </span>
+                        </td>
+                        <td>
+                            @switch (order.Status)
+                            {
+                                case OrderStatus.Pending:
+                                    <span class="badge bg-warning-subtle text-warning border-warning border px-3 rounded-pill">Chờ xử lý</span>
+                                    break;
+                                case OrderStatus.Confirmed:
+                                    <span class="badge bg-info-subtle text-info border-info border px-3 rounded-pill">Đã xác nhận</span>
+                                    break;
+                                case OrderStatus.Shipping:
+                                    <span class="badge bg-primary-subtle text-primary border-primary border px-3 rounded-pill">Đang giao</span>
+                                    break;
+                                case OrderStatus.Completed:
+                                    <span class="badge bg-success-subtle text-success border-success border px-3 rounded-pill">Hoàn thành</span>
+                                    break;
+                                case OrderStatus.Cancelled:
+                                    <span class="badge bg-danger-subtle text-danger border-danger border px-3 rounded-pill">Đã hủy</span>
+                                    break;
+                            }
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-1">
+                                <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-light-info rounded-pill px-2" title="Xem chi tiết">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
+                                @if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Confirmed)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@order.Id" class="btn btn-sm btn-light-warning rounded-pill px-2" title="Sửa thông tin">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                }
+
+                                @if (order.Status == OrderStatus.Pending)
+                                {
+                                    <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@order.Id" />
+                                        <input type="hidden" name="status" value="@OrderStatus.Confirmed" />
+                                        <input type="hidden" name="returnToIndex" value="true" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-light-success rounded-pill px-2" title="Xác nhận đơn">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (order.Status == OrderStatus.Confirmed)
+                                {
+                                    <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@order.Id" />
+                                        <input type="hidden" name="status" value="@OrderStatus.Shipping" />
+                                        <input type="hidden" name="returnToIndex" value="true" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-light-primary rounded-pill px-2" title="Bắt đầu giao hàng">
+                                            <i class="fa-solid fa-truck"></i>
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (order.Status == OrderStatus.Shipping)
+                                {
+                                    <form asp-action="UpdateStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@order.Id" />
+                                        <input type="hidden" name="status" value="@OrderStatus.Completed" />
+                                        <input type="hidden" name="returnToIndex" value="true" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-light-success rounded-pill px-2" title="Hoàn thành đơn hàng">
+                                            <i class="fa-solid fa-check-double"></i>
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (order.Status != OrderStatus.Completed && order.Status != OrderStatus.Cancelled)
+                                {
+                                    <form asp-action="UpdateStatus" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                                        <input type="hidden" name="id" value="@order.Id" />
+                                        <input type="hidden" name="status" value="@OrderStatus.Cancelled" />
+                                        <input type="hidden" name="returnToIndex" value="true" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-light-danger rounded-pill px-2" title="Hủy đơn hàng">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

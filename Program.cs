@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Data;
+using EcommerceApp.Data;
 using EcommerceApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,9 +26,9 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Cookie
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
+    options.LoginPath = "/Account/Auth";
     options.AccessDeniedPath = "/Account/AccessDenied";
-    options.LogoutPath = "/Account/Logout";
+    options.LogoutPath = "/Account/Auth";
 
     options.Cookie.Name = "CayCanhAuth";
 });

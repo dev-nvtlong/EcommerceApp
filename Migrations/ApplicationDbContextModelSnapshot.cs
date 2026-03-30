@@ -292,6 +292,51 @@ namespace EcommerceApp.Migrations
                     b.ToTable("Likes");
                 });
 
+            modelBuilder.Entity("EcommerceApp.Models.Notification", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int?>("CreateByUserID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifiedByUserID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RedirectUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("EcommerceApp.Models.Order", b =>
                 {
                     b.Property<int>("ID")
@@ -315,8 +360,20 @@ namespace EcommerceApp.Migrations
                     b.Property<int?>("ModifiedByUserID")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
+
+                    b.Property<string>("ShipAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShipName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShipPhone")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -499,7 +556,7 @@ namespace EcommerceApp.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>

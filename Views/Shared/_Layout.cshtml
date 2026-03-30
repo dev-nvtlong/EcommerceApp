@@ -46,8 +46,8 @@
                             <li class="px-3 py-2 border-bottom mb-2">
                                 <span class="d-block fw-bold small">Chào, @User.Identity.Name</span>
                             </li>
-                            <li><a class="dropdown-item rounded-3 py-2 small" href="#"><i class="fa-solid fa-circle-user me-2"></i> Hồ sơ</a></li>
-                            <li><a class="dropdown-item rounded-3 py-2 small" href="#"><i class="fa-solid fa-clock-rotate-left me-2"></i> Đơn hàng</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 small" asp-controller="Account" asp-action="Profile"><i class="fa-solid fa-circle-user me-2"></i> Hồ sơ</a></li>
+                            <li><a class="dropdown-item rounded-3 py-2 small" asp-controller="Order" asp-action="Index"><i class="fa-solid fa-clock-rotate-left me-2"></i> Đơn hàng</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
@@ -64,7 +64,6 @@
                         }
                     </ul>
                 </div>
-                <a class="btn btn-sm btn-outline-primary rounded-pill d-none d-md-inline-block px-3" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin</a>
             </div>
         </div>
     </header>
@@ -74,47 +73,60 @@
     </main>
 
     <footer class="main-footer">
-        <div class="main-footer__container">
-            <div>
-                <span class="main-footer__brand-title">GREEN LIFE</span>
-                <p class="main-footer__description">
-                    Mang hơi thở thiên nhiên vào không gian sống của bạn. Chuyên cung cấp cây cảnh, cây công trình và các sản phẩm chăm sóc thực vật chuyên nghiệp.
-                </p>
-                <div class="d-flex gap-3">
-                    <a href="#" class="main-footer__link"><i class="fa-brands fa-facebook"></i></a>
-                    <a href="#" class="main-footer__link"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" class="main-footer__link"><i class="fa-brands fa-tiktok"></i></a>
+        <div class="container text-white py-5">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-4 text-emerald-300">
+                        <i class="fa-solid fa-seedling me-2"></i> GREEN LIFE
+                    </h5>
+                    <p class="text-white-50 small mb-4 pe-lg-4">
+                        Tôn vinh cuộc sống xanh bằng cách mang không gian thiên nhiên vào chính ngôi nhà của bạn. Với chúng tôi, mỗi cái cây đều mang một câu chuyện riêng.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle shadow-sm" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle shadow-sm" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle shadow-sm" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;"><i class="fa-brands fa-tiktok"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle shadow-sm" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-4 opacity-75">Sản phẩm</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" asp-controller="Shop" asp-action="Index">Tất cả sản phẩm</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" href="#">Cây nội thất</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" href="#">Cây ngoài trời</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" href="#">Chậu & Phụ kiện</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-4 opacity-75">Thông tin</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" asp-controller="Home" asp-action="Privacy">Về chúng tôi</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" href="#">Chính sách bảo mật</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" href="#">Điều khoản sử dụng</a></li>
+                        <li class="mb-2"><a class="text-white-50 text-decoration-none hover-white" href="#">Hướng dẫn chăm sóc</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-4 opacity-75">Đăng ký nhận tin</h6>
+                    <p class="text-white-50 small mb-3">Nhận ngay mẹo chăm sóc cây và các chương trình ưu đãi mới nhất từ Green Life.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control bg-dark border-secondary text-white small" placeholder="Email của bạn..." aria-label="Email" style="border-radius: 50px 0 0 50px; background-color: rgba(255,255,255,0.05) !important;">
+                        <button class="btn btn-primary px-4" type="button" style="border-radius: 0 50px 50px 0;">Gửi</button>
+                    </div>
+                    <div class="small text-white-50 mt-3 pt-2 border-top border-secondary border-opacity-25">
+                        <div class="mb-2"><i class="fa-solid fa-location-dot me-3 text-primary"></i> 456 Đường Láng, Đống Đa, Hà Nội</div>
+                        <div class="mb-2"><i class="fa-solid fa-phone me-3 text-primary"></i> +84 (24) 3456 7890</div>
+                        <div><i class="fa-solid fa-envelope me-3 text-primary"></i> contact@greenlife.vn</div>
+                    </div>
                 </div>
             </div>
-            <div>
-                <h4 class="main-footer__links-title">Mua sắm</h4>
-                <ul class="main-footer__list">
-                    <li class="main-footer__list-item"><a class="main-footer__link" asp-controller="Shop" asp-action="Index">Tất cả sản phẩm</a></li>
-                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Nam</a></li>
-                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Nữ</a></li>
-                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Phụ kiện</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="main-footer__links-title">Thông tin</h4>
-                <ul class="main-footer__list">
-                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Về chúng tôi</a></li>
-                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Chính sách bảo mật</a></li>
-                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Điều khoản sử dụng</a></li>
-                    <li class="main-footer__list-item"><a class="main-footer__link" href="#">Tuyển dụng</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="main-footer__links-title">Liên hệ</h4>
-                <ul class="main-footer__list">
-                    <li class="main-footer__list-item"><i class="fa-solid fa-location-dot me-2"></i> 123 Đường ABC, Hà Nội</li>
-                    <li class="main-footer__list-item"><i class="fa-solid fa-phone me-2"></i> +(84) 123 456 789</li>
-                    <li class="main-footer__list-item"><i class="fa-solid fa-envelope me-2"></i> contact@eshop.com</li>
-                </ul>
-            </div>
         </div>
-        <div class="main-footer__bottom">
-            <p>&copy; @DateTime.Now.Year E-SHOP - Designed for excellence.</p>
+        <div class="main-footer__bottom py-4 text-center border-top border-secondary border-opacity-10">
+            <p class="text-white-50 small mb-0">&copy; @DateTime.Now.Year GREEN LIFE. Bản quyền thuộc về Green Life Team.</p>
         </div>
     </footer>
 
@@ -130,6 +142,13 @@
         }
 
         function addToCart(productId, quantity = 1) {
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <text>
+                window.location.href = '/Account/Auth';
+                return;
+                </text>
+            }
             $.post('/Cart/AddToCart', { productId: productId, quantity: quantity }, function(res) {
                 if (res.success) {
                     updateCartBadge();
@@ -145,7 +164,24 @@
                     });
                 }
             }).fail(function() {
-                window.location.href = '/Account/Login';
+                window.location.href = '/Account/Auth';
+            });
+        }
+
+        function buyNow(productId, quantity = 1) {
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <text>
+                window.location.href = '/Account/Auth';
+                return;
+                </text>
+            }
+            $.post('/Cart/AddToCart', { productId: productId, quantity: quantity }, function(res) {
+                if (res.success) {
+                    window.location.href = '/Order/Checkout';
+                }
+            }).fail(function() {
+                window.location.href = '/Account/Auth';
             });
         }
 

@@ -11,15 +11,87 @@ namespace EcommerceApp.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
+        private readonly AutoMapper.IMapper _mapper;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public AccountController(
             UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole<int>> roleManager)
+            RoleManager<IdentityRole<int>> roleManager,
+            AutoMapper.IMapper mapper,
+            IWebHostEnvironment hostEnvironment)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _mapper = mapper;
+            _hostEnvironment = hostEnvironment;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Auth");
+            
+            var model = _mapper.Map<UserDto>(user);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDto model, IFormFile? avatarFile)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Auth");
+
+            if (ModelState.IsValid)
+            {
+                if (avatarFile != null)
+                {
+                    string wwwRootPath = _hostEnvironment.WebRootPath;
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
+                    string avatarPath = Path.Combine(wwwRootPath, @"uploads\avatars");
+
+                    if (!Directory.Exists(avatarPath))
+                    {
+                        Directory.CreateDirectory(avatarPath);
+                    }
+
+                    // Delete old avatar
+                    if (!string.IsNullOrEmpty(user.Avatar))
+                    {
+                        var oldPath = Path.Combine(wwwRootPath, user.Avatar.TrimStart('/'));
+                        if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+                    }
+
+                    using (var fileStream = new FileStream(Path.Combine(avatarPath, fileName), FileMode.Create))
+                    {
+                        await avatarFile.CopyToAsync(fileStream);
+                    }
+                    user.Avatar = "/uploads/avatars/" + fileName;
+                }
+
+                user.FullName = model.FullName;
+                user.PhoneNumber = model.PhoneNumber;
+                user.Address = model.Address;
+                user.DateOfBirth = model.DateOfBirth;
+                user.Gender = model.Gender;
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    TempData["Success"] = "Cập nhật thông tin cá nhân thành công!";
+                    return RedirectToAction(nameof(Profile));
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+            return View("Profile", userDto);
         }
 
         [HttpGet]

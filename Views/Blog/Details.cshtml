@@ -1,0 +1,180 @@
+@model EcommerceApp.Application.DTOs.Blog.BlogPostDto
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Kinh nghiệm</a></li>
+                    <li class="breadcrumb-item active text-truncate" style="max-width: 200px;">@Model.Title</li>
+                </ol>
+            </nav>
+
+            <article class="blog-post">
+                <header class="mb-5">
+                    <h1 class="display-5 fw-bold text-dark mb-4">@Model.Title</h1>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                <i class="fa-solid fa-user-tie h5 mb-0"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">@Model.AuthorName</div>
+                                <div class="text-muted small">Đăng ngày @Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-4">
+                            <button onclick="toggleLike(@Model.Id)" class="btn @(Model.IsLikedByCurrentUser ? "btn-danger" : "btn-outline-danger") rounded-pill px-4 shadow-sm transition-all" id="likeBtn">
+                                <i class="@(Model.IsLikedByCurrentUser ? "fa-solid" : "fa-regular") fa-heart me-2"></i>
+                                <span id="likeCount">@Model.LikeCount</span> lượt thích
+                            </button>
+                            <div class="text-muted"><i class="fa-solid fa-comment me-2"></i>@Model.Comments.Count bình luận</div>
+                        </div>
+                    </div>
+                </header>
+
+                @if (!string.IsNullOrEmpty(Model.Thumbnail))
+                {
+                    <div class="rounded-4 overflow-hidden mb-5 shadow-lg">
+                        <img src="@Model.Thumbnail" alt="@Model.Title" class="w-100 h-auto">
+                    </div>
+                }
+
+                <div class="blog-content fs-5 text-dark lh-lg mb-5 border-bottom pb-5">
+                    @Html.Raw(Model.Content)
+                </div>
+
+                <!-- Comments Section -->
+                <section class="comments-section" id="comments">
+                    <h3 class="fw-bold mb-4">Bình luận (@Model.Comments.Count)</h3>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-light">
+                            <div class="d-flex gap-3">
+                                <div class="flex-grow-1">
+                                    <textarea id="commentContent" class="form-control border-0 rounded-3 p-3 shadow-none" rows="3" placeholder="Chia sẻ cảm nghĩ của bạn về bài viết..."></textarea>
+                                    <div class="d-flex justify-content-end mt-3">
+                                        <button onclick="addComment(@Model.Id)" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Gửi bình luận</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning rounded-4 border-0 shadow-sm p-4 text-center mb-5">
+                           Vui lòng <a asp-controller="Account" asp-action="Auth" class="fw-bold text-decoration-none">đăng nhập</a> để tham gia thảo luận.
+                        </div>
+                    }
+
+                    <div id="commentsList" class="d-flex flex-column gap-4">
+                        @foreach (var comment in Model.Comments)
+                        {
+                            <div class="comment-item d-flex gap-3 p-4 bg-white rounded-4 shadow-sm border">
+                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px;">
+                                    @if (!string.IsNullOrEmpty(comment.UserAvatar))
+                                    {
+                                        <img src="@comment.UserAvatar" class="w-100 h-100 rounded-circle object-fit-cover shadow-sm">
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-user small"></i>
+                                    }
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="fw-bold mb-0">@comment.UserName</h6>
+                                        <span class="text-muted small">@comment.CreatedAt.ToString("dd/MM, HH:mm")</span>
+                                    </div>
+                                    <p class="text-muted mb-0 lh-base">@comment.Content</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </section>
+            </article>
+        </div>
+    </div>
+</div>
+
+<style>
+    .blog-content img { max-width: 100%; height: auto; border-radius: 1rem; margin: 2rem 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .blog-content h2 { font-weight: 800; color: #2d6a4f; margin-top: 3rem; margin-bottom: 1.5rem; }
+    .blog-content p { margin-bottom: 1.5rem; }
+    .comment-item { transition: all 0.3s ease; }
+    .comment-item:hover { transform: scale(1.01); border-color: #2d6a4f !important; }
+</style>
+
+@section Scripts {
+    <script>
+        function toggleLike(postId) {
+            $.post('/Blog/ToggleLike', { postId: postId }, function (data) {
+                if (data.success) {
+                    const btn = document.getElementById('likeBtn');
+                    const icon = btn.querySelector('i');
+                    const countSpan = document.getElementById('likeCount');
+                    let count = parseInt(countSpan.innerText);
+
+                    if (data.isLiked) {
+                        btn.classList.replace('btn-outline-danger', 'btn-danger');
+                        icon.classList.replace('fa-regular', 'fa-solid');
+                        countSpan.innerText = count + 1;
+                    } else {
+                        btn.classList.replace('btn-danger', 'btn-outline-danger');
+                        icon.classList.replace('fa-solid', 'fa-regular');
+                        countSpan.innerText = count - 1;
+                    }
+                }
+            }).fail(() => window.location.href = '/Account/Auth');
+        }
+
+        function addComment(postId) {
+            const content = document.getElementById('commentContent').value;
+            if (!content.trim()) return;
+
+            $.post('/Blog/AddComment', { postId: postId, content: content }, function (data) {
+                if (data.success) {
+                    document.getElementById('commentContent').value = '';
+                    const comment = data.comment;
+                    const date = new Date(comment.createdAt);
+                    const formattedDate = date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) + ', ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                    
+                    const avatarContent = comment.userAvatar 
+                        ? `<img src="${comment.userAvatar}" class="w-100 h-100 rounded-circle object-fit-cover shadow-sm">`
+                        : `<i class="fa-solid fa-user small"></i>`;
+
+                    const html = `
+                        <div class="comment-item d-flex gap-3 p-4 bg-white rounded-4 shadow-sm border animate__animated animate__fadeIn">
+                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px;">
+                                ${avatarContent}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0">${comment.userName}</h6>
+                                    <span class="text-muted small">${formattedDate}</span>
+                                </div>
+                                <p class="text-muted mb-0 lh-base">${comment.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    $('#commentsList').prepend(html);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã đăng bình luận!',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    Swal.fire('Lỗi!', data.message, 'error');
+                }
+            });
+        }
+    </script>
+}

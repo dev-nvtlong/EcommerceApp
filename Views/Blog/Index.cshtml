@@ -1,19 +1,81 @@
+@model IEnumerable<EcommerceApp.Application.DTOs.Blog.BlogPostDto>
 @{
-    ViewData["Title"] = "Tin tức";
+    ViewData["Title"] = "Chia sẻ kinh nghiệm";
 }
 
 <div class="py-5 bg-white border-bottom">
-    <div class="container">
-        <h1 class="fw-bold mb-0">Tin tức & Xu hướng</h1>
-        <p class="text-muted mt-2">Cập nhật những kiến thức thời trang và phong cách sống mới nhất.</p>
+    <div class="container text-center">
+        <h1 class="fw-bold mb-0 display-5 text-success">Kinh nghiệm & Bí quyết</h1>
+        <p class="text-muted mt-3 mb-0 fs-5">Nơi chia sẻ những kiến thức hữu ích về chăm sóc cây cảnh và không gian sống xanh.</p>
     </div>
 </div>
 
-<div class="container py-5 text-center">
-    <div class="py-5">
-        <i class="fa-solid fa-newspaper h1 text-muted opacity-25 mb-4"></i>
-        <h2 class="h4 fw-bold">Trang tin tức đang trong quá trình phát triển</h2>
-        <p class="text-muted">Quay lại sau nhé! Chúng tôi đang chuẩn bị những nội dung tuyệt vời dành cho bạn.</p>
-        <a asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill px-5 mt-3">Trở về Trang chủ</a>
+<div class="container py-5">
+    <div class="row g-4">
+        @foreach (var post in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-transform hover-translate-y">
+                    <a asp-action="Details" asp-route-id="@post.Id" class="text-decoration-none">
+                        <div class="position-relative overflow-hidden" style="aspect-ratio: 16/9;">
+                            @if (!string.IsNullOrEmpty(post.Thumbnail))
+                            {
+                                <img src="@post.Thumbnail" class="w-100 h-100 object-fit-cover transition-all duration-500 hover-scale" alt="@post.Title">
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-muted">
+                                    <i class="fa-solid fa-seedling h1 opacity-25"></i>
+                                </div>
+                            }
+                        </div>
+                    </a>
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold small">Mẹo vặt</span>
+                            <span class="text-muted small italic">@post.CreatedAt?.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <h3 class="h5 fw-bold mb-3">
+                            <a asp-action="Details" asp-route-id="@post.Id" class="text-dark text-decoration-none hover-text-success">@post.Title</a>
+                        </h3>
+                        <p class="text-muted small mb-4 line-clamp-3">
+                            @(System.Text.RegularExpressions.Regex.Replace(post.Content ?? "", "<.*?>", String.Empty))
+                        </p>
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2 text-primary" style="width: 32px; height: 32px;">
+                                    <i class="fa-solid fa-user-pen" style="font-size: 0.8rem;"></i>
+                                </div>
+                                <span class="small fw-bold text-dark">@post.AuthorName</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fa-solid fa-heart me-1 text-danger"></i> @post.LikeCount
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
+    
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fa-solid fa-mug-hot h1 text-muted opacity-25 mb-3"></i>
+            <p class="text-muted">Chúng tôi đang chuẩn bị những nội dung tuyệt vời nhất cho bạn. Quay lại sau nhé!</p>
+        </div>
+    }
 </div>
+
+<style>
+    .hover-translate-y:hover { transform: translateY(-10px); }
+    .hover-scale:hover { transform: scale(1.05); }
+    .hover-text-success:hover { color: #2d6a4f !important; }
+    .transition-all { transition: all 0.4s ease; }
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>

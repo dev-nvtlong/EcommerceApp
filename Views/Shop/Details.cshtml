@@ -1,0 +1,211 @@
+@model EcommerceApp.Application.DTOs.Product.ProductDto
+@using EcommerceApp.Enums
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<style>
+    .product-details { padding: 60px 0; }
+    .product-image-container { background: #f8fafc; border-radius: 30px; overflow: hidden; }
+    .product-price { font-size: 2rem; font-weight: 700; color: #10b981; }
+    .btn-cart { padding: 15px 40px; border-radius: 50px; font-weight: 600; }
+    
+    .rating-stars { color: #f59e0b; font-size: 1.2rem; }
+    .review-item { border-bottom: 1px solid #f1f5f9; padding: 20px 0; }
+    
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 5px;
+    }
+    .star-rating input { display: none; }
+    .star-rating label {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: #cbd5e1;
+        transition: color 0.2s;
+    }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: #f59e0b;
+    }
+</style>
+
+<div class="product-details">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-6">
+                <div class="product-image-container shadow-sm">
+                    <img src="@(Model.ImageUrls != null && Model.ImageUrls.Any() ? Model.ImageUrls.First() : "/images/no-image.png")" class="img-fluid w-100" alt="@Model.Name">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">Cửa hàng</a></li>
+                        <li class="breadcrumb-item active">@Model.Name</li>
+                    </ol>
+                </nav>
+                
+                <h1 class="display-5 fw-bold mb-3">@Model.Name</h1>
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rating-stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= (int)Math.Floor((double)ViewBag.AverageRating))
+                            {
+                                <i class="fa-solid fa-star"></i>
+                            }
+                            else if (i - (double)ViewBag.AverageRating <= 0.5)
+                            {
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-regular fa-star"></i>
+                            }
+                        }
+                    </div>
+                    <span class="text-muted small">(@ViewBag.AverageRating.ToString("F1") / 5.0) - @ViewBag.ReviewCount đánh giá</span>
+                </div>
+                
+                <div class="product-price mb-4">@Model.Price.ToString("N0")₫</div>
+                
+                <div class="mb-5 text-muted lh-lg">
+                    @Html.Raw(Model.Description)
+                </div>
+                
+                <div class="d-flex gap-3 mb-5">
+                    <div class="input-group" style="width: 140px;">
+                        <button class="btn btn-outline-secondary border-0 bg-light rounded-start-pill px-3" type="button" id="btnMinus">-</button>
+                        <input type="text" class="form-control border-0 bg-light text-center fw-bold" value="1" id="quantityInput" readonly>
+                        <button class="btn btn-outline-secondary border-0 bg-light rounded-end-pill px-3" type="button" id="btnPlus">+</button>
+                    </div>
+                    <button class="btn btn-success btn-cart rounded-pill px-5 shadow-sm" id="btnAddToCart">
+                        <i class="fa-solid fa-cart-shopping me-2"></i> Thêm vào giỏ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="row mt-5 pt-5 border-top">
+            <div class="col-lg-7">
+                <h3 class="fw-bold mb-4">Đánh giá từ khách hàng</h3>
+                <div id="reviewsList">
+                    @if (ViewBag.Reviews != null && ((List<EcommerceApp.Application.DTOs.Review.ReviewDto>)ViewBag.Reviews).Any())
+                    {
+                        foreach (var review in (List<EcommerceApp.Application.DTOs.Review.ReviewDto>)ViewBag.Reviews)
+                        {
+                            <div class="review-item mb-4">
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-weight: bold;">
+                                        @(string.IsNullOrEmpty(review.UserFullName) ? "U" : review.UserFullName[0].ToString().ToUpper())
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@review.UserFullName</div>
+                                        <div class="rating-stars small">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="fa-@(i <= review.Rating ? "solid" : "regular") fa-star"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="ms-auto text-muted small">@review.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                </div>
+                                <div class="text-muted ps-5">
+                                    @review.Comment
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted italic">Chưa có đánh giá nào cho sản phẩm này.</p>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="bg-light p-4 rounded-4 shadow-sm">
+                    <h4 class="fw-bold mb-3">Viết đánh giá của bạn</h4>
+                    <form id="reviewForm">
+                        <input type="hidden" id="productId" value="@Model.ProductId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Chất lượng sản phẩm</label>
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="rating" value="5"><label for="star5" class="fa-solid fa-star"></label>
+                                <input type="radio" id="star4" name="rating" value="4"><label for="star4" class="fa-solid fa-star"></label>
+                                <input type="radio" id="star3" name="rating" value="3"><label for="star3" class="fa-solid fa-star"></label>
+                                <input type="radio" id="star2" name="rating" value="2"><label for="star2" class="fa-solid fa-star"></label>
+                                <input type="radio" id="star1" name="rating" value="1"><label for="star1" class="fa-solid fa-star"></label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Nhận xét của bạn</label>
+                            <textarea id="comment" class="form-control border-0 rounded-3 p-3" rows="4" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm này..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-3 fw-bold">Gửi đánh giá</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Quantity buttons
+            $('#btnPlus').click(function() {
+                let val = parseInt($('#quantityInput').val());
+                $('#quantityInput').val(val + 1);
+            });
+
+            $('#btnMinus').click(function() {
+                let val = parseInt($('#quantityInput').val());
+                if (val > 1) $('#quantityInput').val(val - 1);
+            });
+
+            // Add to Cart
+            $('#btnAddToCart').click(function() {
+                const productId = $('#productId').val();
+                const quantity = $('#quantityInput').val();
+                addToCart(productId, quantity);
+            });
+
+            // Review Form
+            $('#reviewForm').submit(function(e) {
+                e.preventDefault();
+                const rating = $('input[name="rating"]:checked').val();
+                const comment = $('#comment').val();
+                const productId = $('#productId').val();
+
+                if (!rating) {
+                    Swal.fire('Chú ý', 'Vui lòng chọn số sao đánh giá', 'info');
+                    return;
+                }
+
+                $.post('/Shop/SubmitReview', { productId, rating, comment }, function(res) {
+                    if (res.success) {
+                        Swal.fire({
+                            title: 'Cảm ơn!',
+                            text: 'Đánh giá của bạn đã được gửi thành công.',
+                            icon: 'success',
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Chú ý', res.message || 'Bạn cần đăng nhập để gửi đánh giá', 'info').then(() => {
+                             if (!res.success && res.message.includes("đăng nhập")) {
+                                 window.location.href = '/Account/Auth?returnUrl=' + encodeURIComponent(window.location.pathname);
+                             }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
