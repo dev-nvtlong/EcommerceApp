@@ -30,12 +30,17 @@ namespace EcommerceApp.Data
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
             #endregion
 
             #region ============== Đăng ký Service =====================
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IBlogService, BlogService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IReviewService, ReviewService>();
             #endregion
             return services;
         }

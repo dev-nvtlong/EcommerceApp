@@ -1,0 +1,98 @@
+@model List<EcommerceApp.Application.DTOs.Review.ReviewDto>
+@{
+    ViewData["Title"] = "Quản lý đánh giá";
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold border-start border-4 border-success ps-3">Danh sách đánh giá</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small">
+                    <tr>
+                        <th class="ps-4">Khách hàng</th>
+                        <th>Sản phẩm</th>
+                        <th>Đánh giá</th>
+                        <th>Bình luận</th>
+                        <th>Ngày gửi</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var review in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <img src="@(string.IsNullOrEmpty(review.UserAvatar) ? "https://ui-avatars.com/api/?name=" + review.UserFullName : review.UserAvatar)" 
+                                         class="rounded-circle me-2" width="35" height="35" alt="">
+                                    <span class="fw-medium small">@review.UserFullName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@review.ProductThumbnail" class="rounded-3 me-2" width="40" height="40" alt="" style="object-fit: cover;">
+                                    <span class="small text-truncate" style="max-width: 150px;">@review.ProductName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-warning small">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fa-@(i <= review.Rating ? "solid" : "regular") fa-star"></i>
+                                    }
+                                </div>
+                            </td>
+                            <td class="small text-muted" style="max-width: 250px;">
+                                @review.Comment
+                            </td>
+                            <td class="small">@review.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end pe-4">
+                                <button onclick="deleteReview(@review.Id)" class="btn btn-sm btn-light-danger rounded-circle">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted italic">Chưa có đánh giá nào</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteReview(id) {
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: "Bạn không thể hoàn tác sau khi xóa đánh giá này!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Đồng ý xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('/Admin/Review/Delete/' + id, function(res) {
+                        if (res.success) {
+                            Swal.fire('Đã xóa!', 'Đánh giá đã được gỡ bỏ.', 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Lỗi!', res.message, 'error');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

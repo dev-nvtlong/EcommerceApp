@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="~/Admin/css/admin-layout.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
     <style>
         .swal2-popup { font-family: 'Outfit', sans-serif !important; border-radius: 20px !important; }
         .swal2-confirm { border-radius: 12px !important; padding: 12px 30px !important; font-weight: 500 !important; }
@@ -67,10 +68,22 @@
 
                 <div class="admin-layout__nav-label">Nội dung & Phản hồi</div>
                 
-                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "BlogPost" ? "admin-layout__nav-link--active" : "")" 
-                   asp-area="Admin" asp-controller="BlogPost" asp-action="Index">
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Blog" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Blog" asp-action="Index">
                     <i class="fa-solid fa-newspaper admin-layout__nav-icon"></i>
                     <span>Bài viết</span>
+                </a>
+
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Comments" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Social" asp-action="Comments">
+                    <i class="fa-solid fa-comment-dots admin-layout__nav-icon"></i>
+                    <span>Bình luận</span>
+                </a>
+
+                <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Likes" ? "admin-layout__nav-link--active" : "")" 
+                   asp-area="Admin" asp-controller="Social" asp-action="Likes">
+                    <i class="fa-solid fa-heart admin-layout__nav-icon"></i>
+                    <span>Lượt thích</span>
                 </a>
                 
                 <a class="admin-layout__nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Review" ? "admin-layout__nav-link--active" : "")" 
@@ -104,14 +117,42 @@
                         <input type="text" placeholder="Tìm kiếm nhanh...">
                     </div>
                     
-                    <div class="admin-layout__notification">
-                        <i class="fa-regular fa-bell"></i>
-                        <span class="admin-layout__notification-badge"></span>
+                    <div class="dropdown admin-layout__notification">
+                        <a href="#" class="text-decoration-none position-relative" data-bs-toggle="dropdown" id="notificationDropdown">
+                            <i class="fa-regular fa-bell fs-5"></i>
+                            <span class="admin-layout__notification-badge badge bg-danger rounded-circle d-none shadow-sm" id="notificationBadge">0</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg ms-3 p-0" aria-labelledby="notificationDropdown" style="width: 350px; min-width: 350px; max-width: 350px; overflow: hidden;">
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+                                <h6 class="mb-0 fw-bold">Thông báo</h6>
+                                <button class="btn btn-sm btn-link text-primary text-decoration-none p-0 small fw-bold" onclick="markAllAsRead(event)">Đọc tất cả</button>
+                            </div>
+                            <div id="notificationList" class="p-0" style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+                                <div class="p-4 text-center text-muted small">Đang tải thông báo...</div>
+                            </div>
+                            <div class="p-2 border-top text-center bg-light">
+                                <a href="#" class="small text-muted text-decoration-none fw-medium">Xem tất cả thông báo</a>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="admin-layout__user">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff" alt="Admin" class="admin-layout__user-avatar">
-                        <span class="admin-layout__user-name">Quản trị viên</span>
+                    <div class="dropdown admin-layout__user">
+                        <a href="#" class="text-decoration-none d-flex align-items-center gap-2" data-bs-toggle="dropdown" id="userDropdown">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff" alt="Admin" class="admin-layout__user-avatar">
+                            <span class="admin-layout__user-name">Quản trị viên</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-3" aria-labelledby="userDropdown">
+                            <li><h6 class="dropdown-header">Tài khoản Admin</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-area="Admin" asp-controller="Auth" asp-action="Logout" method="post" id="logoutForm">
+                                    <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 py-2">
+                                        <i class="fa-solid fa-right-from-bracket"></i>
+                                        <span>Đăng xuất</span>
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </header>
@@ -155,6 +196,72 @@
                     $('body').removeClass('overflow-hidden');
                 }
             });
+
+            // Notification Logic
+            function updateNotificationBadge() {
+                $.get('/Admin/Notification/GetRecent', function(res) {
+                    if (res.unreadCount > 0) {
+                        $('#notificationBadge').text(res.unreadCount).removeClass('d-none');
+                    } else {
+                        $('#notificationBadge').addClass('d-none');
+                    }
+                });
+            }
+
+            window.loadNotifications = function() {
+                const $list = $('#notificationList');
+                $.get('/Admin/Notification/GetRecent', function(res) {
+                    if (!res.notifications || res.notifications.length === 0) {
+                        $list.html('<div class="p-4 text-center text-muted small">Không có thông báo mới</div>');
+                        return;
+                    }
+
+                    let html = '';
+                    res.notifications.forEach(n => {
+                        const iconClass = n.type === 0 ? 'order' : n.type === 1 ? 'comment' : n.type === 2 ? 'like' : n.type === 3 ? 'chat' : 'review';
+                        const icon = n.type === 0 ? 'fa-cart-shopping' : n.type === 1 ? 'fa-comment' : n.type === 2 ? 'fa-heart' : n.type === 3 ? 'fa-message' : 'fa-star';
+                        const unreadClass = n.isRead ? '' : 'notification-item--unread';
+                        const date = new Date(n.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+
+                        html += `
+                            <div class="notification-item p-3 border-bottom d-flex gap-3 ${unreadClass}" onclick="handleNotificationClick(${n.id}, '${n.redirectUrl}')">
+                                <div class="notification-icon notification-icon--${iconClass}">
+                                    <i class="fa-solid ${icon}"></i>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-bold text-dark small text-truncate">${n.title}</div>
+                                    <div class="text-muted small text-truncate">${n.message}</div>
+                                    <div class="text-muted italic mt-1" style="font-size: 10px;">${date}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    $list.html(html);
+                });
+            };
+
+            window.handleNotificationClick = function(id, url) {
+                $.post('/Admin/Notification/MarkAsRead/' + id, function() {
+                    window.location.href = url || '#';
+                });
+            };
+
+            window.markAllAsRead = function(e) {
+                if (e) e.stopPropagation();
+                $.post('/Admin/Notification/MarkAllAsRead', function() {
+                    updateNotificationBadge();
+                    loadNotifications();
+                });
+            };
+
+            $('#notificationDropdown').on('show.bs.dropdown', function () {
+                loadNotifications();
+            });
+
+            // Initial badge update
+            updateNotificationBadge();
+            // Poll every 1 minute
+            setInterval(updateNotificationBadge, 60000);
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

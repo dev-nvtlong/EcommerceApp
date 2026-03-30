@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Models;
+using EcommerceApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +24,8 @@ namespace EcommerceApp.Data
         public DbSet<Like> Likes { get; set; }
 
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

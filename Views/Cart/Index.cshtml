@@ -22,9 +22,10 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th class="ps-4 py-3">Sản phẩm</th>
-                                    <th class="py-3">Giá</th>
+                                    <th class="py-3 text-center">Giá</th>
                                     <th class="py-3 text-center">Số lượng</th>
-                                    <th class="py-3 text-end pe-4">Thành tiền</th>
+                                    <th class="py-3 text-end">Thành tiền</th>
+                                    <th class="py-3 pe-4 text-end"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -33,7 +34,7 @@
                                     <tr class="border-bottom">
                                         <td class="ps-4 py-4">
                                             <div class="d-flex align-items-center gap-3">
-                                                <div class="rounded-3 overflow-hidden" style="width: 80px; aspect-ratio: 1/1;">
+                                                <div class="rounded-3 shadow-sm border overflow-hidden" style="width: 80px; aspect-ratio: 1/1;">
                                                     @if (item.Product?.ImageUrls != null && item.Product.ImageUrls.Any())
                                                     {
                                                         <img src="@item.Product.ImageUrls[0]" class="w-100 h-100 object-fit-cover" alt="@item.Product.Name">
@@ -46,27 +47,30 @@
                                                     }
                                                 </div>
                                                 <div>
-                                                    <h4 class="h6 fw-bold mb-1">@item.Product?.Name</h4>
-                                                    <button onclick="removeItem(@item.ProductId)" class="btn btn-link btn-sm text-danger p-0 text-decoration-none small">
-                                                        <i class="fa-solid fa-trash-can me-1"></i> Xóa
-                                                    </button>
+                                                    <h4 class="h6 fw-bold mb-1 text-dark">@item.Product?.Name</h4>
+                                                    <span class="small text-muted">Mã SP: #@item.ProductId</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="py-4 fw-medium text-muted">
-                                            @item.Product?.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))
+                                        <td class="py-4 fw-medium text-center text-muted">
+                                            @item.Product?.Price.ToString("N0")₫
                                         </td>
                                         <td class="py-4">
                                             <div class="d-flex justify-content-center">
-                                                <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-sm" style="width: 120px;">
-                                                    <button class="btn btn-light" onclick="updateQuantity(@item.ProductId, @(item.Quantity - 1))">-</button>
-                                                    <input type="text" class="form-control text-center border-0 bg-white" value="@item.Quantity" readonly>
-                                                    <button class="btn btn-light" onclick="updateQuantity(@item.ProductId, @(item.Quantity + 1))">+</button>
+                                                <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-sm" style="width: 110px; height: 35px;">
+                                                    <button class="btn btn-white border-0" onclick="updateQuantity(@item.ProductId, @(item.Quantity - 1))"><i class="fa-solid fa-minus fs-xs"></i></button>
+                                                    <input type="text" class="form-control text-center border-0 bg-white fw-bold px-0" value="@item.Quantity" readonly>
+                                                    <button class="btn btn-white border-0" onclick="updateQuantity(@item.ProductId, @(item.Quantity + 1))"><i class="fa-solid fa-plus fs-xs"></i></button>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="py-4 text-end pe-4 fw-bold text-primary">
-                                            @item.SubTotal.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))
+                                        <td class="py-4 text-end fw-bold text-success">
+                                            @item.SubTotal.ToString("N0")₫
+                                        </td>
+                                        <td class="py-4 text-end pe-4">
+                                            <button onclick="removeItem(@item.ProductId)" class="btn btn-light btn-sm rounded-circle shadow-sm text-danger border-0 d-inline-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" title="Xóa khỏi giỏ">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 }
@@ -84,7 +88,7 @@
 
             <!-- Summary -->
             <div class="col-lg-4">
-                <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 100px;">
+                <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 100px; z-index: 10;">
                     <h3 class="h5 fw-bold mb-4">Tổng số tiền</h3>
                     
                     <div class="d-flex justify-content-between mb-3 text-muted">
@@ -103,9 +107,9 @@
                         <span class="h5 fw-bold text-primary">@Model.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
                     </div>
                     
-                    <button class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-lg mb-3">
+                    <a asp-controller="Order" asp-action="Checkout" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-lg mb-3">
                         TIẾN HÀNH THANH TOÁN
-                    </button>
+                    </a>
                     
                     <div class="text-center">
                         <img src="https://img.icons8.com/color/48/000000/visa.png" width="30">

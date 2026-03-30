@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Areas.Admin.ViewModels;
+using EcommerceApp.Areas.Admin.ViewModels;
 using EcommerceApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +53,13 @@ namespace EcommerceApp.Areas.Admin.Controllers
 
             ModelState.AddModelError("", "Đăng nhập không hợp lệ");
             return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Auth", new { area = "Admin" });
         }
     }
 }

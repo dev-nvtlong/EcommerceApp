@@ -1,0 +1,177 @@
+@model EcommerceApp.Application.DTOs.Cart.CartDto
+@using EcommerceApp.Enums
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="py-5 bg-white border-bottom">
+    <div class="container">
+        <h1 class="fw-bold mb-0">Thanh toán</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 mt-2">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Cart" asp-action="Index">Giỏ hàng</a></li>
+                <li class="breadcrumb-item active">Thanh toán</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h3 class="h5 fw-bold mb-4 d-flex align-items-center">
+                    <i class="fa-solid fa-truck-fast text-primary me-2"></i>
+                    Thông tin đơn hàng
+                </h3>
+                
+                <div class="table-responsive">
+                    <table class="table table-borderless align-middle">
+                        <thead class="text-muted small text-uppercase">
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end">Tạm tính</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (item.Product?.ImageUrls != null && item.Product.ImageUrls.Any())
+                                            {
+                                                <img src="@item.Product.ImageUrls[0]" class="rounded-3 me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                            }
+                                            <div>
+                                                <div class="fw-semibold">@item.Product.Name</div>
+                                                <div class="text-muted small">@item.Product.Price.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">x @item.Quantity</td>
+                                    <td class="text-end fw-bold">@item.SubTotal.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h3 class="h5 fw-bold mb-4 d-flex align-items-center">
+                    <i class="fa-solid fa-credit-card text-primary me-2"></i>
+                    Phương thức thanh toán
+                </h3>
+                
+                <form id="checkoutForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="payment-option border rounded-4 p-3 d-flex align-items-center cursor-pointer transition-all w-100">
+                                <input type="radio" name="PaymentMethod" value="@((int)PaymentMethod.Cash)" class="form-check-input me-3" checked>
+                                <div>
+                                    <div class="fw-bold">Tiền mặt (COD)</div>
+                                    <div class="text-muted small">Thanh toán khi nhận hàng</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="payment-option border rounded-4 p-3 d-flex align-items-center cursor-pointer transition-all w-100">
+                                <input type="radio" name="PaymentMethod" value="@((int)PaymentMethod.Banking)" class="form-check-input me-3">
+                                <div>
+                                    <div class="fw-bold">Chuyển khoản</div>
+                                    <div class="text-muted small">Qua ngân hàng hoặc ví điện tử</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 2rem;">
+                <h3 class="h5 fw-bold mb-4">Tổng cộng</h3>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tổng tiền hàng</span>
+                    <span>@Model.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Phí vận chuyển</span>
+                    <span class="text-success fw-bold">Miễn phí</span>
+                </div>
+                
+                <hr class="my-3 opacity-25">
+                
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold h5 mb-0">Thành tiền</span>
+                    <span class="fw-bold h5 mb-0 text-primary">@Model.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
+                </div>
+                
+                <button type="button" onclick="placeOrder()" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-lg transition-transform hover-scale">
+                    XÁC NHẬN ĐẶT HÀNG
+                </button>
+                
+                <div class="mt-4 p-3 bg-light rounded-4 small text-muted">
+                    <i class="fa-solid fa-shield-halved text-success me-1"></i>
+                    Cam kết bảo mật thông tin khách hàng và giao hàng nhanh chóng trong 2-4 ngày làm việc.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-option:hover { border-color: var(--bs-primary) !important; background-color: rgba(var(--bs-primary-rgb), 0.05); }
+    .payment-option input:checked + div { color: var(--bs-primary); }
+    .transition-all { transition: all 0.3s ease; }
+    .cursor-pointer { cursor: pointer; }
+    .hover-scale:hover { transform: translateY(-2px); }
+</style>
+
+@section Scripts {
+    <script>
+        function placeOrder() {
+            const formData = new FormData(document.getElementById('checkoutForm'));
+            const data = {
+                paymentMethod: parseInt(formData.get('PaymentMethod'))
+            };
+
+            Swal.fire({
+                title: 'Xác nhận đặt hàng?',
+                text: "Đơn hàng của bạn sẽ được xử lý ngay lập tức!",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2d6a4f',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Đặt ngay',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Order/PlaceOrder',
+                        type: 'POST',
+                        data: data,
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Thành công!',
+                                    text: 'Cảm ơn bạn đã tin tưởng Green Life.',
+                                    icon: 'success',
+                                    confirmButtonColor: '#2d6a4f'
+                                }).then(() => {
+                                    window.location.href = '/Order/Success/' + response.orderId;
+                                });
+                            } else {
+                                Swal.fire('Lỗi!', response.message || 'Có lỗi xảy ra', 'error');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

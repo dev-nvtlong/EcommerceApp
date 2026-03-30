@@ -1,0 +1,116 @@
+@model EcommerceApp.Application.DTOs.Blog.CreateBlogPostDto
+@{
+    bool isEdit = ViewContext.RouteData.Values["action"]?.ToString() == "Edit";
+    ViewData["Title"] = isEdit ? "Chỉnh sửa bài viết" : "Viết bài mới";
+}
+
+<style>
+    .ck-editor__editable_inline {
+        min-height: 400px;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-0 text-success">@(isEdit ? "Chỉnh sửa bài viết" : "Viết bài mới")</h1>
+            <p class="text-muted mb-0 small">Chia sẻ những kiến thức bổ ích về cây cảnh đến mọi người.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <form asp-action="@(isEdit ? "Edit" : "Create")" method="post" enctype="multipart/form-data">
+                    @if (isEdit) { <input type="hidden" name="id" value="@ViewContext.RouteData.Values["id"]" /> }
+                    <input type="hidden" asp-for="Thumbnail" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Title" class="form-label fw-bold">Tiêu đề bài viết</label>
+                        <input asp-for="Title" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Nhập tiêu đề ấn tượng...">
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Content" class="form-label fw-bold">Nội dung</label>
+                        <textarea asp-for="Content" id="editor" class="form-control" rows="15"></textarea>
+                        <span asp-validation-for="Content" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ThumbnailFile" class="form-label fw-bold">Ảnh đại diện</label>
+                        <div class="d-flex align-items-start gap-4">
+                            <div class="flex-grow-1">
+                                <input asp-for="ThumbnailFile" type="file" class="form-control border-0 bg-light rounded-3" onchange="previewImage(this)">
+                                <div class="form-text mt-2 small">Định dạng hỗ trợ: JPG, PNG, WEBP. Tối đa 2MB.</div>
+                                <span asp-validation-for="ThumbnailFile" class="text-danger small"></span>
+                            </div>
+                            <div id="imagePreviewContainer" class="@(string.IsNullOrEmpty(Model.Thumbnail) ? "d-none" : "")">
+                                <p class="small text-muted mb-2">Xem trước:</p>
+                                <img id="thumbnailPreview" src="@Model.Thumbnail" class="rounded-3 shadow-sm border" style="width: 150px; height: 100px; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check form-switch p-0 d-flex align-items-center gap-3">
+                           <input class="form-check-input ms-0 mt-0" type="checkbox" asp-for="IsPublished" id="flexSwitchCheckDefault" style="width: 40px; height: 20px;">
+                           <label class="form-check-label fw-bold" for="flexSwitchCheckDefault">Công khai bài viết này</label>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-25">
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm">
+                            <i class="fa-solid fa-save me-2"></i> @(isEdit ? "Cập nhật ngay" : "Đăng bài viết")
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 2rem;">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-circle-info text-primary me-2"></i>Hướng dẫn</h5>
+                <ul class="text-muted small ps-3">
+                    <li class="mb-2">Sử dụng tiêu đề ngắn gọn nhưng thu hút sự chú ý.</li>
+                    <li class="mb-2">Nội dung bài viết nên có ít nhất 300 từ để đạt SEO tốt.</li>
+                    <li class="mb-2">Hình ảnh giúp bài viết sinh động và tin cậy hơn.</li>
+                    <li class="mb-2">Lưu ở chế độ "Nháp" nếu bạn chưa hoàn thiện nội dung.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'undo', 'redo' ]
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        function previewImage(input) {
+            const container = document.getElementById('imagePreviewContainer');
+            const preview = document.getElementById('thumbnailPreview');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    container.classList.remove('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

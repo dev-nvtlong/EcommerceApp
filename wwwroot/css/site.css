@@ -174,16 +174,8 @@ body {
 .main-footer {
     background: var(--dark);
     color: white;
-    padding: 5rem 2rem 2rem;
+    padding: 3rem 0 0;
     margin-top: 5rem;
-}
-
-.main-footer__container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 4rem;
 }
 
 .main-footer__brand-title {
@@ -230,6 +222,22 @@ body {
     text-align: center;
     color: #94a3b8;
     font-size: 0.875rem;
+}
+.hover-white:hover {
+    color: white !important;
+}
+.text-emerald-300 {
+    color: #6ee7b7 !important;
+}
+.btn-white {
+    background-color: white;
+    color: var(--dark);
+}
+.btn-white:hover {
+    background-color: #f8fafc;
+}
+.fs-xs {
+    font-size: 0.75rem;
 }
 
 @media (max-width: 992px) {

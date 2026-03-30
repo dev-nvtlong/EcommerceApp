@@ -1,0 +1,99 @@
+@model EcommerceApp.Application.DTOs.Account.UserDto
+@using EcommerceApp.Enums
+@{
+    ViewData["Title"] = "Chi tiết khách hàng: " + Model.FullName;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý khách hàng</a></li>
+            <li class="breadcrumb-item active">Chi tiết: @Model.FullName</li>
+        </ol>
+    </nav>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 btn-sm">
+        <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 text-center p-5 mb-4">
+            <img src="@(string.IsNullOrEmpty(Model.Avatar) ? "https://ui-avatars.com/api/?name=" + Model.FullName + "&background=6366f1&color=fff&size=256" : Model.Avatar)" 
+                 class="rounded-circle border border-4 border-white shadow-sm mx-auto mb-4" 
+                 style="width: 150px; height: 150px; object-fit: cover;">
+            
+            <h4 class="fw-bold mb-1">@Model.FullName</h4>
+            <p class="text-muted mb-4">@@@Model.UserName</p>
+            
+            <div class="d-flex justify-content-center gap-2 mb-4">
+                @foreach (var role in Model.Roles)
+                {
+                    <span class="badge bg-primary rounded-pill px-4 py-2">@role</span>
+                }
+            </div>
+            <hr class="opacity-10 my-4">
+            <div class="text-start">
+                <div class="mb-3">
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-1">Ngày đăng ký</label>
+                    <div class="fw-semibold">@Model.CreateAt?.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+                <div class="mb-0">
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-1">Email</label>
+                    <div class="fw-semibold">@Model.Email</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0">Thông tin chi tiết</h5>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-1">Họ và tên</label>
+                    <div class="p-3 bg-light rounded-3">@Model.FullName</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-1">Số điện thoại</label>
+                    <div class="p-3 bg-light rounded-3">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "--" : Model.PhoneNumber)</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-1">Ngày sinh</label>
+                    <div class="p-3 bg-light rounded-3">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "--")</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-1">Giới tính</label>
+                    <div class="p-3 bg-light rounded-3">
+                        @(Model.Gender switch {
+                            GenderType.Male => "Nam",
+                            GenderType.Female => "Nữ",
+                            GenderType.Other => "Khác",
+                            _ => "Chưa xác định"
+                        })
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="text-muted small fw-bold text-uppercase d-block mb-1">Địa chỉ</label>
+                    <div class="p-3 bg-light rounded-3" style="min-height: 100px;">
+                        @(string.IsNullOrEmpty(Model.Address) ? "Chưa cung cấp địa chỉ." : Model.Address)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-5 pt-4 border-top">
+                @if (!Model.Roles.Contains("Admin"))
+                {
+                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa người dùng này?')">
+                        <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-bold">
+                            <i class="fa-solid fa-trash-can me-2"></i> Xóa tài khoản người dùng
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
