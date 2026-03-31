@@ -35,21 +35,24 @@
 
 <div class="product-details">
     <div class="container">
-        <div class="row g-5">
-            <div class="col-lg-6">
-                <div class="product-image-container shadow-sm">
+        <a asp-action="Index" class="btn btn-link text-decoration-none text-muted mb-4 p-0">
+            <i class="fa-solid fa-arrow-left me-2"></i> Quay lại tất cả sản phẩm
+        </a>
+        <div class="row g-5 align-items-start">
+            <div class="col-lg-5">
+                <div class="product-image-container shadow-sm mx-auto" style="max-width: 450px;">
                     <img src="@(Model.ImageUrls != null && Model.ImageUrls.Any() ? Model.ImageUrls.First() : "/images/no-image.png")" class="img-fluid w-100" alt="@Model.Name">
                 </div>
             </div>
-            <div class="col-lg-6">
-                <nav aria-label="breadcrumb" class="mb-4">
+            <div class="col-lg-7">
+                <nav aria-label="breadcrumb" class="mb-4 d-none d-md-block">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">Cửa hàng</a></li>
                         <li class="breadcrumb-item active">@Model.Name</li>
                     </ol>
                 </nav>
                 
-                <h1 class="display-5 fw-bold mb-3">@Model.Name</h1>
+                <h1 class="display-6 fw-bold mb-3">@Model.Name</h1>
                 <div class="d-flex align-items-center gap-3 mb-4">
                     <div class="rating-stars">
                         @for (int i = 1; i <= 5; i++)
@@ -71,9 +74,9 @@
                     <span class="text-muted small">(@ViewBag.AverageRating.ToString("F1") / 5.0) - @ViewBag.ReviewCount đánh giá</span>
                 </div>
                 
-                <div class="product-price mb-4">@Model.Price.ToString("N0")₫</div>
+                <div class="product-price mb-3">@Model.Price.ToString("N0")₫</div>
                 
-                <div class="mb-5 text-muted lh-lg">
+                <div class="mb-5 text-muted lh-lg fs-6 small">
                     @Html.Raw(Model.Description)
                 </div>
                 

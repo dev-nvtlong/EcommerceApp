@@ -1,4 +1,5 @@
-﻿using EcommerceApp.Base;
+using EcommerceApp.Base;
+using EcommerceApp.Enums;
 
 namespace EcommerceApp.Models
 {
@@ -9,6 +10,9 @@ namespace EcommerceApp.Models
 
         public string? Thumbnail { get; set; }
 
+        public BlogCategory Category { get; set; } = BlogCategory.Experience;
+        public string? Tags { get; set; }
+
         public int UserId { get; set; }
         public ApplicationUser User { get; set; }
 
@@ -16,6 +20,6 @@ namespace EcommerceApp.Models
 
         public ICollection<Comment>? Comments { get; set; }
         public ICollection<Like>? Likes { get; set; }
+        public ICollection<BlogPostImage>? Images { get; set; }
     }
-
 }

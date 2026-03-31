@@ -2,6 +2,7 @@ using AutoMapper;
 using EcommerceApp.Application.DTOs.Blog;
 using EcommerceApp.Application.Interfaces.Services;
 using EcommerceApp.Data;
+using EcommerceApp.Enums;
 using EcommerceApp.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,12 +21,27 @@ namespace EcommerceApp.Application.Services
             _notificationService = notificationService;
         }
 
-        public async Task<List<BlogPostDto>> GetPublishedPostsAsync()
+        public async Task<List<BlogPostDto>> GetPublishedPostsAsync(string? searchTerm = null, BlogCategory? category = null)
         {
-            var posts = await _context.BlogPosts
+            var query = _context.BlogPosts
                 .Include(p => p.User)
                 .Include(p => p.Likes)
-                .Where(p => p.IsPublished)
+                .Where(p => p.IsPublished);
+
+            if (category.HasValue)
+            {
+                query = query.Where(p => p.Category == category.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(p => p.Title.ToLower().Contains(searchTerm) || 
+                                       (p.Content != null && p.Content.ToLower().Contains(searchTerm)) ||
+                                       (p.Tags != null && p.Tags.ToLower().Contains(searchTerm)));
+            }
+
+            var posts = await query
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
@@ -153,6 +169,27 @@ namespace EcommerceApp.Application.Services
             if (post == null) return false;
 
             _context.BlogPosts.Remove(post);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> AddPostImagesAsync(int postId, List<string> imageUrls)
+        {
+            var post = await _context.BlogPosts.Include(p => p.Images).FirstOrDefaultAsync(p => p.ID == postId);
+            if (post == null) return false;
+
+            int nextOrder = (post.Images?.Any() == true) ? post.Images.Max(i => i.SortOrder) + 1 : 1;
+
+            foreach (var url in imageUrls)
+            {
+                _context.BlogPostImages.Add(new BlogPostImage
+                {
+                    BlogPostId = postId,
+                    ImageUrl = url,
+                    SortOrder = nextOrder++
+                });
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }

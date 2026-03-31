@@ -6,7 +6,7 @@ namespace EcommerceApp.Application.Interfaces.Services
     public interface IBlogService
     {
         // Client side
-        Task<List<BlogPostDto>> GetPublishedPostsAsync();
+        Task<List<BlogPostDto>> GetPublishedPostsAsync(string? searchTerm = null, BlogCategory? category = null);
         Task<BlogPostDto?> GetPostDetailsAsync(int id, int? currentUserId = null);
         Task<bool> ToggleLikeAsync(int postId, int userId);
         Task<CommentDto> AddCommentAsync(int postId, int userId, string content);
@@ -16,5 +16,6 @@ namespace EcommerceApp.Application.Interfaces.Services
         Task<BlogPostDto> CreatePostAsync(int userId, CreateBlogPostDto dto);
         Task<bool> UpdatePostAsync(int id, CreateBlogPostDto dto);
         Task<bool> DeletePostAsync(int id);
+        Task<bool> AddPostImagesAsync(int postId, List<string> imageUrls);
     }
 }

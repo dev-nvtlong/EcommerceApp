@@ -10,5 +10,6 @@ namespace EcommerceApp.Application.Interfaces.Services
         Task CreateAsync(ProductDto dto);
         Task UpdateAsync(ProductDto dto);
         Task DeleteAsync(int id);
+        Task<List<ProductDto>> SearchAsync(string searchTerm);
     }
 }

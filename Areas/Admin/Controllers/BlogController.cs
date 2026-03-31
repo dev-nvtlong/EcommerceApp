@@ -1,6 +1,7 @@
 using EcommerceApp.Application.DTOs.Blog;
 using EcommerceApp.Application.Interfaces.Services;
 using EcommerceApp.Models;
+using EcommerceApp.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -44,10 +45,22 @@ namespace EcommerceApp.Areas.Admin.Controllers
 
             if (dto.ThumbnailFile != null)
             {
-                dto.Thumbnail = await SaveThumbnail(dto.ThumbnailFile);
+                dto.Thumbnail = await SaveFile(dto.ThumbnailFile);
             }
 
-            await _blogService.CreatePostAsync(UserId, dto);
+            var postDto = await _blogService.CreatePostAsync(UserId, dto);
+            
+            // Save additional images
+            if (dto.ImageFiles != null && dto.ImageFiles.Any())
+            {
+                var imageUrls = new List<string>();
+                foreach (var file in dto.ImageFiles)
+                {
+                    imageUrls.Add(await SaveFile(file));
+                }
+                await _blogService.AddPostImagesAsync(postDto.Id, imageUrls);
+            }
+
             TempData["Success"] = "Thêm bài viết mới thành công!";
             return RedirectToAction(nameof(Index));
         }
@@ -62,7 +75,9 @@ namespace EcommerceApp.Areas.Admin.Controllers
                 Title = post.Title,
                 Content = post.Content,
                 Thumbnail = post.Thumbnail,
-                IsPublished = post.IsPublished
+                IsPublished = post.IsPublished,
+                Category = post.Category,
+                Tags = post.Tags
             };
             return View("Create", dto);
         }
@@ -75,17 +90,28 @@ namespace EcommerceApp.Areas.Admin.Controllers
 
             if (dto.ThumbnailFile != null)
             {
-                dto.Thumbnail = await SaveThumbnail(dto.ThumbnailFile);
+                dto.Thumbnail = await SaveFile(dto.ThumbnailFile);
             }
 
             var result = await _blogService.UpdatePostAsync(id, dto);
             if (!result) return NotFound();
 
+            // Save additional images (append)
+            if (dto.ImageFiles != null && dto.ImageFiles.Any())
+            {
+                var imageUrls = new List<string>();
+                foreach (var file in dto.ImageFiles)
+                {
+                    imageUrls.Add(await SaveFile(file));
+                }
+                await _blogService.AddPostImagesAsync(id, imageUrls);
+            }
+
             TempData["Success"] = "Cập nhật bài viết thành công!";
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<string> SaveThumbnail(IFormFile file)
+        private async Task<string> SaveFile(IFormFile file)
         {
             var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "blogs");
             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);

@@ -1,3 +1,4 @@
+@using EcommerceApp.Enums
 @model IEnumerable<EcommerceApp.Application.DTOs.Blog.BlogPostDto>
 @{
     ViewData["Title"] = "Quản lý bài viết";
@@ -29,6 +30,7 @@
                     <thead class="bg-light text-muted small text-uppercase">
                         <tr>
                             <th class="ps-4 py-3">Bài viết</th>
+                            <th>Danh mục</th>
                             <th>Tác giả</th>
                             <th>Ngày viết</th>
                             <th>Trạng thái</th>
@@ -53,9 +55,25 @@
                                         }
                                         <div>
                                             <div class="fw-bold text-dark">@item.Title</div>
-                                            <div class="small text-muted"><i class="fa-solid fa-heart me-1"></i> @item.LikeCount lượt thích</div>
+                                            <div class="small text-muted">
+                                                <i class="fa-solid fa-heart me-1 text-danger"></i> @item.LikeCount
+                                                @if (!string.IsNullOrEmpty(item.Tags))
+                                                {
+                                                    <span class="ms-2"><i class="fa-solid fa-tag me-1 text-primary"></i> @item.Tags.Split(',').Length thẻ</span>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    @if (item.Category == BlogCategory.Sales)
+                                    {
+                                        <span class="badge bg-success text-white rounded-pill px-3">Bài viết</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary text-white rounded-pill px-3">Kinh nghiệm</span>
+                                    }
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark rounded-pill px-3">@item.AuthorName</span>

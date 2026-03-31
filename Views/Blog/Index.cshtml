@@ -1,12 +1,46 @@
+@using EcommerceApp.Enums
 @model IEnumerable<EcommerceApp.Application.DTOs.Blog.BlogPostDto>
 @{
-    ViewData["Title"] = "Chia sẻ kinh nghiệm";
+    var category = (BlogCategory?)ViewData["Category"];
+    var title = category == BlogCategory.Sales ? "Bài viết sản phẩm" : "Kinh nghiệm & Bí quyết";
+    var description = category == BlogCategory.Sales 
+        ? "Khám phá các sản phẩm nổi bật và tin tức ưu đãi mới nhất từ Green Life." 
+        : "Nơi chia sẻ những kiến thức hữu ích về chăm sóc cây cảnh và không gian sống xanh.";
+    ViewData["Title"] = title;
 }
 
-<div class="py-5 bg-white border-bottom">
-    <div class="container text-center">
-        <h1 class="fw-bold mb-0 display-5 text-success">Kinh nghiệm & Bí quyết</h1>
-        <p class="text-muted mt-3 mb-0 fs-5">Nơi chia sẻ những kiến thức hữu ích về chăm sóc cây cảnh và không gian sống xanh.</p>
+@{
+    var bannerImg = category == BlogCategory.Sales 
+        ? "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=2000"
+        : "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=2000";
+}
+
+<div class="blog-banner py-5 text-white position-relative overflow-hidden" 
+     style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url('@bannerImg') center/cover; min-height: 300px; display: flex; align-items: center;">
+    <div class="container text-center py-5">
+        <h1 class="fw-bold display-4 mb-3 animate__animated animate__fadeInDown">@title</h1>
+        <p class="fs-5 opacity-75 mb-0 animate__animated animate__fadeInUp">@description</p>
+    </div>
+</div>
+
+<div class="container mb-5" style="margin-top: -35px; position: relative; z-index: 10;">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-xl-6">
+            <form asp-action="Index" method="get" class="search-form p-2 bg-white shadow-lg rounded-pill border">
+                <input type="hidden" name="category" value='@ViewData["Category"]' />
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+                        <i class="fa-solid fa-magnifying-glass fs-5"></i>
+                    </span>
+                    <input type="text" name="searchTerm" class="form-control border-0 bg-transparent py-3 fs-6" 
+                           placeholder="Bạn đang tìm kiếm gì?..." value="@ViewData["SearchTerm"]" style="box-shadow: none;">
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold transition-all px-lg-5">
+                        <span class="d-none d-sm-inline">Tìm kiếm</span>
+                        <i class="fa-solid fa-arrow-right d-sm-none"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -32,12 +66,27 @@
                     </a>
                     <div class="card-body p-4 d-flex flex-column">
                         <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold small">Mẹo vặt</span>
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold small">
+                                @(post.Category == BlogCategory.Sales ? "Bài viết" : "Kinh nghiệm")
+                            </span>
                             <span class="text-muted small italic">@post.CreatedAt?.ToString("dd/MM/yyyy")</span>
                         </div>
-                        <h3 class="h5 fw-bold mb-3">
+                        <h3 class="h5 fw-bold mb-2">
                             <a asp-action="Details" asp-route-id="@post.Id" class="text-dark text-decoration-none hover-text-success">@post.Title</a>
                         </h3>
+                        
+                        @if (!string.IsNullOrEmpty(post.Tags))
+                        {
+                            <div class="mb-3 d-flex flex-wrap gap-2">
+                                @foreach (var tag in post.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    <a asp-action="Index" asp-route-searchTerm="@tag.Trim()" class="text-decoration-none small text-muted bg-light px-2 py-1 rounded-pill hover-bg-success-subtle">
+                                        <i class="fa-solid fa-hashtag small opacity-50"></i>@tag.Trim()
+                                    </a>
+                                }
+                            </div>
+                        }
+
                         <p class="text-muted small mb-4 line-clamp-3">
                             @(System.Text.RegularExpressions.Regex.Replace(post.Content ?? "", "<.*?>", String.Empty))
                         </p>
@@ -61,8 +110,18 @@
     @if (!Model.Any())
     {
         <div class="text-center py-5">
-            <i class="fa-solid fa-mug-hot h1 text-muted opacity-25 mb-3"></i>
-            <p class="text-muted">Chúng tôi đang chuẩn bị những nội dung tuyệt vời nhất cho bạn. Quay lại sau nhé!</p>
+            @if (!string.IsNullOrEmpty(ViewData["SearchTerm"]?.ToString()))
+            {
+                <i class="fa-solid fa-magnifying-glass-chart h1 text-muted opacity-25 mb-3"></i>
+                <h4 class="fw-bold">Không tìm thấy bài viết nào</h4>
+                <p class="text-muted">Rất tiếc, chúng tôi không tìm thấy bài viết nào khớp với từ khóa <strong>"@ViewData["SearchTerm"]"</strong>. Hãy thử lại với từ khóa khác nhé!</p>
+                <a asp-action="Index" class="btn btn-outline-success mt-3 rounded-pill px-4">Xem tất cả bài viết</a>
+            }
+            else
+            {
+                <i class="fa-solid fa-mug-hot h1 text-muted opacity-25 mb-3"></i>
+                <p class="text-muted">Chúng tôi đang chuẩn bị những nội dung tuyệt vời nhất cho bạn. Quay lại sau nhé!</p>
+            }
         </div>
     }
 </div>

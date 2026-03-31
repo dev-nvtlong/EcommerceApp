@@ -10,8 +10,8 @@
         border-radius: 30px;
         position: relative;
         overflow: hidden;
-        margin-top: 2rem;
-        padding: 4rem;
+        margin-top: 0;
+        padding: 2.5rem 4rem;
         color: white;
     }
     .shop-banner__img {
@@ -29,18 +29,18 @@
     }
 </style>
 
-<div class="container mb-4">
+<div class="container mt-3 mb-4">
     <div class="shop-banner shadow-sm">
         <img src="https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=1200&auto=format&fit=crop" class="shop-banner__img" alt="Plant Decoration">
         <div class="shop-banner__content animate__animated animate__fadeInLeft">
             <span class="badge bg-emerald-400 bg-opacity-25 text-emerald-300 px-3 py-2 rounded-pill mb-3 fw-bold">
                 <i class="fa-solid fa-leaf me-2"></i> BỘ SƯU TẬP MÙA XUÂN
             </span>
-            <h1 class="display-5 fw-bold mb-3">TẬN HƯỞNG KHÔNG GIAN SỐNG <span class="text-emerald-300">TRONG LÀNH</span></h1>
-            <p class="mb-4 opacity-75 lead">Lựa chọn những loài cây phong thủy tốt nhất cho phòng làm việc và ngôi nhà của bạn. Giảm ngay 20% khi mua combo!</p>
+            <h1 class="display-6 fw-bold mb-2">TẬN HƯỞNG KHÔNG GIAN SỐNG <span class="text-emerald-300">TRONG LÀNH</span></h1>
+            <p class="mb-4 opacity-75 small">Lựa chọn những loài cây phong thủy tốt nhất cho phòng làm việc và ngôi nhà của bạn.</p>
             <div class="d-flex gap-3">
-                <a href="#filterForm" class="btn btn-emerald-400 rounded-pill px-4 fw-bold">Khám phá ngay</a>
-                <a href="#" class="btn btn-outline-light rounded-pill px-4 fw-bold">Xem ưu đãi</a>
+                <a href="#filterForm" class="btn btn-emerald-400 rounded-pill px-4 fw-bold btn-sm">Khám phá ngay</a>
+                <a href="#" class="btn btn-outline-light rounded-pill px-4 fw-bold btn-sm">Xem ưu đãi</a>
             </div>
         </div>
     </div>
@@ -53,7 +53,7 @@
     .btn-emerald-400:hover { background-color: #10b981; border-color: #10b981; color: white; }
 </style>
 
-<div class="container py-5">
+<div class="container pb-5">
     <div class="row g-4">
         <!-- Sidebar Filters -->
         <aside class="col-lg-3">
@@ -62,26 +62,47 @@
                 <input type="hidden" name="sortOrder" id="sortOrderInput" value="@ViewBag.SortOrder" />
 
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                    <h3 class="h5 fw-bold mb-4">Danh mục</h3>
-                    <div class="list-group list-group-flush">
-                        <a asp-action="Index" asp-route-categoryId="" 
-                           asp-route-minPrice="@ViewBag.MinPrice" asp-route-maxPrice="@ViewBag.MaxPrice" asp-route-sortOrder="@ViewBag.SortOrder"
-                           class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center @(ViewBag.CurrentCategory == null ? "text-primary fw-bold" : "text-muted")">
-                            Tất cả sản phẩm
-                        </a>
-                        @foreach (var cat in categories)
-                        {
-                            <a asp-action="Index" asp-route-categoryId="@cat.Id" 
-                               asp-route-minPrice="@ViewBag.MinPrice" asp-route-maxPrice="@ViewBag.MaxPrice" asp-route-sortOrder="@ViewBag.SortOrder"
-                               class="list-group-item list-group-item-action border-0 px-0 d-flex justify-content-between align-items-center @(ViewBag.CurrentCategory == (int?)cat.Id ? "text-primary fw-bold" : "text-muted")">
-                                @cat.Name
-                            </a>
-                        }
+                    <h2 class="h5 fw-bold mb-4">Danh mục sản phẩm</h2>
+                    @{
+                        var allCats = categories ?? new List<EcommerceApp.Application.DTOs.Category.CategoryDto>();
+                        var plantKeywords = new[] { "Cây", "Hoa", "Sen", "Kiểng", "Lan", "Trầu", "Xương", "Rồng", "Lá" };
+                        var medKeywords = new[] { "Thuốc", "Phân", "Trị", "Dưỡng", "Kích", "Trừ", "Dung dịch", "Xịt" };
+
+                        var plantCats = allCats.Where(c => plantKeywords.Any(k => c.Name.Contains(k, StringComparison.OrdinalIgnoreCase))).ToList();
+                        var medCats = allCats.Where(c => medKeywords.Any(k => c.Name.Contains(k, StringComparison.OrdinalIgnoreCase))).ToList();
+                        var otherCats = allCats.Except(plantCats).Except(medCats).ToList();
+                        plantCats.AddRange(otherCats);
+                    }
+
+                    <div class="mb-4">
+                        <label class="small fw-bold text-muted mb-2 d-block">CHỌN CÂY TRỒNG</label>
+                        <select class="form-select border-0 bg-light rounded-3 shadow-none py-2" 
+                                onchange="if(this.value) window.location.href=this.value">
+                            <option value="@Url.Action("Index", new { categoryId = "", minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, sortOrder = ViewBag.SortOrder })">-- Tất cả loại cây --</option>
+                            @foreach (var cat in plantCats)
+                            {
+                                <!option value="@Url.Action("Index", new { categoryId = cat.Id, minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, sortOrder = ViewBag.SortOrder })" 
+                                         @(ViewBag.CurrentCategory == (int?)cat.Id ? "selected" : "")>@cat.Name</!option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="small fw-bold text-muted mb-2 d-block">VẬT TƯ & THUỐC</label>
+                        <select class="form-select border-0 bg-light rounded-3 shadow-none py-2" 
+                                onchange="if(this.value) window.location.href=this.value">
+                            <option value="@Url.Action("Index", new { categoryId = "", minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, sortOrder = ViewBag.SortOrder })">-- Chọn vật tư --</option>
+                            @foreach (var cat in medCats)
+                            {
+                                <!option value="@Url.Action("Index", new { categoryId = cat.Id, minPrice = ViewBag.MinPrice, maxPrice = ViewBag.MaxPrice, sortOrder = ViewBag.SortOrder })" 
+                                         @(ViewBag.CurrentCategory == (int?)cat.Id ? "selected" : "")>@cat.Name</!option>
+                            }
+                        </select>
                     </div>
                     
                     <hr class="my-4 text-muted opacity-25">
                     
-                    <h3 class="h5 fw-bold mb-4">Khoảng giá</h3>
+                    <h2 class="h5 fw-bold mb-4">Khoảng giá</h2>
                     <div class="mb-3">
                         <div class="d-flex gap-2 align-items-center mb-2">
                             <input type="number" name="minPrice" value="@ViewBag.MinPrice" class="form-control form-control-sm border-0 bg-light rounded-3" placeholder="Từ">
@@ -90,11 +111,11 @@
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100 rounded-pill btn-sm fw-bold py-2 shadow-sm">
-                        Áp dụng lọc
+                        Áp dụng lọc giá
                     </button>
-                    @if (ViewBag.MinPrice != null || ViewBag.MaxPrice != null)
+                    @if (ViewBag.MinPrice != null || ViewBag.MaxPrice != null || ViewBag.CurrentCategory != null)
                     {
-                        <a asp-action="Index" asp-route-categoryId="@ViewBag.CurrentCategory" class="btn btn-link btn-sm text-muted w-100 mt-2 text-decoration-none">Xóa lọc</a>
+                        <a asp-action="Index" class="btn btn-link btn-sm text-danger w-100 mt-2 text-decoration-none">Xóa tất cả bộ lọc</a>
                     }
                 </div>
             </form>

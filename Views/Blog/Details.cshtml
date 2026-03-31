@@ -1,3 +1,4 @@
+@using EcommerceApp.Enums
 @model EcommerceApp.Application.DTOs.Blog.BlogPostDto
 @{
     ViewData["Title"] = Model.Title;
@@ -9,13 +10,23 @@
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-                    <li class="breadcrumb-item"><a asp-action="Index">Kinh nghiệm</a></li>
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index" asp-route-category="@Model.Category">
+                            @(Model.Category == BlogCategory.Sales ? "Bài viết" : "Kinh nghiệm")
+                        </a>
+                    </li>
                     <li class="breadcrumb-item active text-truncate" style="max-width: 200px;">@Model.Title</li>
                 </ol>
             </nav>
 
             <article class="blog-post">
                 <header class="mb-5">
+                    <div class="mb-3">
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold small">
+                            <i class="fa-solid fa-layer-group me-1"></i>
+                            @(Model.Category == BlogCategory.Sales ? "Bài viết sản phẩm" : "Kinh nghiệm & Bí quyết")
+                        </span>
+                    </div>
                     <h1 class="display-5 fw-bold text-dark mb-4">@Model.Title</h1>
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center">
@@ -44,9 +55,22 @@
                     </div>
                 }
 
-                <div class="blog-content fs-5 text-dark lh-lg mb-5 border-bottom pb-5">
+                <div class="blog-content fs-5 text-dark lh-lg mb-5 pb-5">
                     @Html.Raw(Model.Content)
                 </div>
+
+                @if (!string.IsNullOrEmpty(Model.Tags))
+                {
+                    <div class="mb-5 d-flex flex-wrap gap-2 py-3 border-top border-bottom">
+                        <span class="text-muted small fw-bold me-2 align-self-center"><i class="fa-solid fa-tags me-1"></i>Tag:</span>
+                        @foreach (var tag in Model.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            <a asp-action="Index" asp-route-searchTerm="@tag.Trim()" class="text-decoration-none small text-muted bg-light px-3 py-1 rounded-pill border transition-all hover-bg-success-subtle">
+                                <i class="fa-solid fa-hashtag small opacity-50 me-1"></i>@tag.Trim()
+                            </a>
+                        }
+                    </div>
+                }
 
                 <!-- Comments Section -->
                 <section class="comments-section" id="comments">

@@ -57,10 +57,22 @@ namespace EcommerceApp.Application.Services
             {
                 // Update basic properties
                 _mapper.Map(dto, existingProduct);
-                
+
                 await _repository.UpdateAsync(existingProduct);
                 await _repository.SaveAsync();
             }
+        }
+        public async Task<List<ProductDto>> SearchAsync(string searchTerm)
+        {
+            var data = await _repository.GetAllAsync();
+            if (string.IsNullOrWhiteSpace(searchTerm)) return _mapper.Map<List<ProductDto>>(data);
+
+            var filtered = data.Where(p => 
+                p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || 
+                (p.Description != null && p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            ).ToList();
+
+            return _mapper.Map<List<ProductDto>>(filtered);
         }
     }
 }

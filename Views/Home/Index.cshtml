@@ -265,44 +265,62 @@
     </div>
 </section>
 
-<!-- Featured Products Section -->
-<section id="featured" class="py-5 mt-5">
+<!-- Latest Sales Articles Section -->
+<section id="latest-news" class="py-5 mt-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-5">
             <div>
-                <h2 class="section-title mb-2">Sản phẩm tiêu biểu</h2>
-                <p class="text-muted mb-0">Những loài cây đang được săn đón nhất trong mùa này</p>
+                <h2 class="section-title mb-2">Bài viết nổi bật</h2>
+                <p class="text-muted mb-0">Cập nhật những xu hướng và mẹo chăm sóc không gian sống mới nhất</p>
             </div>
-            <a asp-controller="Shop" asp-action="Index" class="btn btn-premium btn-soft-green text-primary px-4 fw-bold text-decoration-none">Ghé thăm cửa hàng</a>
+            <a asp-controller="Blog" asp-action="Index" asp-route-category="Sales" class="btn btn-premium btn-soft-green text-primary px-4 fw-bold text-decoration-none">Khám phá Blog</a>
         </div>
         
         <div class="row g-4">
-            @if (products != null && products.Any())
+            @{
+                var latestPosts = ViewBag.LatestSalesPosts as List<EcommerceApp.Application.DTOs.Blog.BlogPostDto>;
+            }
+            @if (latestPosts != null && latestPosts.Any())
             {
-                foreach (var p in products)
+                foreach (var post in latestPosts)
                 {
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <div class="product-card-v2 group">
-                            <div class="position-relative overflow-hidden mb-3" style="border-radius: 12px; aspect-ratio: 1/1;">
-                                <img src="@(p.ImageUrls != null && p.ImageUrls.Any() ? p.ImageUrls[0] : "/images/no-image.png")" class="w-100 h-100 object-fit-cover transition-transform" alt="@p.Name">
-                                <div class="position-absolute top-0 end-0 p-2">
-                                    <button class="btn btn-white btn-sm rounded-circle shadow-sm"><i class="fa-regular fa-heart"></i></button>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-transform hover-translate-y">
+                            <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="text-decoration-none">
+                                <div class="position-relative overflow-hidden" style="aspect-ratio: 16/9;">
+                                    @if (!string.IsNullOrEmpty(post.Thumbnail))
+                                    {
+                                        <img src="@post.Thumbnail" class="w-100 h-100 object-fit-cover transition-all duration-500 hover-scale" alt="@post.Title">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-muted">
+                                            <i class="fa-solid fa-newspaper h1 opacity-25"></i>
+                                        </div>
+                                    }
                                 </div>
-                                <div class="position-absolute bottom-0 start-0 w-100 p-2 translate-y-100 group-hover-translate-y-0 transition-transform">
-                                    <button onclick="addToCart(@p.ProductId)" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm text-sm">
-                                        <i class="fa-solid fa-cart-shopping me-1"></i> Thêm vào giỏ
-                                    </button>
+                            </a>
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="mb-2">
+                                    <span class="text-muted small italic">@post.CreatedAt?.ToString("dd/MM/yyyy")</span>
                                 </div>
-                            </div>
-                            <div class="px-1 text-center">
-                                <h3 class="h6 fw-bold mb-1 text-truncate">
-                                    <a asp-controller="Shop" asp-action="Details" asp-route-id="@p.ProductId" class="text-dark text-decoration-none">@p.Name</a>
+                                <h3 class="h6 fw-bold mb-3 line-clamp-2">
+                                    <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="text-dark text-decoration-none hover-text-success">@post.Title</a>
                                 </h3>
-                                <div class="text-primary fw-extrabold h5 mb-0">@p.Price.ToString("N0")₫</div>
+                                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                    <span class="small fw-bold text-success">@post.AuthorName</span>
+                                    <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="text-decoration-none small fw-bold">Xem thêm <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Đang cập nhật những bài viết mới nhất...</p>
+                </div>
             }
         </div>
     </div>

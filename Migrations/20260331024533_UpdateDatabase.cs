@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EcommerceApp.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateDB : Migration
+    public partial class UpdateDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -224,6 +224,8 @@ namespace EcommerceApp.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Thumbnail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Category = table.Column<int>(type: "int", nullable: false),
+                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     IsPublished = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -272,6 +274,9 @@ namespace EcommerceApp.Migrations
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
+                    ShipName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShipAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShipPhone = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreateByUserID = table.Column<int>(type: "int", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -467,7 +472,7 @@ namespace EcommerceApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Review",
+                name: "Reviews",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -480,14 +485,14 @@ namespace EcommerceApp.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Review", x => x.ID);
+                    table.PrimaryKey("PK_Reviews", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Review_AspNetUsers_UserId",
+                        name: "FK_Reviews_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Review_Products_ProductId",
+                        name: "FK_Reviews_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "ID",
@@ -604,13 +609,13 @@ namespace EcommerceApp.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Review_ProductId",
-                table: "Review",
+                name: "IX_Reviews_ProductId",
+                table: "Reviews",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Review_UserId",
-                table: "Review",
+                name: "IX_Reviews_UserId",
+                table: "Reviews",
                 column: "UserId");
         }
 
@@ -654,7 +659,7 @@ namespace EcommerceApp.Migrations
                 name: "ProductImage");
 
             migrationBuilder.DropTable(
-                name: "Review");
+                name: "Reviews");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

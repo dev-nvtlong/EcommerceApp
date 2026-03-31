@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - E-Shop</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -24,12 +22,16 @@
             <nav class="main-header__nav">
                 <a class="main-header__link" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                 <a class="main-header__link" asp-area="" asp-controller="Shop" asp-action="Index">Cây & Sản phẩm</a>
-                <a class="main-header__link" asp-area="" asp-controller="Blog" asp-action="Index">Kinh nghiệm</a>
+                <a class="main-header__link" asp-area="" asp-controller="Blog" asp-action="Index" asp-route-category="Sales">Bài viết</a>
+                <a class="main-header__link" asp-area="" asp-controller="Blog" asp-action="Index" asp-route-category="Experience">Kinh nghiệm</a>
                 <a class="main-header__link" asp-area="" asp-controller="Home" asp-action="Privacy">Về chúng tôi</a>
             </nav>
             
             <div class="main-header__actions">
-                <div class="main-header__action">
+                <div class="main-header__action d-lg-none" onclick="toggleMobileMenu()">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+                <div class="main-header__action d-none d-lg-block">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
                 <a asp-controller="Cart" asp-action="Index" class="main-header__action text-decoration-none">
@@ -67,6 +69,28 @@
             </div>
         </div>
     </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu-overlay" class="mobile-menu-overlay d-none" onclick="toggleMobileMenu()"></div>
+    <div id="mobile-menu-drawer" class="mobile-menu-drawer">
+        <div class="p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a class="main-header__logo mb-0" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fa-solid fa-seedling"></i>
+                    <span>Green Life</span>
+                </a>
+                <button class="btn-close" onclick="toggleMobileMenu()"></button>
+            </div>
+            <hr class="opacity-10 mb-4">
+            <nav class="d-flex flex-column gap-3">
+                <a class="mobile-menu__link active" asp-controller="Home" asp-action="Index"><i class="fa-solid fa-house me-3"></i>Trang chủ</a>
+                <a class="mobile-menu__link" asp-controller="Shop" asp-action="Index"><i class="fa-solid fa-leaf me-3"></i>Cây & Sản phẩm</a>
+                <a class="mobile-menu__link" asp-controller="Blog" asp-action="Index" asp-route-category="Sales"><i class="fa-solid fa-newspaper me-3"></i>Bài viết bán hàng</a>
+                <a class="mobile-menu__link" asp-controller="Blog" asp-action="Index" asp-route-category="Experience"><i class="fa-solid fa-lightbulb me-3"></i>Kinh nghiệm chăm sóc</a>
+                <a class="mobile-menu__link" asp-controller="Home" asp-action="Privacy"><i class="fa-solid fa-circle-info me-3"></i>Về chúng tôi</a>
+            </nav>
+        </div>
+    </div>
 
     <main role="main">
         @RenderBody()
@@ -130,11 +154,267 @@
         </div>
     </footer>
 
+    <!-- Contact & Chatbot Widget -->
+    <!-- Contact & Chatbot Widget -->
+    <div id="contact-widget-container" class="contact-widget-container">
+        <!-- Chatbot FAB (First in HTML -> Bottom in flex-reverse) -->
+        <div class="chatbot-wrapper">
+             <div id="chat-window" class="chat-window d-none animate__animated animate__fadeInUp">
+                <div class="chat-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="chat-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold small">Green Life Assistant</div>
+                            <div class="text-white-50 fs-xs">Phản hồi ngay lập tức</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" onclick="toggleChat()"></button>
+                </div>
+                <div id="chat-messages" class="chat-body p-3">
+                    <div class="message bot">
+                        Xin chào! Tôi có thể giúp bạn tìm kiếm cây cảnh hoặc chia sẻ kinh nghiệm chăm sóc cây đấy. Bạn cần gì ạ?
+                    </div>
+                </div>
+                <div class="chat-footer p-2 border-top">
+                    <form id="chat-form" class="input-group input-group-sm">
+                        <input type="text" id="chat-input" class="form-control border-0 bg-light rounded-pill px-3" placeholder="Hỏi tôi bất cứ điều gì...">
+                        <button type="submit" class="btn btn-primary rounded-pill ms-2"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div id="chat-welcome-bubble" class="chat-welcome-bubble d-none animate__animated">
+                Bạn cần tìm kiếm gì? <i class="fa-solid fa-face-smile-wd me-1"></i>
+                <button type="button" class="btn-close ms-1" style="font-size: 0.5rem;" onclick="closeWelcomeBubble(event)"></button>
+            </div>
+            <button id="chat-fab" class="contact-btn chat-btn shadow-lg" onclick="toggleChat()">
+                <i class="fa-solid fa-comment-dots"></i>
+                <span class="contact-tooltip">Chatbot</span>
+            </button>
+        </div>
+
+        <!-- Zalo Button (Middle) -->
+        <a href="https://zalo.me/0819124953" target="_blank" class="contact-btn zalo-btn shadow-lg" title="Chat Zalo">
+            <span class="zalo-icon-wrap">Z</span>
+            <span class="contact-tooltip">Zalo</span>
+        </a>
+
+        <!-- Call Button (Last in HTML -> Top in flex-reverse) -->
+        <a href="tel:+842434567890" class="contact-btn call-btn shadow-lg" title="Gọi ngay">
+            <i class="fa-solid fa-phone"></i>
+            <span class="contact-tooltip">Gọi ngay</span>
+        </a>
+    </div>
+
+    <style>
+        .contact-widget-container { 
+            position: fixed; bottom: 20px; right: 20px; z-index: 999999; 
+            display: flex; flex-direction: column-reverse; gap: 12px; align-items: center;
+        }
+        .contact-btn { 
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; color: white !important; font-size: 1.25rem; transition: all 0.3s;
+            position: relative; border: none; cursor: pointer;
+        }
+        .contact-btn:hover { transform: scale(1.1) rotate(5deg); }
+        
+        .call-btn { background: #22c55e; animation: pulse-green 2s infinite; }
+        .zalo-btn { background: #0084ff; font-weight: 900; }
+        .chat-btn { background: #16a34a; }
+        
+        .zalo-icon-wrap { font-family: sans-serif; font-weight: 800; font-size: 1.4rem; }
+        
+        .contact-tooltip {
+            position: absolute; right: 65px; top: 50%; transform: translateY(-50%);
+            background: #1e293b; color: white; font-size: 0.75rem; padding: 5px 12px;
+            border-radius: 6px; opacity: 0; transition: all 0.3s; pointer-events: none;
+            white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .contact-btn:hover .contact-tooltip { opacity: 1; right: 60px; }
+        
+        .chat-window {
+            position: absolute; bottom: 65px; right: 0; width: 350px; height: 500px;
+            background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .chat-header { background: #16a34a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .chat-avatar { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .chat-body { flex: 1; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+        .message { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 0.9rem; margin-bottom: 5px; }
+        .message.bot { background: white; border: 1px solid #e2e8f0; align-self: flex-start; color: #1e293b; }
+        .message.user { background: #16a34a; color: white; align-self: flex-end; }
+        
+        .chat-item-card { 
+            background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 8px; 
+            margin-top: 5px; text-decoration: none; color: inherit; display: block; transition: background 0.2s;
+        }
+        .chat-item-card:hover { background: #f1f5f9; }
+        .fs-xs { font-size: 0.7rem; }
+        
+        .chat-welcome-bubble {
+            position: absolute; bottom: 0; right: 65px; background: white; color: #1e293b;
+            padding: 10px 15px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0; font-size: 0.85rem; font-weight: 600; 
+            white-space: nowrap; z-index: 99;
+            display: flex; align-items: center; justify-content: space-between;
+            animation: float-left 3s ease-in-out infinite;
+        }
+        .chat-welcome-bubble:after {
+            content: ''; position: absolute; top: 18px; right: -8px;
+            width: 15px; height: 15px; background: white; border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0; transform: rotate(45deg);
+        }
+
+        @@keyframes float-left {
+            0% { transform: translateX(0px); }
+            50% { transform: translateX(-5px); }
+            100% { transform: translateX(0px); }
+        }
+
+        @@keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        /* Mobile Adjustments */
+        @@media (max-width: 768px) {
+            .contact-widget-container { 
+                bottom: 20px !important; 
+                right: 15px !important; 
+                gap: 8px !important; 
+                z-index: 99999999 !important;
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            .contact-btn { 
+                width: 48px !important; 
+                height: 48px !important; 
+                font-size: 1.2rem !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                display: flex !important;
+            }
+            .chat-window { width: calc(100vw - 30px); height: 75vh; bottom: 65px; right: -5px; }
+            .contact-tooltip { display: none !important; }
+            .chat-welcome-bubble { bottom: 60px; right: 0; font-size: 0.75rem; padding: 8px 12px; }
+        }
+
+        /* Mobile Drawer Styles */
+        .mobile-menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5); z-index: 100000; backdrop-filter: blur(2px);
+        }
+        .mobile-menu-drawer {
+            position: fixed; top: 0; left: 0; width: 280px; height: 100vh;
+            background: white; z-index: 100001; transition: transform 0.3s ease;
+            transform: translateX(-100%); box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+        }
+        .mobile-menu-drawer.active { transform: translateX(0); }
+        .mobile-menu__link {
+            text-decoration: none; color: var(--dark); font-weight: 500;
+            padding: 10px 15px; border-radius: 8px; transition: all 0.2s;
+        }
+        .mobile-menu__link:hover, .mobile-menu__link.active { background: #f0fdf4; color: var(--primary); }
+    </style>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobile-menu-drawer');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('d-none');
+            
+            if (drawer.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function toggleChat() {
+            const window = document.getElementById('chat-window');
+            window.classList.toggle('d-none');
+            
+            // Hide welcome bubble when opening chat
+            const bubble = document.getElementById('chat-welcome-bubble');
+            if (bubble) bubble.classList.add('d-none');
+
+            // Hide/Show Call and Zalo buttons based on chat state
+            const otherButtons = document.querySelectorAll('.call-btn, .zalo-btn');
+            if (!window.classList.contains('d-none')) {
+                otherButtons.forEach(btn => btn.classList.add('d-none'));
+                document.getElementById('chat-input').focus();
+            } else {
+                otherButtons.forEach(btn => btn.classList.remove('d-none'));
+            }
+        }
+
+        function closeWelcomeBubble(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('chat-welcome-bubble').classList.add('d-none');
+        }
+
+        function appendMessage(msg, type = 'bot', items = null) {
+            const body = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type} animate__animated animate__fadeInUp animate__faster`;
+            msgDiv.textContent = msg;
+            
+            if (items && items.length > 0) {
+                const itemsDiv = document.createElement('div');
+                itemsDiv.className = 'mt-2';
+                items.forEach(item => {
+                    const card = document.createElement('a');
+                    card.href = item.url;
+                    card.className = 'chat-item-card shadow-xs';
+                    card.innerHTML = `
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid ${item.type === 'Product' ? 'fa-leaf text-success' : 'fa-book text-primary'}"></i>
+                            <div class="overflow-hidden">
+                                <div class="fw-bold fs-xs text-truncate">${item.title}</div>
+                                <div class="text-muted fs-xs">${item.type === 'Product' ? item.price : 'Bởi ' + item.author}</div>
+                            </div>
+                        </div>
+                    `;
+                    itemsDiv.appendChild(card);
+                });
+                msgDiv.appendChild(itemsDiv);
+            }
+            
+            body.appendChild(msgDiv);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        $('#chat-form').submit(function(e) {
+            e.preventDefault();
+            const input = $('#chat-input');
+            const msg = input.val().trim();
+            if (!msg) return;
+
+            appendMessage(msg, 'user');
+            input.val('');
+
+            // Typing indicator simulation
+            const typingId = 'typing-' + Date.now();
+            const typingDiv = $('<div class="message bot small italic text-muted" id="'+typingId+'">Đang nghĩ...</div>');
+            $('#chat-messages').append(typingDiv);
+
+            $.post('/Chat/Query', { message: msg }, function(res) {
+                $(`#${typingId}`).remove();
+                appendMessage(res.reply, 'bot', res.items);
+            }).fail(function() {
+                $(`#${typingId}`).remove();
+                appendMessage("Rất tiếc, đã có lỗi kết nối. Hãy thử lại nhé!", 'bot');
+            });
+        });
+
         function updateCartBadge() {
             $.get('/Cart/GetCartSummary', function(res) {
                 $('#cart-badge').text(res.totalItems);
@@ -187,6 +467,16 @@
 
         $(document).ready(function() {
             updateCartBadge();
+
+            // Show welcome bubble after 3 seconds
+            setTimeout(() => {
+                const bubble = document.getElementById('chat-welcome-bubble');
+                const chatWindow = document.getElementById('chat-window');
+                if (bubble && chatWindow && chatWindow.classList.contains('d-none')) {
+                    bubble.classList.remove('d-none');
+                    bubble.classList.add('animate__fadeInRight');
+                }
+            }, 3000);
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
