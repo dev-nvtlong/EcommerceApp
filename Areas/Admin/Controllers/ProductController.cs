@@ -73,8 +73,10 @@ namespace EcommerceApp.Areas.Admin.Controllers
 
                 if (dto.ProductId == 0)
                 {
-                    await _productService.CreateAsync(dto);
+                    dto.IsActive = true;
+                    var newId = await _productService.CreateAsync(dto);
                     TempData["Success"] = "Thêm sản phẩm thành công!";
+                    TempData["OpenImportModal"] = newId; // Trigger modal for new product
                 }
                 else
                 {
@@ -85,6 +87,38 @@ namespace EcommerceApp.Areas.Admin.Controllers
             }
             ViewBag.Categories = await _categoryService.GetAllAsync();
             return View(nameof(Index), await _productService.GetAllAsync());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ImportStock(int productId, int quantity, decimal costPrice)
+        {
+            try
+            {
+                await _productService.ImportStockAsync(productId, quantity, costPrice);
+                return Json(new { success = true, message = "Nhập hàng thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleActive(int id)
+        {
+            try
+            {
+                var product = await _productService.GetByIdAsync(id);
+                if (product == null) return Json(new { success = false, message = "Không tìm thấy sản phẩm" });
+
+                product.IsActive = !product.IsActive;
+                await _productService.UpdateAsync(product);
+                return Json(new { success = true, isActive = product.IsActive });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]

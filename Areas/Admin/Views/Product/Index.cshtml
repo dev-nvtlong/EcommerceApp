@@ -109,6 +109,15 @@
         color: white;
     }
 
+    .btn-action--import {
+        color: #10b981;
+        background-color: rgba(16, 185, 129, 0.1);
+    }
+    .btn-action--import:hover {
+        background-color: #10b981;
+        color: white;
+    }
+
     /* Modal Styling */
     .modal-content {
         border: none;
@@ -145,10 +154,16 @@
             <h2 class="product-page__title">Sản phẩm</h2>
             <p class="text-muted">Quản lý kho hàng, thông tin sản phẩm và giá bán.</p>
         </div>
-        <button class="btn btn-primary d-flex align-items-center gap-2" onclick="openModal()">
-            <i class="fa-solid fa-plus"></i>
-            Thêm sản phẩm
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary d-flex align-items-center gap-2 rounded-pill px-4" onclick="openImportModal()">
+                <i class="fa-solid fa-truck-ramp-box"></i>
+                Nhập hàng
+            </button>
+            <button class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4" onclick="openModal()">
+                <i class="fa-solid fa-plus"></i>
+                Thêm sản phẩm
+            </button>
+        </div>
     </div>
 
     @if (TempData["Success"] != null)
@@ -169,7 +184,9 @@
                             <th class="px-4 py-3" style="width: 80px;">Hình ảnh</th>
                             <th class="py-3">Tên sản phẩm</th>
                             <th class="py-3">Danh mục</th>
+                            <th class="py-3">Kho / Giá nhập</th>
                             <th class="py-3">Giá bán</th>
+                            <th class="py-3">Trạng thái</th>
                             <th class="py-3 text-end px-4" style="width: 150px;">Thao tác</th>
                         </tr>
                     </thead>
@@ -201,10 +218,24 @@
                                         </span>
                                     </td>
                                     <td>
+                                        <div class="fw-bold">@item.StockQuantity</div>
+                                        <div class="text-muted small">Vốn: @item.CostPrice.ToString("N0")₫</div>
+                                    </td>
+                                    <td>
                                         <div class="product-table__price">@item.Price.ToString("N0")₫</div>
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" @(item.IsActive ? "checked" : "") 
+                                                   onchange="toggleActive(@item.ProductId, this.checked, this)">
+                                            <span class="status-label small @(item.IsActive ? "text-success" : "text-danger")">@(item.IsActive ? "Đang bán" : "Ngừng")</span>
+                                        </div>
                                     </td>
                                     <td class="text-end px-4">
                                         <div class="d-flex justify-content-end gap-2">
+                                            <button class="btn btn-action btn-action--import" onclick="openImportModal(@item.ProductId, '@item.Name')" title="Nhập hàng">
+                                                <i class="fa-solid fa-truck-medical"></i>
+                                            </button>
                                             <button class="btn btn-action btn-action--edit" onclick="openModal(@item.ProductId)" title="Chỉnh sửa">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
@@ -268,18 +299,39 @@
                             </select>
                         </div>
 
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái kinh doanh</label>
+                            <div class="form-check form-switch p-3 bg-light rounded-3">
+                                <input type="hidden" name="IsActive" value="false">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="productIsActive" name="IsActive" value="true">
+                                <label class="form-check-label small fw-bold text-dark" for="productIsActive">Đang bán trên web</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Sản phẩm nổi bật</label>
+                            <div class="form-check form-switch p-3 bg-light rounded-3">
+                                <input type="hidden" name="IsFeatured" value="false">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="productIsFeatured" name="IsFeatured" value="true">
+                                <label class="form-check-label small fw-bold text-dark" for="productIsFeatured">Hiện ở trang chủ</label>
+                            </div>
+                        </div>
+
                         <div class="col-md-12">
                             <label for="productImageFile" class="form-label">Ảnh sản phẩm</label>
-                            <div class="d-flex flex-column gap-3">
-                                <div class="upload-box p-4 border-dashed border-2 rounded-4 text-center bg-light cursor-pointer" 
-                                     onclick="document.getElementById('productImageFile').click()">
-                                    <i class="fa-solid fa-cloud-arrow-up fs-2 text-primary mb-2"></i>
-                                    <p class="mb-0 small text-muted">Bấm để chọn ảnh từ thiết bị</p>
-                                    <input type="file" id="productImageFile" name="ImageFile" accept="image/*" class="d-none" onchange="previewImage(this)">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-6">
+                                    <div class="upload-box p-4 border-dashed border-2 rounded-4 text-center bg-light cursor-pointer" 
+                                         onclick="document.getElementById('productImageFile').click()">
+                                        <i class="fa-solid fa-cloud-arrow-up fs-2 text-primary mb-2"></i>
+                                        <p class="mb-0 small text-muted">Bấm để chọn ảnh từ thiết bị</p>
+                                        <input type="file" id="productImageFile" name="ImageFile" accept="image/*" class="d-none" onchange="previewImage(this)">
+                                    </div>
                                 </div>
-                                <div id="imagePreviewContainer" class="d-none">
-                                    <p class="small text-muted mb-2">Xem trước:</p>
-                                    <img id="imagePreview" src="" alt="Preview" class="rounded-4 shadow-sm" style="max-height: 150px; width: auto; object-fit: cover;">
+                                <div class="col-md-6">
+                                    <div id="imagePreviewContainer" class="d-none border rounded-4 p-2 text-center bg-white shadow-sm" style="min-height: 120px; display: flex; align-items: center; justify-content: center;">
+                                        <img id="imagePreview" src="" alt="Preview" class="rounded-3 shadow-sm" style="max-height: 100px; width: auto; object-fit: cover;">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -304,6 +356,46 @@
     .cursor-pointer { cursor: pointer; }
 </style>
 
+<!-- Import Stock Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold">Nhập hàng vào kho <span id="importProductTitle" class="text-primary h6"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="importForm">
+                <div class="modal-body px-4 pb-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Sản phẩm</label>
+                            <select class="form-select rounded-3" id="importProductId" name="productId" required>
+                                <option value="">-- Chọn sản phẩm --</option>
+                                @foreach (var p in Model)
+                                {
+                                    <option value="@p.ProductId">@p.Name (Mã: @p.ProductId)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số lượng nhập</label>
+                            <input type="number" class="form-control rounded-3" id="importQuantity" name="quantity" required min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Giá nhập kho (₫)</label>
+                            <input type="number" class="form-control rounded-3" id="importCostPrice" name="costPrice" required min="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-4 px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-4 px-4 shadow-sm">Xác nhận nhập hàng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         const modal = new bootstrap.Modal(document.getElementById('productModal'));
@@ -317,12 +409,64 @@
         const imagePreviewContainer = document.getElementById('imagePreviewContainer');
         const imagePreview = document.getElementById('imagePreview');
 
+        const importModal = new bootstrap.Modal(document.getElementById('importModal'));
+        const productIsActive = document.getElementById('productIsActive');
+        const productIsFeatured = document.getElementById('productIsFeatured');
+
+        $(document).ready(function() {
+            @if (TempData["OpenImportModal"] != null)
+            {
+                <text>
+                const newProductId = @TempData["OpenImportModal"];
+                // Find the name by locating the ID tag in the table
+                const newProductName = $(`.text-muted.small:contains("#${newProductId}")`).closest('td').find('.product-table__name').text();
+                openImportModal(newProductId, newProductName);
+                </text>
+            }
+
+            $('#importForm').submit(function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/Admin/Product/ImportStock', formData, function(res) {
+                    if (res.success) {
+                        importModal.hide();
+                        Swal.fire('Thành công', res.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Lỗi', res.message, 'error');
+                    }
+                });
+            });
+        });
+
+        function openImportModal(id = 0, name = '') {
+            document.getElementById('importForm').reset();
+            document.getElementById('importProductTitle').innerText = name ? ` - ${name}` : '';
+            if (id > 0) {
+                document.getElementById('importProductId').value = id;
+            }
+            importModal.show();
+        }
+
+        function toggleActive(id, isActive, checkbox) {
+            const label = $(checkbox).siblings('.status-label');
+            $.post(`/Admin/Product/ToggleActive/${id}`, function(res) {
+                if (res.success) {
+                    toastr.success('Đã cập nhật trạng thái kinh doanh');
+                    // Reload the page to refresh the state completely as requested
+                    setTimeout(() => location.reload(), 500);
+                } else {
+                    toastr.error(res.message || 'Có lỗi xảy ra');
+                    checkbox.checked = !isActive; // Revert
+                }
+            });
+        }
+
         function openModal(id = 0) {
             // Reset modal state
             imagePreviewContainer.classList.add('d-none');
             imagePreview.src = '';
             document.getElementById('productImageFile').value = '';
-
+            
             if (id === 0) {
                 document.getElementById('productModalLabel').innerText = 'Thêm sản phẩm mới';
                 productId.value = 0;
@@ -331,6 +475,8 @@
                 productPrice.value = '';
                 productCategory.value = '';
                 productDescription.value = '';
+                productIsActive.checked = true; // Default for NEW
+                productIsFeatured.checked = false;
                 modal.show();
             } else {
                 fetch(`/Admin/Product/GetById/${id}`)
@@ -343,6 +489,10 @@
                         productCategory.value = data.categoryId;
                         productDescription.value = data.description || '';
                         
+                        // Set checkboxes based on data
+                        productIsActive.checked = data.isActive === true;
+                        productIsFeatured.checked = data.isFeatured === true;
+                        
                         // Show current image if exists
                         if (data.imageUrls && data.imageUrls.length > 0) {
                             existingImageUrl.value = data.imageUrls[0];
@@ -354,7 +504,10 @@
                         
                         modal.show();
                     })
-                    .catch(err => alert('Không thể tải thông tin sản phẩm.'));
+                    .catch(err => {
+                        console.error(err);
+                        alert('Không thể tải thông tin sản phẩm.');
+                    });
             }
         }
 

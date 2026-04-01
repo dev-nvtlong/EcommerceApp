@@ -9,10 +9,12 @@ namespace EcommerceApp.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
+        private readonly IProductService _productService;
 
-        public CartController(ICartService cartService)
+        public CartController(ICartService cartService, IProductService productService)
         {
             _cartService = cartService;
+            _productService = productService;
         }
 
         private int UserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -27,7 +29,15 @@ namespace EcommerceApp.Controllers
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
             await _cartService.AddToCartAsync(UserId, productId, quantity);
-            return Json(new { success = true });
+            var product = await _productService.GetByIdAsync(productId);
+            
+            return Json(new { 
+                success = true, 
+                product = new { 
+                    name = product?.Name, 
+                    imageUrl = product?.ImageUrls?.FirstOrDefault() 
+                } 
+            });
         }
 
         [HttpPost]
@@ -49,6 +59,25 @@ namespace EcommerceApp.Controllers
         {
             var cart = await _cartService.GetCartByUserIdAsync(UserId);
             return Json(new { totalItems = cart.TotalItems });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCartSummaryFull()
+        {
+            var cart = await _cartService.GetCartByUserIdAsync(UserId);
+            var items = cart.Items.Select(i => new {
+                productId = i.ProductId,
+                name = i.Product.Name,
+                imageUrl = i.Product.ImageUrls?.FirstOrDefault(),
+                price = i.Product.Price,
+                quantity = i.Quantity
+            });
+
+            return Json(new { 
+                totalItems = cart.TotalItems, 
+                totalAmount = cart.TotalAmount,
+                items = items
+            });
         }
     }
 }

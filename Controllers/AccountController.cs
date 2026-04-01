@@ -183,5 +183,19 @@ namespace EcommerceApp.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckProfileStatus()
+        {
+            if (User.Identity?.IsAuthenticated != true) return Json(new { isAuthenticated = false });
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Json(new { isAuthenticated = false });
+
+            bool isMissingInfo = string.IsNullOrEmpty(user.Address) || string.IsNullOrEmpty(user.PhoneNumber);
+            return Json(new { 
+                isAuthenticated = true, 
+                isMissingInfo = isMissingInfo
+            });
+        }
     }
 }

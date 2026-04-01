@@ -1,0 +1,50 @@
+@model EcommerceApp.Application.DTOs.Order.OrderDto
+
+<div class="modal-header border-0 pb-0">
+    <h5 class="modal-title fw-bold" id="orderModalLabel">Chỉnh sửa đơn hàng #@Model.Id</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body p-4">
+    <div class="card border-0 shadow-none p-0">
+        <h6 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-pen-to-square me-2"></i>Cập nhật thông tin giao hàng</h6>
+        
+        <div class="mb-4 text-muted small text-uppercase fw-bold">
+            Mã đơn hàng: <span class="text-dark">#@Model.Id</span> | 
+            Trạng thái: <span class="badge bg-warning-subtle text-warning border-warning border px-2 rounded-pill">@Model.Status.ToString()</span>
+        </div>
+
+        <form id="editOrderForm" asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="ShipName" class="form-label text-muted small fw-bold text-uppercase">Tên người nhận</label>
+                <input asp-for="ShipName" class="form-control border-0 bg-light rounded-3 px-3 py-2 shadow-none" required />
+                <span asp-validation-for="ShipName" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ShipPhone" class="form-label text-muted small fw-bold text-uppercase">Số điện thoại</label>
+                <input asp-for="ShipPhone" class="form-control border-0 bg-light rounded-3 px-3 py-2 shadow-none" required />
+                <span asp-validation-for="ShipPhone" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ShipAddress" class="form-label text-muted small fw-bold text-uppercase">Địa chỉ giao hàng</label>
+                <textarea asp-for="ShipAddress" class="form-control border-0 bg-light rounded-3 px-3 py-2 shadow-none" rows="3" required></textarea>
+                <span asp-validation-for="ShipAddress" class="text-danger small"></span>
+            </div>
+
+            <div class="alert alert-info border-0 rounded-4 mb-4 small">
+                <i class="fa-solid fa-circle-info me-2"></i>
+                Việc chỉnh sửa thông tin giao hàng ở đây sẽ không thay đổi thông tin trong hồ sơ khách hàng.
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary rounded-pill fw-bold py-2 shadow-sm">
+                    <i class="fa-solid fa-floppy-disk me-2"></i> Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

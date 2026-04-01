@@ -10,13 +10,15 @@ namespace EcommerceApp.Application.Services
     {
         private readonly IOrderRepository _orderRepository;
         private readonly ICartRepository _cartRepository;
+        private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
 
-        public OrderService(IOrderRepository orderRepository, ICartRepository cartRepository, IMapper mapper, INotificationService notificationService)
+        public OrderService(IOrderRepository orderRepository, ICartRepository cartRepository, IProductRepository productRepository, IMapper mapper, INotificationService notificationService)
         {
             _orderRepository = orderRepository;
             _cartRepository = cartRepository;
+            _productRepository = productRepository;
             _mapper = mapper;
             _notificationService = notificationService;
         }
@@ -89,6 +91,34 @@ namespace EcommerceApp.Application.Services
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order != null)
             {
+                // Subtract stock when order is completed
+                if (status == Enums.OrderStatus.Completed && order.Status != Enums.OrderStatus.Completed)
+                {
+                    if (order.Details != null)
+                    {
+                        foreach (var detail in order.Details)
+                        {
+                            var product = await _productRepository.GetByIdAsync(detail.ProductId);
+                            if (product != null)
+                            {
+                                product.StockQuantity -= detail.Quantity;
+                                product.SoldCount = (product.SoldCount ?? 0) + detail.Quantity;
+                                await _productRepository.UpdateAsync(product);
+                                
+                                if (product.StockQuantity < 5)
+                                {
+                                    await _notificationService.CreateNotificationAsync(
+                                        "Cảnh báo tồn kho", 
+                                        $"Sản phẩm '{product.Name}' sắp hết hàng (vừa giảm xuống {product.StockQuantity} cây).", 
+                                        Enums.NotificationType.LowStock,
+                                        $"/Admin/Product/Index"
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+
                 order.Status = status;
                 await _orderRepository.UpdateAsync(order);
             }

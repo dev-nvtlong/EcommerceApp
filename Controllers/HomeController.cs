@@ -27,11 +27,11 @@ namespace EcommerceApp.Controllers
         public async Task<IActionResult> Index()
         {
             var categories = await _categoryService.GetAllAsync();
-            var products = await _productService.GetAllAsync();
+            var products = await _productService.GetAllActiveAsync();
             var blogPosts = await _blogService.GetPublishedPostsAsync(category: BlogCategory.Sales);
             
             ViewBag.Categories = categories.Take(4).ToList();
-            ViewBag.FeaturedProducts = products.Take(8).ToList();
+            ViewBag.FeaturedProducts = products.Where(p => p.IsFeatured).Take(8).ToList();
             ViewBag.LatestSalesPosts = blogPosts.Take(4).ToList();
             
             return View();

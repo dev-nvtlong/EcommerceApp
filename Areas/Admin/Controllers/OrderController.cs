@@ -26,6 +26,12 @@ namespace EcommerceApp.Areas.Admin.Controllers
         {
             var order = await _orderService.GetOrderByIdAsync(id);
             if (order == null) return NotFound();
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_DetailsPartial", order);
+            }
+
             return View(order);
         }
 
@@ -47,8 +53,17 @@ namespace EcommerceApp.Areas.Admin.Controllers
             // Restricted editing: Cannot edit if already shipping or beyond
             if (order.Status == OrderStatus.Shipping || order.Status == OrderStatus.Completed || order.Status == OrderStatus.Cancelled)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return BadRequest("Không thể chỉnh sửa đơn hàng ở trạng thái này.");
+                }
                 TempData["Error"] = "Không thể chỉnh sửa đơn hàng ở trạng thái này.";
                 return RedirectToAction(nameof(Index));
+            }
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_EditPartial", order);
             }
             
             return View(order);

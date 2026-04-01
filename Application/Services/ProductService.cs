@@ -15,11 +15,12 @@ namespace EcommerceApp.Application.Services
             _repository = repository;
             _mapper = mapper;
         }
-        public async Task CreateAsync(ProductDto dto)
+        public async Task<int> CreateAsync(ProductDto dto)
         {
             var entity = _mapper.Map<Product>(dto);
             await _repository.CreateAsync(entity);
             await _repository.SaveAsync();
+            return entity.ProductId;
         }
 
         public async Task DeleteAsync(int id)
@@ -36,6 +37,13 @@ namespace EcommerceApp.Application.Services
         {
             var data = await _repository.GetAllAsync();
             return _mapper.Map<List<ProductDto>>(data);
+        }
+
+        public async Task<List<ProductDto>> GetAllActiveAsync()
+        {
+            var data = await _repository.GetAllAsync();
+            var active = data.Where(p => p.IsActive).ToList();
+            return _mapper.Map<List<ProductDto>>(active);
         }
 
         public async Task<ProductDto?> GetByIdAsync(int id)
@@ -65,14 +73,26 @@ namespace EcommerceApp.Application.Services
         public async Task<List<ProductDto>> SearchAsync(string searchTerm)
         {
             var data = await _repository.GetAllAsync();
-            if (string.IsNullOrWhiteSpace(searchTerm)) return _mapper.Map<List<ProductDto>>(data);
+            if (string.IsNullOrWhiteSpace(searchTerm)) return _mapper.Map<List<ProductDto>>(data.Where(p => p.IsActive).ToList());
 
-            var filtered = data.Where(p => 
+            var filtered = data.Where(p => p.IsActive && (
                 p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || 
                 (p.Description != null && p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-            ).ToList();
+            )).ToList();
 
             return _mapper.Map<List<ProductDto>>(filtered);
+        }
+
+        public async Task ImportStockAsync(int productId, int quantity, decimal costPrice)
+        {
+            var product = await _repository.GetByIdAsync(productId);
+            if (product != null)
+            {
+                product.StockQuantity += quantity;
+                product.CostPrice = costPrice;
+                await _repository.UpdateAsync(product);
+                await _repository.SaveAsync();
+            }
         }
     }
 }

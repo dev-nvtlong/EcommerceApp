@@ -31,13 +31,36 @@
                 <div class="main-header__action d-lg-none" onclick="toggleMobileMenu()">
                     <i class="fa-solid fa-bars"></i>
                 </div>
-                <div class="main-header__action d-none d-lg-block">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                <div class="dropdown me-2 mini-cart">
+                    <a href="#" class="main-header__action text-decoration-none dropdown-toggle no-caret" data-bs-toggle="dropdown" id="cartDropdown" onclick="loadMiniCart()">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span id="cart-badge" class="main-header__badge">0</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-0 mini-cart__menu" aria-labelledby="cartDropdown" style="width: 350px; overflow: hidden;">
+                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+                            <h6 class="mb-0 fw-bold">Giỏ hàng của bạn</h6>
+                            <span class="badge bg-emerald-primary rounded-pill small" id="mini-cart-count">0 món</span>
+                        </div>
+                        <div id="mini-cart-items" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Items will be loaded here -->
+                            <div class="p-4 text-center text-muted small">Đang tải giỏ hàng...</div>
+                        </div>
+                        <div class="p-3 border-top bg-white">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted small fw-bold">TỔNG CỘNG:</span>
+                                <span class="fw-bold text-success fs-5" id="mini-cart-total">0₫</span>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <a asp-controller="Cart" asp-action="Index" class="btn btn-emerald-outline w-100 rounded-pill py-2 fw-bold x-small shadow-none">GIỎ HÀNG</a>
+                                </div>
+                                <div class="col-6">
+                                    <a asp-controller="Order" asp-action="Checkout" class="btn btn-emerald-primary w-100 rounded-pill py-2 fw-bold x-small shadow-emerald">THANH TOÁN</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <a asp-controller="Cart" asp-action="Index" class="main-header__action text-decoration-none">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <span id="cart-badge" class="main-header__badge">0</span>
-                </a>
                 <div class="dropdown main-header__user">
                     <a href="#" class="main-header__action text-decoration-none" data-bs-toggle="dropdown">
                         <i class="fa-regular fa-user"></i>
@@ -153,6 +176,24 @@
             <p class="text-white-50 small mb-0">&copy; @DateTime.Now.Year GREEN LIFE. Bản quyền thuộc về Green Life Team.</p>
         </div>
     </footer>
+    
+    <!-- Mini Cart Toast Notification -->
+    <div id="cart-toast" class="cart-toast d-none animate__animated">
+        <div class="cart-toast__content">
+            <div class="d-flex align-items-center gap-3">
+                <div class="cart-toast__img-wrap shadow-xs">
+                    <img id="toast-product-img" src="" alt="Product">
+                </div>
+                <div class="flex-grow-1 overflow-hidden">
+                    <div class="cart-toast__status"><i class="fa-solid fa-check-circle text-success me-1"></i> Đã thêm vào giỏ</div>
+                    <div id="toast-product-name" class="cart-toast__name text-truncate fw-bold small">Tên sản phẩm</div>
+                </div>
+            </div>
+            <div class="d-grid mt-3">
+                <a asp-controller="Cart" asp-action="Index" class="btn btn-success btn-sm rounded-pill fw-bold">XEM GIỎ HÀNG</a>
+            </div>
+        </div>
+    </div>
 
     <!-- Contact & Chatbot Widget -->
     <!-- Contact & Chatbot Widget -->
@@ -318,6 +359,32 @@
             padding: 10px 15px; border-radius: 8px; transition: all 0.2s;
         }
         .mobile-menu__link:hover, .mobile-menu__link.active { background: #f0fdf4; color: var(--primary); }
+
+        /* Cart Toast Styling */
+        .cart-toast {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 1000000;
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+        }
+        .cart-toast__content { padding: 15px; }
+        .cart-toast__img-wrap { width: 50px; height: 50px; border-radius: 8px; overflow: hidden; background: #f8fafc; }
+        .cart-toast__img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .cart-toast__status { font-size: 0.75rem; color: #64748b; margin-bottom: 2px; }
+        .cart-toast__name { color: #1e293b; max-width: 180px; }
+
+        /* Mini Cart Dropdown styling */
+        .no-caret::after { display: none !important; }
+        .mini-cart__menu { margin-top: 15px !important; z-index: 1100; }
+        .mini-cart__item { transition: background 0.2s; }
+        .mini-cart__item:hover { background: #f8fafc; }
+        .x-small { font-size: 0.7rem !important; }
     </style>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -432,20 +499,100 @@
             $.post('/Cart/AddToCart', { productId: productId, quantity: quantity }, function(res) {
                 if (res.success) {
                     updateCartBadge();
-                    Swal.fire({
-                        title: 'Thành công!',
-                        text: 'Sản phẩm đã được thêm vào giỏ hàng.',
-                        icon: 'success',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
+                    // Load and show mini cart instead of toast if preferred, 
+                    // but for add-to-cart feedback, toast is better. 
+                    // Let's stick with toast and just update badgenum
+                    showCartToast(res.product);
                 }
             }).fail(function() {
                 window.location.href = '/Account/Auth';
             });
+        }
+
+        function loadMiniCart() {
+            // Block dropdown when on Cart page
+            if (window.location.pathname.toLowerCase().includes('/cart')) {
+                $('#cartDropdown').dropdown('hide');
+                return;
+            }
+
+            const $list = $('#mini-cart-items');
+            const $total = $('#mini-cart-total');
+            const $count = $('#mini-cart-count');
+
+            $.get('/Cart/GetCartSummaryFull', function(res) {
+                $count.text(res.totalItems + ' món');
+                $total.text(res.totalAmount.toLocaleString('vi-VN') + '₫');
+
+                if (!res.items || res.items.length === 0) {
+                    $list.html('<div class="p-5 text-center text-muted small"><i class="fa-solid fa-cart-arrow-down d-block mb-2 fs-2 opacity-10"></i> Giỏ hàng trống</div>');
+                    return;
+                }
+
+                let html = '';
+                res.items.forEach(item => {
+                    html += `
+                        <div class="mini-cart__item p-3 border-bottom d-flex gap-3 align-items-center position-relative">
+                            <div class="mini-cart__img-wrap rounded overflow-hidden" style="width: 60px; height: 60px; background: #f8fafc; flex-shrink: 0;">
+                                <img src="${item.imageUrl || '/images/no-image.png'}" class="w-100 h-100 object-fit-cover">
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-bold text-dark small text-truncate d-block mb-1">${item.name}</div>
+                                <div class="text-success fw-bold small mb-1">${item.price.toLocaleString('vi-VN')}₫</div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="input-group input-group-sm" style="width: 80px;">
+                                        <button class="btn btn-light btn-sm border py-0 px-2" onclick="updateMiniCartQty(${item.productId}, ${item.quantity - 1})">-</button>
+                                        <span class="form-control form-control-sm text-center py-0 px-1 border-0 bg-transparent small fw-bold">${item.quantity}</span>
+                                        <button class="btn btn-light btn-sm border py-0 px-2" onclick="updateMiniCartQty(${item.productId}, ${item.quantity + 1})">+</button>
+                                    </div>
+                                    <button class="btn btn-link text-danger p-0 ms-auto text-decoration-none" onclick="removeMiniCartItem(${item.productId})">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                $list.html(html);
+            });
+        }
+
+        function updateMiniCartQty(productId, quantity) {
+            if (quantity <= 0) {
+                removeMiniCartItem(productId);
+                return;
+            }
+            $.post('/Cart/UpdateQuantity', { productId: productId, quantity: quantity }, function(res) {
+                if (res.success) {
+                    loadMiniCart();
+                    updateCartBadge();
+                }
+            });
+        }
+
+        function removeMiniCartItem(productId) {
+            $.post('/Cart/RemoveItem', { productId: productId }, function(res) {
+                if (res.success) {
+                    loadMiniCart();
+                    updateCartBadge();
+                }
+            });
+        }
+
+        function showCartToast(product) {
+            const $toast = $('#cart-toast');
+            if (product) {
+                $('#toast-product-img').attr('src', product.imageUrl || '/images/no-image.png');
+                $('#toast-product-name').text(product.name);
+            }
+            
+            $toast.removeClass('d-none animate__fadeOutRight').addClass('animate__fadeInRight');
+            
+            // Auto hide after 4 seconds
+            setTimeout(() => {
+                $toast.addClass('animate__fadeOutRight');
+                setTimeout(() => $toast.addClass('d-none'), 1000);
+            }, 4000);
         }
 
         function buyNow(productId, quantity = 1) {
@@ -467,6 +614,28 @@
 
         $(document).ready(function() {
             updateCartBadge();
+
+            // Profile check on Cart/Checkout pages
+            const path = window.location.pathname.toLowerCase();
+            if (path.includes('/cart') || path.includes('/order/checkout')) {
+                $.get('/Account/CheckProfileStatus', function(res) {
+                    if (res.isAuthenticated && res.isMissingInfo) {
+                        Swal.fire({
+                            title: 'Thông tin chưa đầy đủ!',
+                            text: 'Vui lòng bổ sung Địa chỉ và Số điện thoại để chúng tôi có thể giao hàng cho bạn.',
+                            icon: 'warning',
+                            confirmButtonText: 'Cập nhật ngay',
+                            confirmButtonColor: '#10b981',
+                            showCancelButton: true,
+                            cancelButtonText: 'Để sau'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/Account/Profile';
+                            }
+                        });
+                    }
+                });
+            }
 
             // Show welcome bubble after 3 seconds
             setTimeout(() => {
