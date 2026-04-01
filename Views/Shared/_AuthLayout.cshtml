@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Green Life Auth</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body { background: #f6f5f7; }
+        .auth-logo {
+            position: absolute; top: 30px; left: 40px;
+            font-size: 1.5rem; font-weight: 700; color: var(--primary);
+            text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <a class="auth-logo" asp-area="" asp-controller="Home" asp-action="Index">
+        <i class="fa-solid fa-seedling"></i>
+        <span>Green Life</span>
+    </a>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

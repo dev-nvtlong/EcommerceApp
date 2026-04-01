@@ -169,6 +169,19 @@
             </footer>
         </div>
     </div>
+    
+    <!-- Global Modal cho Order Details -->
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4" id="orderModalContent">
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -242,7 +255,51 @@
 
             window.handleNotificationClick = function(id, url) {
                 $.post('/Admin/Notification/MarkAsRead/' + id, function() {
-                    window.location.href = url || '#';
+                    if (url) {
+                        const orderIdMatch = url.match(/\/Order\/Details\/(\d+)/i);
+                        if (orderIdMatch && orderIdMatch[1]) {
+                            window.loadGlobalOrderDetails(orderIdMatch[1]);
+                        } else {
+                            window.location.href = url;
+                        }
+                    }
+                });
+            };
+
+            window.loadGlobalOrderDetails = function(id) {
+                const $modal = $('#orderModal');
+                const $modalContent = $('#orderModalContent');
+                
+                $modalContent.html(`
+                    <div class="modal-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                `);
+                $modal.modal('show');
+
+                $.ajax({
+                    url: '/Admin/Order/Details',
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (data) {
+                        $modalContent.html(data);
+                    },
+                    error: function (xhr) {
+                        $modalContent.html(`
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold text-danger">Lỗi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4 text-center">
+                                <p class="mb-0 text-muted">${xhr.responseText || 'Đã có lỗi xảy ra khi tải dữ liệu.'}</p>
+                            </div>
+                            <div class="modal-footer border-0 pt-0 text-center">
+                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        `);
+                    }
                 });
             };
 

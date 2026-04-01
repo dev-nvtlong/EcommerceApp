@@ -11,6 +11,9 @@ namespace EcommerceApp.Mappings
             CreateMap<BlogPost, BlogPostDto>()
                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.User.FullName ?? src.User.UserName))
                 .ForMember(dest => dest.LikeCount, opt => opt.MapFrom(src => src.Likes != null ? src.Likes.Count : 0))
+                .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Images != null 
+                    ? src.Images.OrderBy(i => i.SortOrder).Select(i => i.ImageUrl).ToList() 
+                    : new List<string>()))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
 
             CreateMap<Comment, CommentDto>()

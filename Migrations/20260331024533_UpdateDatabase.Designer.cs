@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EcommerceApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260330052455_CreateDB")]
-    partial class CreateDB
+    [Migration("20260331024533_UpdateDatabase")]
+    partial class UpdateDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -128,6 +128,9 @@ namespace EcommerceApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -148,6 +151,9 @@ namespace EcommerceApp.Migrations
 
                     b.Property<int?>("ModifiedByUserID")
                         .HasColumnType("int");
+
+                    b.Property<string>("Tags")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Thumbnail")
                         .HasColumnType("nvarchar(max)");
@@ -369,6 +375,15 @@ namespace EcommerceApp.Migrations
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 
+                    b.Property<string>("ShipAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShipName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShipPhone")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -550,7 +565,7 @@ namespace EcommerceApp.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Review");
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>

@@ -1,5 +1,6 @@
 using EcommerceApp.Application.DTOs.Blog;
 using EcommerceApp.Application.Interfaces.Services;
+using EcommerceApp.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,9 +20,11 @@ namespace EcommerceApp.Controllers
             ? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) 
             : null;
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm = null, BlogCategory? category = null)
         {
-            var posts = await _blogService.GetPublishedPostsAsync();
+            var posts = await _blogService.GetPublishedPostsAsync(searchTerm, category);
+            ViewData["SearchTerm"] = searchTerm;
+            ViewData["Category"] = category;
             return View(posts);
         }
 

@@ -29,6 +29,20 @@
                     <input type="hidden" asp-for="Thumbnail" />
                     <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Category" class="form-label fw-bold">Danh mục bài viết</label>
+                            <select asp-for="Category" class="form-select form-select-lg border-0 bg-light rounded-3" asp-items="Html.GetEnumSelectList<EcommerceApp.Enums.BlogCategory>()">
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Tags" class="form-label fw-bold">Thẻ (Tags)</label>
+                            <input asp-for="Tags" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Ví dụ: cây cảnh, mẹo vặt...">
+                            <span asp-validation-for="Tags" class="text-danger small"></span>
+                        </div>
+                    </div>
+
                     <div class="mb-4">
                         <label asp-for="Title" class="form-label fw-bold">Tiêu đề bài viết</label>
                         <input asp-for="Title" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Nhập tiêu đề ấn tượng...">
@@ -42,17 +56,30 @@
                     </div>
 
                     <div class="mb-4">
-                        <label asp-for="ThumbnailFile" class="form-label fw-bold">Ảnh đại diện</label>
-                        <div class="d-flex align-items-start gap-4">
+                        <label asp-for="ThumbnailFile" class="form-label fw-bold">Ảnh đại diện (Thumbnail)</label>
+                        <div class="d-flex align-items-start gap-4 p-3 bg-light rounded-3">
                             <div class="flex-grow-1">
-                                <input asp-for="ThumbnailFile" type="file" class="form-control border-0 bg-light rounded-3" onchange="previewImage(this)">
-                                <div class="form-text mt-2 small">Định dạng hỗ trợ: JPG, PNG, WEBP. Tối đa 2MB.</div>
+                                <input asp-for="ThumbnailFile" type="file" class="form-control border-0" onchange="previewImage(this)">
+                                <div class="form-text mt-2 small">Ảnh chính hiển thị ở danh sách bài viết. Tối đa 2MB.</div>
                                 <span asp-validation-for="ThumbnailFile" class="text-danger small"></span>
                             </div>
                             <div id="imagePreviewContainer" class="@(string.IsNullOrEmpty(Model.Thumbnail) ? "d-none" : "")">
-                                <p class="small text-muted mb-2">Xem trước:</p>
-                                <img id="thumbnailPreview" src="@Model.Thumbnail" class="rounded-3 shadow-sm border" style="width: 150px; height: 100px; object-fit: cover;">
+                                <img id="thumbnailPreview" src="@Model.Thumbnail" class="rounded-3 shadow-sm border" style="width: 120px; height: 80px; object-fit: cover;">
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="ImageFiles" class="form-label fw-bold">Ảnh nội dung bài viết (Nhiều ảnh)</label>
+                        <div class="p-3 border-dashed rounded-3 bg-white text-center">
+                            <input asp-for="ImageFiles" type="file" multiple class="d-none" id="multiFiles" onchange="previewImages(this)">
+                            <label for="multiFiles" class="btn btn-outline-primary btn-sm rounded-pill px-4 mb-2">
+                                <i class="fa-solid fa-cloud-arrow-up me-2"></i>Chọn nhiều ảnh
+                            </label>
+                            <p class="text-muted small mb-0">Các ảnh này sẽ được lưu và hiển thị theo thứ tự bạn chọn.</p>
+                        </div>
+                        <div id="multiImagePreview" class="row g-2 mt-3">
+                             <!-- Multi preview will go here -->
                         </div>
                     </div>
 
@@ -110,6 +137,29 @@
                     container.classList.remove('d-none');
                 }
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewImages(input) {
+            const previewContainer = document.getElementById('multiImagePreview');
+            previewContainer.innerHTML = '';
+            
+            if (input.files) {
+                Array.from(input.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const col = document.createElement('div');
+                        col.className = 'col-2';
+                        col.innerHTML = `
+                            <div class="preview-img-container shadow-sm border">
+                                <span class="preview-badge">${index + 1}</span>
+                                <img src="${e.target.result}" alt="Preview">
+                            </div>
+                        `;
+                        previewContainer.appendChild(col);
+                    }
+                    reader.readAsDataURL(file);
+                });
             }
         }
     </script>

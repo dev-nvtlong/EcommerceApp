@@ -74,6 +74,7 @@
     </div>
 </div>
 
+
 <div class="dashboard-grid">
     <!-- Recent Orders -->
     <div class="dashboard-panel">
@@ -103,12 +104,29 @@
                             </td>
                             <td class="fw-bold text-success">@order.TotalAmount.ToString("N0")₫</td>
                             <td>
-                                <span class="badge bg-@(order.Status == OrderStatus.Completed ? "success" : order.Status == OrderStatus.Pending ? "warning" : "info")-subtle text-@(order.Status == OrderStatus.Completed ? "success" : order.Status == OrderStatus.Pending ? "warning" : "info") rounded-pill px-3">
-                                    @order.Status.ToString()
-                                </span>
+                                @switch (order.Status)
+                                {
+                                    case OrderStatus.Pending:
+                                        <span class="badge bg-warning-subtle text-warning border-warning border px-3 rounded-pill">Chờ xử lý</span>
+                                        break;
+                                    case OrderStatus.Confirmed:
+                                        <span class="badge bg-info-subtle text-info border-info border px-3 rounded-pill">Đã xác nhận</span>
+                                        break;
+                                    case OrderStatus.Shipping:
+                                        <span class="badge bg-primary-subtle text-primary border-primary border px-3 rounded-pill">Đang giao</span>
+                                        break;
+                                    case OrderStatus.Completed:
+                                        <span class="badge bg-success-subtle text-success border-success border px-3 rounded-pill">Hoàn thành</span>
+                                        break;
+                                    case OrderStatus.Cancelled:
+                                        <span class="badge bg-danger-subtle text-danger border-danger border px-3 rounded-pill">Đã hủy</span>
+                                        break;
+                                }
                             </td>
                             <td class="text-end pe-3">
-                                <a asp-controller="Order" asp-action="Details" asp-route-id="@order.Id" class="btn btn-icon btn-sm btn-light rounded-circle"><i class="fa-solid fa-eye"></i></a>
+                                <button type="button" class="btn btn-icon btn-sm btn-light rounded-circle view-order-details" data-id="@order.Id">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -130,7 +148,9 @@
         <div class="recent-list">
             @foreach (var note in Model.RecentNotifications)
             {
-                <div class="notification-brief @(note.IsRead ? "" : "notification-brief--unread") cursor-pointer" onclick="location.href='@note.RedirectUrl'">
+                <div class="notification-brief @(note.IsRead ? "" : "notification-brief--unread") cursor-pointer handle-notification" 
+                     data-url="@note.RedirectUrl" 
+                     data-id="@note.Id">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="fw-bold small text-dark">@note.Title</span>
                         <span class="text-muted" style="font-size: 10px;">@note.CreatedAt.ToString("HH:mm")</span>
@@ -145,3 +165,32 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Handle Order Details click
+            $('.view-order-details').on('click', function () {
+                const id = $(this).data('id');
+                window.loadGlobalOrderDetails(id);
+            });
+
+            // Handle Notification click
+            $('.handle-notification').on('click', function () {
+                const url = $(this).data('url');
+                const noteId = $(this).data('id');
+                
+                // Mark as read (optional, can call API)
+                $(this).removeClass('notification-brief--unread');
+                
+                // If the URL is for an order detail, show popup
+                const orderIdMatch = url.match(/\/Order\/Details\/(\d+)/i);
+                if (orderIdMatch && orderIdMatch[1]) {
+                    window.loadGlobalOrderDetails(orderIdMatch[1]);
+                } else {
+                    window.location.href = url;
+                }
+            });
+        });
+    </script>
+}

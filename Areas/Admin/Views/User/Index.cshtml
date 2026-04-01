@@ -50,7 +50,7 @@
                                     <i class="fa-solid fa-ellipsis-vertical"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
-                                    <li><a class="dropdown-item py-2" asp-action="Details" asp-route-id="@user.Id"><i class="fa-solid fa-eye me-2 text-primary"></i> Xem chi tiết</a></li>
+                                    <li><button class="dropdown-item py-2 view-user-details" data-id="@user.Id"><i class="fa-solid fa-eye me-2 text-primary"></i> Xem chi tiết</button></li>
                                     @if (!user.Roles.Contains("Admin"))
                                     {
                                         <li><hr class="dropdown-divider"></li>
@@ -69,3 +69,62 @@
         </table>
     </div>
 </div>
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4" id="userModalContent">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            const $modal = $('#userModal');
+            const $modalContent = $('#userModalContent');
+
+            $('.view-user-details').on('click', function () {
+                const id = $(this).data('id');
+                loadModalContent('@Url.Action("Details")', id);
+            });
+
+            function loadModalContent(url, id) {
+                $modalContent.html(`
+                    <div class="modal-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                `);
+                $modal.modal('show');
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (data) {
+                        $modalContent.html(data);
+                    },
+                    error: function (xhr) {
+                        $modalContent.html(`
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold text-danger">Lỗi</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4 text-center">
+                                <p class="mb-0 text-muted">${xhr.responseText || 'Đã có lỗi xảy ra khi tải dữ liệu.'}</p>
+                            </div>
+                            <div class="modal-footer border-0 pt-0">
+                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                            </div>
+                        `);
+                    }
+                });
+            }
+        });
+    </script>
+}

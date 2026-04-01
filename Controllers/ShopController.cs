@@ -29,7 +29,7 @@ namespace EcommerceApp.Controllers
 
         public async Task<IActionResult> Index(int? categoryId, decimal? minPrice, decimal? maxPrice, string? sortOrder = "newest")
         {
-            var products = await _productService.GetAllAsync();
+            var products = await _productService.GetAllActiveAsync();
             
             // Filter by Category
             if (categoryId.HasValue)
@@ -68,13 +68,20 @@ namespace EcommerceApp.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var product = await _productService.GetByIdAsync(id);
-            if (product == null) return NotFound();
+            if (product == null || !product.IsActive) return NotFound();
 
             var reviews = await _reviewService.GetByProductIdAsync(id);
             ViewBag.Reviews = reviews;
             ViewBag.ReviewCount = reviews.Count;
-            ViewBag.AverageRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+            ViewBag.AverageRating = reviews.Any() ? (double)reviews.Average(r => r.Rating) : 0;
             
+            // Related Products
+            var allProducts = await _productService.GetAllActiveAsync();
+            ViewBag.RelatedProducts = allProducts
+                .Where(p => p.CategoryId == product.CategoryId && p.ProductId != id)
+                .Take(4)
+                .ToList();
+                
             return View(product);
         }
     }

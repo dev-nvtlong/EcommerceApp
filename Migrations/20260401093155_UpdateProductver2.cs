@@ -5,7 +5,7 @@
 namespace EcommerceApp.Migrations
 {
     /// <inheritdoc />
-    public partial class addReview : Migration
+    public partial class UpdateProductver2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

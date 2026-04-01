@@ -11,7 +11,14 @@ namespace EcommerceApp.Mappings
             CreateMap<Product, ProductDto>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ID))
                 .ForMember(dest => dest.ImageUrls,
-                    opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl)));
+                    opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl)))
+                .ForMember(dest => dest.ReviewCount,
+                    opt => opt.MapFrom(src => src.Reviews != null ? src.Reviews.Count : 0))
+                .ForMember(dest => dest.AverageRating,
+                    opt => opt.MapFrom(src => src.Reviews != null && src.Reviews.Any() 
+                        ? src.Reviews.Average(r => r.Rating) : 0))
+                .ForMember(dest => dest.SoldCount,
+                    opt => opt.MapFrom(src => src.SoldCount ?? 0));
 
             CreateMap<ProductDto, Product>()
                 .ForMember(dest => dest.ID, opt => opt.MapFrom(src => src.ProductId))

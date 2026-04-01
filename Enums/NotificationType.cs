@@ -6,6 +6,7 @@ namespace EcommerceApp.Enums
         NewComment,
         NewLike,
         NewChat,
-        NewReview
+        NewReview,
+        LowStock
     }
 }

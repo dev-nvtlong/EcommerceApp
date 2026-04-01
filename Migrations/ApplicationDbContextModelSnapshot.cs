@@ -125,6 +125,9 @@ namespace EcommerceApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -146,6 +149,9 @@ namespace EcommerceApp.Migrations
                     b.Property<int?>("ModifiedByUserID")
                         .HasColumnType("int");
 
+                    b.Property<string>("Tags")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Thumbnail")
                         .HasColumnType("nvarchar(max)");
 
@@ -161,6 +167,31 @@ namespace EcommerceApp.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("BlogPosts");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Models.BlogPostImage", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("BlogPostId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.ToTable("BlogPostImages");
                 });
 
             modelBuilder.Entity("EcommerceApp.Models.Cart", b =>
@@ -461,6 +492,9 @@ namespace EcommerceApp.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("CostPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int?>("CreateByUserID")
                         .HasColumnType("int");
 
@@ -469,6 +503,9 @@ namespace EcommerceApp.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
@@ -490,6 +527,9 @@ namespace EcommerceApp.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoldCount")
                         .HasColumnType("int");
 
                     b.Property<int>("StockQuantity")
@@ -701,6 +741,17 @@ namespace EcommerceApp.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EcommerceApp.Models.BlogPostImage", b =>
+                {
+                    b.HasOne("EcommerceApp.Models.BlogPost", "BlogPost")
+                        .WithMany("Images")
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlogPost");
                 });
 
             modelBuilder.Entity("EcommerceApp.Models.Cart", b =>
@@ -917,6 +968,8 @@ namespace EcommerceApp.Migrations
             modelBuilder.Entity("EcommerceApp.Models.BlogPost", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("Images");
 
                     b.Navigation("Likes");
                 });

@@ -20,6 +20,7 @@ namespace EcommerceApp.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
 
         public DbSet<BlogPost> BlogPosts { get; set; }
+        public DbSet<BlogPostImage> BlogPostImages { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Like> Likes { get; set; }
 
@@ -155,6 +156,12 @@ namespace EcommerceApp.Data
                 .HasForeignKey(b => b.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // ================== BLOG POST IMAGES ==================
+            builder.Entity<BlogPostImage>()
+                .HasOne(bi => bi.BlogPost)
+                .WithMany(b => b.Images)
+                .HasForeignKey(bi => bi.BlogPostId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public static async Task SeedAsync(

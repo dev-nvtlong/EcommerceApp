@@ -29,17 +29,17 @@ namespace EcommerceApp.Repositories
 
         public async Task<List<Product>> GetAllAsync()
         {
-            return await _context.Products.Include(p => p.Images).ToListAsync();
+            return await _context.Products.Include(p => p.Images).Include(p => p.Reviews).ToListAsync();
         }
 
         public async Task<Product?> GetByIdAsync(int id)
         {
-            return await _context.Products.Include(p => p.Images).FirstOrDefaultAsync(p => p.ID == id);
+            return await _context.Products.Include(p => p.Images).Include(p => p.Reviews).FirstOrDefaultAsync(p => p.ID == id);
         }
 
         public async Task<Product?> GetByIdAsNoTrackingAsync(int id)
         {
-            return await _context.Products.AsNoTracking().Include(p => p.Images).FirstOrDefaultAsync(p => p.ID == id);
+            return await _context.Products.AsNoTracking().Include(p => p.Images).Include(p => p.Reviews).FirstOrDefaultAsync(p => p.ID == id);
         }
 
         public async Task SaveAsync()

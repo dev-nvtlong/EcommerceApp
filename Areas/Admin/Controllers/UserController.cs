@@ -43,6 +43,12 @@ namespace EcommerceApp.Areas.Admin.Controllers
             
             var dto = _mapper.Map<UserDto>(user);
             dto.Roles = await _userManager.GetRolesAsync(user);
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_DetailsPartial", dto);
+            }
+
             return View(dto);
         }
 
