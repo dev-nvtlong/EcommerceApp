@@ -19,7 +19,7 @@ namespace EcommerceApp.Repositories
             return order;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var entity = await _context.Orders.FindAsync(id);
             if (entity != null)
@@ -29,7 +29,7 @@ namespace EcommerceApp.Repositories
             }
         }
 
-        public async Task<List<Order>> GetAllByUserIdAsync(int userId)
+        public async Task<List<Order>> GetAllByUserIdAsync(Guid userId)
         {
             return await _context.Orders
                 .Include(o => o.Details)
@@ -37,13 +37,13 @@ namespace EcommerceApp.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Order?> GetByIdAsync(int id)
+        public async Task<Order?> GetByIdAsync(Guid id)
         {
             return await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.Details)
                     .ThenInclude(d => d.Product)
-                .FirstOrDefaultAsync(o => o.ID == id);
+                .FirstOrDefaultAsync(o => o.Id == id);
         }
 
         public async Task UpdateAsync(Order order)

@@ -22,7 +22,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
             return View(orders);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
             if (order == null) return NotFound();
@@ -36,7 +36,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateStatus(int id, OrderStatus status, bool returnToIndex = false)
+        public async Task<IActionResult> UpdateStatus(Guid id, OrderStatus status, bool returnToIndex = false)
         {
             await _orderService.UpdateOrderStatusAsync(id, status);
             TempData["Success"] = "Cập nhật trạng thái đơn hàng thành công!";
@@ -45,7 +45,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             var order = await _orderService.GetOrderByIdAsync(id);
             if (order == null) return NotFound();

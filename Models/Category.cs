@@ -2,12 +2,12 @@
 
 namespace EcommerceApp.Models
 {
-    public class Category : AuditableEntity
+    public class Category : BaseEntity
     {
         public string Name { get; set; }
         public string? Description { get; set; }
 
-        public int? ParentId { get; set; }
+        public Guid? ParentId { get; set; }
         public Category? Parent { get; set; }
 
         public ICollection<Category>? Children { get; set; }

@@ -4,9 +4,9 @@ namespace EcommerceApp.Application.DTOs.Cart
 {
     public class CartItemDto
     {
-        public int Id { get; set; }
-        public int CartId { get; set; }
-        public int ProductId { get; set; }
+        public Guid Id { get; set; }
+        public Guid CartId { get; set; }
+        public Guid ProductId { get; set; }
         public ProductDto? Product { get; set; }
         public int Quantity { get; set; }
         

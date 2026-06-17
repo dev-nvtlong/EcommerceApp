@@ -1,12 +1,13 @@
 using EcommerceApp.Base;
 using EcommerceApp.Enums;
+using EcommerceApp.Models.Entities;
 
 namespace EcommerceApp.Models
 {
-    public class Order : AuditableEntity
+    public class Order : BaseEntity
     {
-        public int UserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public Guid UserId { get; set; }
+        public User User { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public decimal TotalAmount { get; set; }
 

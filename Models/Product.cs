@@ -2,14 +2,14 @@ using EcommerceApp.Base;
 
 namespace EcommerceApp.Models
 {
-    public class Product : AuditableEntity
+    public class Product : BaseEntity
     {
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public int StockQuantity { get; set; }
-        public int CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
         public Category Category { get; set; }
         public int? SoldCount { get; set; }
 

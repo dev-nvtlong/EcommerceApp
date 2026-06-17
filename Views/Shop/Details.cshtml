@@ -144,19 +144,32 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <div class="price-tag-wrap">
+                    <div class="price-tag-wrap @(Model.StockQuantity <= 0 ? "opacity-50" : "")">
                         <div class="price-label">Giá tốt nhất</div>
                         <div class="product-price">@Model.Price.ToString("N0")₫</div>
                     </div>
+                    @if (Model.StockQuantity <= 0)
+                    {
+                        <div class="mt-2 text-danger fw-bold small animate__animated animate__pulse animate__infinite">
+                            <i class="fa-solid fa-circle-xmark me-1"></i> TẠM HẾT HÀNG
+                        </div>
+                    }
                 </div>
             </div>
 
             <div class="row g-5">
                 <!-- Product Image Area -->
                 <div class="col-lg-6">
-                    <div class="product-image-container shadow-sm p-4 text-center">
+                    <div class="product-image-container shadow-sm p-4 text-center @(Model.StockQuantity <= 0 ? "grayscale-filter" : "")" style="position: relative;">
                         <img src="@(Model.ImageUrls != null && Model.ImageUrls.Any() ? Model.ImageUrls.First() : "/images/no-image.png")" 
-                             class="img-fluid" alt="@Model.Name" style="max-height: 500px; width: auto; object-fit: contain;">
+                             class="img-fluid" alt="@Model.Name" style="max-height: 500px; width: auto; object-fit: contain; @(Model.StockQuantity <= 0 ? "opacity: 0.6;" : "")">
+                        
+                        @if (Model.StockQuantity <= 0)
+                        {
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <span class="badge bg-danger rounded-pill px-4 py-2 fw-bold shadow-lg" style="font-size: 1.2rem; transform: rotate(-5deg);">HẾT HÀNG</span>
+                            </div>
+                        }
                     </div>
                 </div>
 
@@ -166,69 +179,104 @@
                         <label class="small fw-bold text-uppercase tracking-wider text-muted mb-3 d-block">Giao tới địa chỉ</label>
                         
                         <!-- Delivery Address Card -->
-                        <div class="delivery-location-card shadow-sm d-flex align-items-center gap-3">
-                            <div class="text-emerald-primary fs-4"><i class="fa-solid fa-location-dot"></i></div>
-                            <div class="flex-grow-1 overflow-hidden">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="small fw-bold text-dark">Vị trí nhận hàng</span>
-                                    <a href="#" class="location-btn-edit" onclick="changeAddress()">Thay đổi</a>
+                        <div class="delivery-location-card shadow-sm">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <div class="text-emerald-primary fs-4"><i class="fa-solid fa-location-dot"></i></div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex justify-content-between align-items-center mb-0">
+                                        <span class="small fw-bold text-dark">Giao tới địa chỉ:</span>
+                                        <a href="javascript:void(0)" class="location-btn-edit" onclick="changeAddress()">Thay đổi</a>
+                                    </div>
+                                    <div class="text-muted small text-truncate" id="currentAddress">@(ViewBag.UserAddress ?? "Mễ Trì, Nam Từ Liêm, Hà Nội")</div>
                                 </div>
-                                <div class="text-muted small text-truncate" id="currentAddress">Mễ Trì, Nam Từ Liêm, Hà Nội</div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3 pt-2 border-top border-light">
+                                <div class="text-emerald-primary fs-5"><i class="fa-solid fa-phone"></i></div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-0">
+                                        <span class="small fw-bold text-dark">Số điện thoại nhận:</span>
+                                    </div>
+                                    <input type="text" id="shipPhone" class="form-control form-control-sm border-0 bg-transparent p-0 small text-muted fw-bold" value="@(ViewBag.UserPhone ?? "")" placeholder="Nhập SĐT nhận hàng...">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <div class="small fw-bold text-muted mb-2">Số lượng:</div>
-                            <div class="quantity-picker shadow-sm">
-                                <button class="qty-btn" type="button" id="btnMinus"><i class="fa-solid fa-minus"></i></button>
-                                <input type="text" class="qty-input" value="1" id="quantityInput" readonly>
-                                <button class="qty-btn" type="button" id="btnPlus"><i class="fa-solid fa-plus"></i></button>
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <span class="small fw-bold text-muted">Số lượng:</span>
+                            <div class="quantity-picker shadow-sm ms-2 @(Model.StockQuantity <= 0 ? "opacity-50" : "")">
+                                <button class="qty-btn" type="button" @(Model.StockQuantity <= 0 ? "disabled" : "") id="btnMinus"><i class="fa-solid fa-minus"></i></button>
+                                <input type="text" class="qty-input" value="@(Model.StockQuantity <= 0 ? "0" : "1")" id="quantityInput" readonly @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                                <button class="qty-btn" type="button" @(Model.StockQuantity <= 0 ? "disabled" : "") id="btnPlus"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                            
+                            <div class="inventory-status-line ms-auto">
+                                <div class="d-inline-flex align-items-center gap-2">
+                                    <span class="small text-muted fw-bold">Đã bán : <span class="text-dark">@(Model.SoldCount ?? 0)</span></span>
+                                    <span class="text-muted opacity-25">|</span>
+                                    <span class="small text-muted fw-bold">Kho : <span class="@(Model.StockQuantity <= 0 ? "text-danger" : "text-emerald-dark")">@(Model.StockQuantity <= 0 ? "Hết" : Model.StockQuantity.ToString())</span></span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Buttons Side by Side -->
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <button class="btn btn-emerald-outline btn-action w-100" id="btnAddToCart">
-                                    <i class="fa-solid fa-cart-shopping me-2"></i> THÊM GIỎ HÀNG
-                                </button>
-                            </div>
-                            <div class="col-md-6">
-                                <button class="btn btn-emerald-primary btn-action w-100" id="btnBuyNow">
-                                    MUA NGAY
-                                </button>
-                            </div>
+                            @if (Model.StockQuantity > 0)
+                            {
+                                <div class="col-md-6">
+                                    <button class="btn btn-emerald-outline btn-action w-100" id="btnAddToCart">
+                                        <i class="fa-solid fa-cart-shopping me-2"></i> THÊM GIỎ HÀNG
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-emerald-primary btn-action w-100" id="btnBuyNow">
+                                        MUA NGAY
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-md-6">
+                                    <a href="https://zalo.me/0819124953" target="_blank" class="btn btn-info text-white btn-action w-100 shadow-sm">
+                                        <i class="fa-solid fa-comments me-2"></i> LIÊN HỆ ĐẶT HÀNG
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="tel:+842434567890" class="btn btn-primary btn-action w-100 shadow-sm border-0" style="background: #0ea5e9 !important;">
+                                        <i class="fa-solid fa-phone me-2"></i> GỌI TƯ VẤN NGAY
+                                    </a>
+                                </div>
+                            }
                         </div>
-                    </div>
 
-                    <div class="benefit-card p-3 rounded-4 bg-emerald-light-50 border border-emerald-100 mb-4">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="text-emerald-primary fs-3"><i class="fa-solid fa-truck-fast"></i></div>
-                            <div>
-                                <div class="fw-bold small text-emerald-dark">Giao hàng siêu tốc</div>
-                                <div class="fs-xs text-muted">Nhận hàng trong 2-4h tại khu vực Hà Nội & HCM</div>
+                        <div class="benefit-card p-3 rounded-4 bg-emerald-light-50 border border-emerald-100 mb-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="text-emerald-primary fs-3"><i class="fa-solid fa-truck-fast"></i></div>
+                                <div>
+                                    <div class="fw-bold small text-emerald-dark">Hỗ trợ giao hàng</div>
+                                    <div class="fs-xs text-muted">Nhận ngay tại cửa hàng hoặc giao hàng thần tốc 2h</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="product-description-wrap">
-                        <div class="d-flex justify-content-between align-items-center cursor-pointer" 
-                             data-bs-toggle="collapse" data-bs-target="#descCollapse" aria-expanded="true" 
-                             style="cursor: pointer;" onclick="$(this).find('.toggle-icon-desc').toggleClass('fa-plus fa-minus')">
-                            <div class="small fw-bold text-uppercase tracking-wider text-emerald-dark mb-0">Mô tả sản phẩm</div>
-                            <div class="text-emerald-primary"><i class="fa-solid fa-minus toggle-icon-desc"></i></div>
-                        </div>
-                        
-                        <div class="collapse show mt-3" id="descCollapse">
-                            <div class="text-muted small lh-base border-top pt-3">
-                                @if (!string.IsNullOrEmpty(Model.Description)) { @Html.Raw(Model.Description) }
-                                else { <span class="fst-italic opacity-50">Đang cập nhật nội dung...</span> }
+                        <div class="product-description-wrap">
+                            <div class="d-flex justify-content-between align-items-center cursor-pointer" 
+                                 data-bs-toggle="collapse" data-bs-target="#descCollapse" aria-expanded="true" 
+                                 style="cursor: pointer;" onclick="$(this).find('.toggle-icon-desc').toggleClass('fa-plus fa-minus')">
+                                <div class="small fw-bold text-uppercase tracking-wider text-emerald-dark mb-0">Mô tả sản phẩm</div>
+                                <div class="text-emerald-primary"><i class="fa-solid fa-minus toggle-icon-desc"></i></div>
+                            </div>
+                            
+                            <div class="collapse show mt-3" id="descCollapse">
+                                <div class="text-muted small lh-base border-top pt-3">
+                                    @if (!string.IsNullOrEmpty(Model.Description)) { @Html.Raw(Model.Description) }
+                                    else { <span class="fst-italic opacity-50">Đang cập nhật nội dung...</span> }
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </div> <!-- End product-meta-section -->
+                </div> <!-- End col-lg-6 -->
+            </div> <!-- End row g-5 -->
+        </div> <!-- End product-main-card -->
 
         <!-- Reviews Section -->
         <div class="row mt-5 pt-5 border-top">
@@ -247,12 +295,12 @@
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
                                             <div>
-                                                <div class="fw-bold text-dark">@review.UserFullName</div>
-                                                <div class="rating-stars small">
+                                                <div class="fw-bold text-dark small">@review.UserFullName</div>
+                                                <div class="rating-stars small" style="font-size: 0.7rem;">
                                                     @for (int i = 1; i <= 5; i++) { <i class="fa-@(i <= review.Rating ? "solid" : "regular") fa-star"></i> }
                                                 </div>
                                             </div>
-                                            <div class="text-muted small">@review.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                            <div class="text-muted" style="font-size: 11px;">@review.CreatedAt.ToString("dd/MM/yyyy")</div>
                                         </div>
                                         <div class="text-muted small mt-2">@review.Comment</div>
                                     </div>
@@ -262,17 +310,17 @@
                     }
                     else
                     {
-                        <div class="text-center py-4 bg-light rounded-4 border-dashed border-2 border-muted opacity-50 fst-italic">Chưa có đánh giá nào.</div>
+                        <div class="text-center py-5 bg-light rounded-4 border-dashed border-2 opacity-50 fst-italic">Sản phẩm này chưa có đánh giá nào.</div>
                     }
                 </div>
             </div>
             <div class="col-lg-5">
                 <div class="bg-white p-4 rounded-4 shadow-sm border border-emerald-100">
-                    <h4 class="fw-bold mb-3 h5 text-emerald-dark">Viết nhận xét của bạn</h4>
+                    <h4 class="fw-bold mb-3 h5 text-emerald-dark">Gửi nhận xét</h4>
                     <form id="reviewForm">
                         <input type="hidden" id="productId" value="@Model.ProductId">
                         <div class="mb-3 text-center">
-                            <label class="form-label small fw-bold text-muted d-block">Bạn cảm thấy sản phẩm thế nào?</label>
+                            <label class="form-label small fw-bold text-muted d-block mb-2">Đánh giá chung</label>
                             <div class="star-rating d-inline-flex">
                                 <input type="radio" id="star5" name="rating" value="5"><label for="star5" class="fa-solid fa-star"></label>
                                 <input type="radio" id="star4" name="rating" value="4"><label for="star4" class="fa-solid fa-star"></label>
@@ -282,40 +330,40 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <textarea id="comment" class="form-control bg-light border-0 rounded-4 p-3 shadow-none" rows="3" placeholder="Chia sẻ cảm nhận về cây trồng này..."></textarea>
+                            <textarea id="comment" class="form-control bg-light border-0 rounded-4 p-3 shadow-none small" rows="3" placeholder="Viết cảm nghĩ của bạn..."></textarea>
                         </div>
-                        <button type="submit" class="btn btn-emerald-primary w-100 rounded-pill py-2 fw-bold">Gửi đánh giá</button>
+                        <button type="submit" class="btn btn-emerald-primary w-100 rounded-pill py-2 fw-bold small shadow-none">GỬI ĐÁNH GIÁ</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Related Products Section -->
+        <!-- Related Products Area (Condensed) -->
         <div class="row mt-5 pt-5 border-top">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-bold mb-0 h4">Gợi ý khác cho bạn</h3>
+                    <h3 class="fw-bold mb-0 h4">Gợi ý tương tự</h3>
                     <a asp-action="Index" class="btn btn-link text-emerald-primary text-decoration-none fw-bold small">Tất cả sản phẩm <i class="fa-solid fa-chevron-right ms-1"></i></a>
                 </div>
-                <div class="row g-4">
+                <div class="row g-3">
                     @if (ViewBag.RelatedProducts != null)
                     {
                         foreach (var p in (List<EcommerceApp.Application.DTOs.Product.ProductDto>)ViewBag.RelatedProducts)
                         {
                             <div class="col-6 col-md-3">
-                                <div class="card suggested-card border-0 shadow-sm h-100 p-3 bg-white">
-                                    <a asp-action="Details" asp-route-id="@p.ProductId" class="d-block overflow-hidden rounded-4 mb-3">
+                                <div class="card suggested-card border-0 shadow-xs h-100 p-2 bg-white">
+                                    <a asp-action="Details" asp-route-id="@p.ProductId" class="d-block overflow-hidden rounded-4 mb-2">
                                         <img src="@(p.ImageUrls != null && p.ImageUrls.Any() ? p.ImageUrls[0] : "/images/no-image.png")" 
-                                             class="card-img-top" alt="@p.Name" style="transition: transform 0.5s;">
+                                             class="card-img-top w-100 h-100 object-fit-cover" alt="@p.Name">
                                     </a>
-                                    <div class="card-body p-0 d-flex flex-column">
-                                        <h4 class="h6 fw-bold mb-2 text-truncate-2">
+                                    <div class="card-body p-2 d-flex flex-column">
+                                        <h4 class="small fw-bold mb-2 text-truncate-2" style="height: 2.4rem;">
                                             <a asp-action="Details" asp-route-id="@p.ProductId" class="text-dark text-decoration-none">@p.Name</a>
                                         </h4>
                                         <div class="mt-auto d-flex justify-content-between align-items-center">
-                                            <span class="text-emerald-primary fw-bold">@p.Price.ToString("N0")₫</span>
-                                            <button class="btn btn-emerald-primary btn-sm rounded-circle p-0" style="width: 28px; height: 28px;" onclick="addToCart(@p.ProductId, 1)">
-                                                <i class="fa-solid fa-cart-plus" style="font-size: 0.7rem;"></i>
+                                            <span class="text-emerald-primary fw-800 small">@p.Price.ToString("N0")₫</span>
+                                            <button class="btn btn-emerald-primary btn-sm rounded-circle p-0" style="width: 24px; height: 24px;" onclick="addToCart('@p.ProductId', 1)">
+                                                <i class="fa-solid fa-cart-plus" style="font-size: 0.6rem;"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -332,10 +380,19 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Quantity buttons
+            // Store initial profile values
+            const profileAddress = "@(ViewBag.UserAddress ?? "")";
+            const profilePhone = "@(ViewBag.UserPhone ?? "")";
+
+            // Quantity buttons logic
             $('#btnPlus').click(function() {
                 let val = parseInt($('#quantityInput').val());
-                $('#quantityInput').val(val + 1);
+                const stock = @Model.StockQuantity;
+                if (val < stock) {
+                    $('#quantityInput').val(val + 1);
+                } else {
+                    toastr.warning('Không thể mua vượt quá số lượng tồn kho!');
+                }
             });
 
             $('#btnMinus').click(function() {
@@ -343,71 +400,78 @@
                 if (val > 1) $('#quantityInput').val(val - 1);
             });
 
-            // Add to Cart
+            // Action Functions
+            function collectShippingInfoIfChanged() {
+                const currentAddress = $('#currentAddress').text().trim();
+                const currentPhone = $('#shipPhone').val().trim();
+                
+                return {
+                    address: (currentAddress === profileAddress) ? null : currentAddress,
+                    phone: (currentPhone === profilePhone) ? null : currentPhone
+                };
+            }
+
             $('#btnAddToCart').click(function() {
-                const productId = $('#productId').val();
+                @if (User.Identity?.IsAuthenticated != true) { <text> window.location.href = '/Account/Login'; return; </text> }
+                const productId = '@Model.ProductId';
                 const quantity = $('#quantityInput').val();
-                addToCart(productId, quantity);
+                const ship = collectShippingInfoIfChanged();
+
+                $.post('/Cart/AddToCart', { productId, quantity, address: ship.address, phone: ship.phone }, function(res) {
+                    if (res.success) {
+                        if (typeof updateCartBadge === 'function') updateCartBadge();
+                        if (typeof showCartToast === 'function') showCartToast(res.product);
+                    }
+                });
             });
 
-            // Buy Now
             $('#btnBuyNow').click(function() {
-                const productId = $('#productId').val();
+                @if (User.Identity?.IsAuthenticated != true) { <text> window.location.href = '/Account/Login'; return; </text> }
+                const productId = '@Model.ProductId';
                 const quantity = $('#quantityInput').val();
-                buyNow(productId, quantity);
+                const ship = collectShippingInfoIfChanged();
+
+                $.post('/Cart/AddToCart', { productId, quantity, address: ship.address, phone: ship.phone }, function(res) {
+                    if (res.success) {
+                        window.location.href = '/Order/Checkout';
+                    }
+                });
             });
 
             window.changeAddress = function() {
                 Swal.fire({
-                    title: 'Cập nhật địa chỉ nhận hàng',
+                    title: 'Địa chỉ giao hàng',
                     input: 'text',
-                    inputLabel: 'Nhập địa chỉ mới của bạn',
+                    inputLabel: 'Thay đổi địa chỉ cho sản phẩm này',
                     inputValue: $('#currentAddress').text(),
                     showCancelButton: true,
                     confirmButtonColor: '#10b981',
-                    cancelButtonText: 'Hủy',
                     confirmButtonText: 'Cập nhật',
-                    inputValidator: (value) => {
-                        if (!value) {
-                            return 'Vui lòng nhập địa chỉ!'
-                        }
-                    }
+                    cancelButtonText: 'Hủy'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $('#currentAddress').text(result.value);
-                        toastr.success('Đã cập nhật địa chỉ giao hàng');
                     }
                 });
             }
 
-            // Review Form
+            // Review Submission with better feedback
             $('#reviewForm').submit(function(e) {
                 e.preventDefault();
                 const rating = $('input[name="rating"]:checked').val();
                 const comment = $('#comment').val();
-                const productId = $('#productId').val();
+                const productId = '@Model.ProductId';
 
                 if (!rating) {
-                    Swal.fire('Chú ý', 'Vui lòng chọn số sao đánh giá', 'info');
+                    Swal.fire('Chú ý', 'Vui lòng chọn mức độ hài lòng (sao)', 'info');
                     return;
                 }
 
                 $.post('/Shop/SubmitReview', { productId, rating, comment }, function(res) {
                     if (res.success) {
-                        Swal.fire({
-                            title: 'Cảm ơn!',
-                            text: 'Đánh giá của bạn đã được gửi thành công.',
-                            icon: 'success',
-                            confirmButtonColor: '#10b981'
-                        }).then(() => {
-                            location.reload();
-                        });
+                        Swal.fire({ title: 'Gửi thành công!', icon: 'success', confirmButtonColor: '#10b981' }).then(() => location.reload());
                     } else {
-                        Swal.fire('Chú ý', res.message || 'Bạn cần đăng nhập để gửi đánh giá', 'info').then(() => {
-                             if (!res.success && res.message.includes("đăng nhập")) {
-                                 window.location.href = '/Account/Auth?returnUrl=' + encodeURIComponent(window.location.pathname);
-                             }
-                        });
+                        Swal.fire('Thông tin', res.message || 'Lỗi gửi đánh giá', 'info');
                     }
                 });
             });

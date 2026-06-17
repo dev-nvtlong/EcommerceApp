@@ -5,12 +5,12 @@ namespace EcommerceApp.Application.DTOs.Review
 {
     public class ReviewDto
     {
-        public int Id { get; set; }
-        public int ProductId { get; set; }
+        public Guid Id { get; set; }
+        public Guid ProductId { get; set; }
         public string ProductName { get; set; }
         public string ProductThumbnail { get; set; }
 
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string UserFullName { get; set; }
         public string UserAvatar { get; set; }
 

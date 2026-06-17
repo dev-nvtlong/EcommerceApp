@@ -20,10 +20,11 @@ namespace EcommerceApp.Application.Services
             _notificationService = notificationService;
         }
 
-        public async Task<List<ReviewDto>> GetByProductIdAsync(int productId)
+        public async Task<List<ReviewDto>> GetByProductIdAsync(Guid productId)
         {
             var reviews = await _context.Reviews
                 .Include(r => r.User)
+                    .ThenInclude(u => u.Profile)
                 .Where(r => r.ProductId == productId)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
@@ -31,7 +32,7 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<List<ReviewDto>>(reviews);
         }
 
-        public async Task<bool> AddReviewAsync(int userId, int productId, int rating, string comment)
+        public async Task<bool> AddReviewAsync(Guid userId, Guid productId, int rating, string comment)
         {
             var review = new Review
             {
@@ -50,7 +51,7 @@ namespace EcommerceApp.Application.Services
             var product = await _context.Products.FindAsync(productId);
             await _notificationService.CreateNotificationAsync(
                 "Đánh giá mới",
-                $"{user?.FullName ?? user?.UserName} đã đánh giá {rating} sao cho sản phẩm: {product?.Name}",
+                $"{user?.UserName} đã đánh giá {rating} sao cho sản phẩm: {product?.Name}",
                 Enums.NotificationType.NewReview,
                 $"/Admin/Review"
             );
@@ -63,13 +64,14 @@ namespace EcommerceApp.Application.Services
             var reviews = await _context.Reviews
                 .Include(r => r.Product)
                 .Include(r => r.User)
+                    .ThenInclude(u => u.Profile)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
 
             return _mapper.Map<List<ReviewDto>>(reviews);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var review = await _context.Reviews.FindAsync(id);
             if (review == null) return false;

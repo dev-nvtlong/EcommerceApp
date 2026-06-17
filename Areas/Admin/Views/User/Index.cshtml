@@ -31,7 +31,6 @@
                                      class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
                                 <div>
                                     <div class="fw-bold text-dark">@user.FullName</div>
-                                    <div class="text-muted small">@@@user.UserName</div>
                                 </div>
                             </div>
                         </td>
@@ -43,7 +42,7 @@
                                 <span class="badge bg-light text-primary border border-primary-subtle rounded-pill px-3 me-1">@role</span>
                             }
                         </td>
-                        <td class="text-muted small">@user.CreateAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-muted small">@user.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td class="text-end pe-4">
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-light rounded-circle shadow-none" type="button" data-bs-toggle="dropdown">
@@ -87,7 +86,20 @@
             const $modal = $('#userModal');
             const $modalContent = $('#userModalContent');
 
-            $('.view-user-details').on('click', function () {
+            // Fix scroll issue: reset body style when modal is hidden
+            $modal.on('hidden.bs.modal', function () {
+                $('body').removeClass('modal-open').css('padding-right', '');
+                $('.modal-backdrop').remove();
+                $modalContent.html(`
+                    <div class="modal-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                    </div>
+                `);
+            });
+
+            $(document).on('click', '.view-user-details', function () {
                 const id = $(this).data('id');
                 loadModalContent('@Url.Action("Details")', id);
             });
@@ -100,7 +112,10 @@
                         </div>
                     </div>
                 `);
-                $modal.modal('show');
+
+                // Show modal first, then load content
+                var bsModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('userModal'));
+                bsModal.show();
 
                 $.ajax({
                     url: url,

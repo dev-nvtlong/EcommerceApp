@@ -206,7 +206,8 @@
             <p class="login-page__subtitle">Vui lòng nhập thông tin của bạn.</p>
         </div>
 
-        <form asp-action="Login" method="post" class="login-page__form">
+        <form action="/Admin/Auth/Login" method="post" class="login-page__form">
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="login-page__field">
                 <label class="login-page__label" asp-for="Email">Email Address</label>
                 <div class="login-page__input-wrapper">

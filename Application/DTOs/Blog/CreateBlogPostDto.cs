@@ -6,7 +6,7 @@ namespace EcommerceApp.Application.DTOs.Blog
 {
     public class CreateBlogPostDto
     {
-        [Required(ErrorMessage = "Tiêu đề không được để trống")]
+        public Guid UserId { get; set; }
         public string Title { get; set; }
 
         public string? Content { get; set; }

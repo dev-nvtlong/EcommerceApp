@@ -1,8 +1,10 @@
 using AutoMapper;
 using EcommerceApp.Application.DTOs.Account;
+using EcommerceApp.Application.Interfaces.Services;
+using EcommerceApp.Data;
+using EcommerceApp.Enums;
 using EcommerceApp.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,62 +14,32 @@ namespace EcommerceApp.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public UserController(UserManager<ApplicationUser> userManager, IMapper mapper)
+        public UserController(IUserService userService)
         {
-            _userManager = userManager;
-            _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var users = await _userManager.Users.ToListAsync();
-            var userDtos = new List<UserDto>();
-            
-            foreach (var user in users)
-            {
-                var dto = _mapper.Map<UserDto>(user);
-                dto.Roles = await _userManager.GetRolesAsync(user);
-                userDtos.Add(dto);
-            }
-            
-            return View(userDtos);
+            var users = await _userService.GetAllUsersAsync();
+            return View(users);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return NotFound();
-            
-            var dto = _mapper.Map<UserDto>(user);
-            dto.Roles = await _userManager.GetRolesAsync(user);
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null) return NotFound("Không tìm thấy người dùng.");
 
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return PartialView("_DetailsPartial", dto);
-            }
-
-            return View(dto);
+            return PartialView("_DetailsPartial", user);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return NotFound();
-            
-            var result = await _userManager.DeleteAsync(user);
-            if (result.Succeeded)
-            {
-                TempData["Success"] = "Xóa người dùng thành công!";
-            }
-            else
-            {
-                TempData["Error"] = "Không thể xóa người dùng.";
-            }
-            return RedirectToAction(nameof(Index));
+            await _userService.DeleteUserAsync(id);
+            return RedirectToAction("Index");
         }
     }
 }

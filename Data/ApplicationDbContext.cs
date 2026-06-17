@@ -1,15 +1,20 @@
+using EcommerceApp.Enums;
 using EcommerceApp.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using EcommerceApp.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApp.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(
             DbContextOptions<ApplicationDbContext> options)
             : base(options){ }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles => Set<UserRole>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
 
@@ -32,6 +37,98 @@ namespace EcommerceApp.Data
         {
             base.OnModelCreating(builder);
 
+            // ================== USER ==================
+            builder.Entity<User>()
+                .HasMany(u => u.RefreshTokens)
+                .WithOne(rt => rt.User)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            builder.Entity<User>()
+                .HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            builder.Entity<User>()
+                .HasMany(u => u.Notifications)
+                .WithOne(n => n.User)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            builder.Entity<User>()
+                .HasMany(u => u.Orders)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<User>().
+                HasMany(u => u.Reviews)
+                .WithOne(r => r.User)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<User>()
+                .HasMany(u => u.BlogPosts)
+                .WithOne(b => b.User)
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<User>()
+                .HasMany(u => u.Likes)
+                .WithOne(l => l.User)
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.NoAction); 
+
+            builder.Entity<User>()
+                .HasMany(u => u.Comments)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.NoAction); 
+
+            builder.Entity<User>()
+                .HasOne(u => u.Profile)
+                .WithOne(up => up.User)
+                .HasForeignKey<UserProfile>(up => up.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            // ================== ROLE ==================
+            builder.Entity<Role>()
+                .HasMany(r => r.UserRoles)
+                .WithOne(ur => ur.Role)
+                .HasForeignKey(ur => ur.RoleId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            // ================== USER ROLE ==================
+            builder.Entity<UserRole>()
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            builder.Entity<UserRole>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserRole>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ================== NOTIFICATION ==================
+            builder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
+            // ================== REFRESH TOKEN ==================
+            builder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
             // ================== LIKE ==================
             builder.Entity<Like>()
                 .HasKey(x => new { x.UserId, x.BlogPostId });
@@ -46,15 +143,14 @@ namespace EcommerceApp.Data
                 .HasOne(l => l.BlogPost)
                 .WithMany(b => b.Likes)
                 .HasForeignKey(l => l.BlogPostId)
-                .OnDelete(DeleteBehavior.Cascade); // Blog xóa thì like xóa theo
-
+                .OnDelete(DeleteBehavior.Cascade); 
 
             // ================== COMMENT ==================
             builder.Entity<Comment>()
                 .HasOne(c => c.BlogPost)
                 .WithMany(b => b.Comments)
                 .HasForeignKey(c => c.BlogPostId)
-                .OnDelete(DeleteBehavior.NoAction); // tránh multiple cascade
+                .OnDelete(DeleteBehavior.NoAction); 
 
             builder.Entity<Comment>()
                 .HasOne(c => c.User)
@@ -62,14 +158,12 @@ namespace EcommerceApp.Data
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-
-            // ================== CATEGORY (SELF RELATION) ==================
+            // ================== CATEGORY ==================
             builder.Entity<Category>()
                 .HasOne(c => c.Parent)
                 .WithMany(c => c.Children)
                 .HasForeignKey(c => c.ParentId)
-                .OnDelete(DeleteBehavior.Restrict); // tránh loop
-
+                .OnDelete(DeleteBehavior.Restrict); 
 
             // ================== PRODUCT ==================
             builder.Entity<Product>()
@@ -78,14 +172,12 @@ namespace EcommerceApp.Data
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
             // ================== PRODUCT IMAGE ==================
             builder.Entity<ProductImage>()
                 .HasOne(pi => pi.Product)
                 .WithMany(p => p.Images)
                 .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             // ================== REVIEW ==================
             builder.Entity<Review>()
@@ -99,7 +191,6 @@ namespace EcommerceApp.Data
                 .WithMany()
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
-
 
             // ================== CART ==================
             builder.Entity<Cart>()
@@ -120,7 +211,6 @@ namespace EcommerceApp.Data
                 .HasForeignKey(ci => ci.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
             // ================== ORDER ==================
             builder.Entity<Order>()
                 .HasOne(o => o.User)
@@ -140,14 +230,12 @@ namespace EcommerceApp.Data
                 .HasForeignKey(od => od.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
             // ================== PAYMENT ==================
             builder.Entity<Payment>()
                 .HasOne(p => p.Order)
                 .WithMany()
                 .HasForeignKey(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             // ================== BLOG POST ==================
             builder.Entity<BlogPost>()
@@ -162,59 +250,6 @@ namespace EcommerceApp.Data
                 .WithMany(b => b.Images)
                 .HasForeignKey(bi => bi.BlogPostId)
                 .OnDelete(DeleteBehavior.Cascade);
-        }
-
-        public static async Task SeedAsync(
-            UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole<int>> roleManager)
-        {
-            // ============================
-            // 1️ Seed Roles
-            // ============================
-
-            string[] roles = { "Admin"};
-
-            foreach (var role in roles)
-            {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole<int>(role));
-                }
-            }
-
-            // ============================
-            // 2️ Seed Admin User
-            // ============================
-
-            var adminEmail = "admin@vuoncay.com";
-
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-            if (adminUser == null)
-            {
-                var user = new ApplicationUser
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    FullName = "System Admin",
-                    EmailConfirmed = true
-                };
-
-                var result = await userManager.CreateAsync(user, "Admin@123");
-
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(user, "Admin");
-                }
-            }
-            else
-            {
-                // Nếu admin đã tồn tại nhưng chưa có role
-                if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
-            }
         }
     }
 }

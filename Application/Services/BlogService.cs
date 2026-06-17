@@ -48,14 +48,15 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<List<BlogPostDto>>(posts);
         }
 
-        public async Task<BlogPostDto?> GetPostDetailsAsync(int id, int? currentUserId = null)
+        public async Task<BlogPostDto?> GetPostDetailsAsync(Guid id, Guid? currentUserId = null)
         {
             var post = await _context.BlogPosts
                 .Include(p => p.User)
+                .Include(p => p.Images)
                 .Include(p => p.Likes)
                 .Include(p => p.Comments!)
                     .ThenInclude(c => c.User)
-                .FirstOrDefaultAsync(p => p.ID == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (post == null) return null;
 
@@ -69,7 +70,7 @@ namespace EcommerceApp.Application.Services
             return dto;
         }
 
-        public async Task<bool> ToggleLikeAsync(int postId, int userId)
+        public async Task<bool> ToggleLikeAsync(Guid postId, Guid userId)
         {
             var like = await _context.Likes.FindAsync(userId, postId);
             if (like != null)
@@ -88,7 +89,7 @@ namespace EcommerceApp.Application.Services
                 var post = await _context.BlogPosts.FindAsync(postId);
                 await _notificationService.CreateNotificationAsync(
                     "Lượt thích mới",
-                    $"{user?.FullName ?? user?.UserName} đã thích bài viết: {post?.Title}",
+                    $"{user?.UserName} đã thích bài viết: {post?.Title}",
                     Enums.NotificationType.NewLike,
                     $"/Blog/Details/{postId}"
                 );
@@ -97,7 +98,7 @@ namespace EcommerceApp.Application.Services
             }
         }
 
-        public async Task<CommentDto> AddCommentAsync(int postId, int userId, string content)
+        public async Task<CommentDto> AddCommentAsync(Guid postId, Guid userId, string content)
         {
             var comment = new Comment
             {
@@ -115,7 +116,7 @@ namespace EcommerceApp.Application.Services
             var user = await _context.Users.FindAsync(userId);
             await _notificationService.CreateNotificationAsync(
                 "Bình luận mới",
-                $"{user?.FullName ?? user?.UserName} đã bình luận bài viết: {post?.Title}",
+                $"{user?.UserName} đã bình luận bài viết: {post?.Title}",
                 Enums.NotificationType.NewComment,
                 $"/Blog/Details/{postId}"
             );
@@ -123,7 +124,7 @@ namespace EcommerceApp.Application.Services
             // Reload to get User info
             var savedComment = await _context.Comments
                 .Include(c => c.User)
-                .FirstAsync(c => c.ID == comment.ID);
+                .FirstAsync(c => c.Id == comment.Id);
 
             return _mapper.Map<CommentDto>(savedComment);
         }
@@ -138,7 +139,7 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<List<BlogPostDto>>(posts);
         }
 
-        public async Task<BlogPostDto> CreatePostAsync(int userId, CreateBlogPostDto dto)
+        public async Task<BlogPostDto> CreatePostAsync(Guid userId, CreateBlogPostDto dto)
         {
             var post = _mapper.Map<BlogPost>(dto);
             post.UserId = userId;
@@ -150,7 +151,7 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<BlogPostDto>(post);
         }
 
-        public async Task<bool> UpdatePostAsync(int id, CreateBlogPostDto dto)
+        public async Task<bool> UpdatePostAsync(Guid id, CreateBlogPostDto dto)
         {
             var post = await _context.BlogPosts.FindAsync(id);
             if (post == null) return false;
@@ -163,7 +164,7 @@ namespace EcommerceApp.Application.Services
             return true;
         }
 
-        public async Task<bool> DeletePostAsync(int id)
+        public async Task<bool> DeletePostAsync(Guid id)
         {
             var post = await _context.BlogPosts.FindAsync(id);
             if (post == null) return false;
@@ -173,9 +174,9 @@ namespace EcommerceApp.Application.Services
             return true;
         }
 
-        public async Task<bool> AddPostImagesAsync(int postId, List<string> imageUrls)
+        public async Task<bool> AddPostImagesAsync(Guid postId, List<string> imageUrls)
         {
-            var post = await _context.BlogPosts.Include(p => p.Images).FirstOrDefaultAsync(p => p.ID == postId);
+            var post = await _context.BlogPosts.Include(p => p.Images).FirstOrDefaultAsync(p => p.Id == postId);
             if (post == null) return false;
 
             int nextOrder = (post.Images?.Any() == true) ? post.Images.Max(i => i.SortOrder) + 1 : 1;

@@ -7,15 +7,15 @@ namespace EcommerceApp.Application.Interfaces.Services
     {
         // Client side
         Task<List<BlogPostDto>> GetPublishedPostsAsync(string? searchTerm = null, BlogCategory? category = null);
-        Task<BlogPostDto?> GetPostDetailsAsync(int id, int? currentUserId = null);
-        Task<bool> ToggleLikeAsync(int postId, int userId);
-        Task<CommentDto> AddCommentAsync(int postId, int userId, string content);
+        Task<BlogPostDto?> GetPostDetailsAsync(Guid id, Guid? currentUserId = null);
+        Task<bool> ToggleLikeAsync(Guid postId, Guid userId);
+        Task<CommentDto> AddCommentAsync(Guid postId, Guid userId, string content);
 
         // Admin side
         Task<List<BlogPostDto>> GetAllPostsAsync();
-        Task<BlogPostDto> CreatePostAsync(int userId, CreateBlogPostDto dto);
-        Task<bool> UpdatePostAsync(int id, CreateBlogPostDto dto);
-        Task<bool> DeletePostAsync(int id);
-        Task<bool> AddPostImagesAsync(int postId, List<string> imageUrls);
+        Task<BlogPostDto> CreatePostAsync(Guid userId, CreateBlogPostDto dto);
+        Task<bool> UpdatePostAsync(Guid id, CreateBlogPostDto dto);
+        Task<bool> DeletePostAsync(Guid id);
+        Task<bool> AddPostImagesAsync(Guid postId, List<string> imageUrls);
     }
 }

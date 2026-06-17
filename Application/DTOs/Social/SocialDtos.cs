@@ -2,11 +2,11 @@ namespace EcommerceApp.Application.DTOs.Social
 {
     public class CommentDto
     {
-        public int Id { get; set; }
-        public int BlogPostId { get; set; }
+        public Guid Id { get; set; }
+        public Guid BlogPostId { get; set; }
         public string BlogPostTitle { get; set; }
 
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string UserFullName { get; set; }
         public string UserAvatar { get; set; }
 
@@ -16,11 +16,11 @@ namespace EcommerceApp.Application.DTOs.Social
 
     public class LikeDto
     {
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string UserFullName { get; set; }
         public string UserAvatar { get; set; }
 
-        public int BlogPostId { get; set; }
+        public Guid BlogPostId { get; set; }
         public string BlogPostTitle { get; set; }
     }
 }

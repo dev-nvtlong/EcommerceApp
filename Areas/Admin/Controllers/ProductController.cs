@@ -25,7 +25,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var product = await _productService.GetByIdAsync(id);
             if (product == null) return NotFound();
@@ -42,7 +42,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
                     string wwwRootPath = _hostEnvironment.WebRootPath;
                     
                     // Delete old image if updating
-                    if (dto.ProductId != 0)
+                    if (dto.ProductId != Guid.Empty)
                     {
                         var productFromDb = await _productService.GetByIdAsNoTrackingAsync(dto.ProductId);
                         if (productFromDb != null && productFromDb.ImageUrls != null && productFromDb.ImageUrls.Any())
@@ -71,7 +71,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
                     dto.ImageUrls = new List<string> { "/uploads/products/" + fileName };
                 }
 
-                if (dto.ProductId == 0)
+                if (dto.ProductId == Guid.Empty)
                 {
                     dto.IsActive = true;
                     var newId = await _productService.CreateAsync(dto);
@@ -90,7 +90,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ImportStock(int productId, int quantity, decimal costPrice)
+        public async Task<IActionResult> ImportStock(Guid productId, int quantity, decimal costPrice)
         {
             try
             {
@@ -104,7 +104,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ToggleActive(int id)
+        public async Task<IActionResult> ToggleActive(Guid id)
         {
             try
             {
@@ -122,7 +122,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             // Delete image file before deleting product
             var product = await _productService.GetByIdAsync(id);

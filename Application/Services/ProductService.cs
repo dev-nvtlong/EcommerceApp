@@ -15,7 +15,7 @@ namespace EcommerceApp.Application.Services
             _repository = repository;
             _mapper = mapper;
         }
-        public async Task<int> CreateAsync(ProductDto dto)
+        public async Task<Guid> CreateAsync(ProductDto dto)
         {
             var entity = _mapper.Map<Product>(dto);
             await _repository.CreateAsync(entity);
@@ -23,7 +23,7 @@ namespace EcommerceApp.Application.Services
             return entity.ProductId;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var entity = await _repository.GetByIdAsync(id);
             if (entity != null)
@@ -46,13 +46,13 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<List<ProductDto>>(active);
         }
 
-        public async Task<ProductDto?> GetByIdAsync(int id)
+        public async Task<ProductDto?> GetByIdAsync(Guid id)
         {
             var entity = await _repository.GetByIdAsync(id);
             return _mapper.Map<ProductDto?>(entity);
         }
 
-        public async Task<ProductDto?> GetByIdAsNoTrackingAsync(int id)
+        public async Task<ProductDto?> GetByIdAsNoTrackingAsync(Guid id)
         {
             var entity = await _repository.GetByIdAsNoTrackingAsync(id);
             return _mapper.Map<ProductDto?>(entity);
@@ -83,13 +83,14 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<List<ProductDto>>(filtered);
         }
 
-        public async Task ImportStockAsync(int productId, int quantity, decimal costPrice)
+        public async Task ImportStockAsync(Guid productId, int quantity, decimal costPrice)
         {
             var product = await _repository.GetByIdAsync(productId);
             if (product != null)
             {
                 product.StockQuantity += quantity;
                 product.CostPrice = costPrice;
+                product.IsActive = true; // Auto-reactivate product when stock is imported
                 await _repository.UpdateAsync(product);
                 await _repository.SaveAsync();
             }

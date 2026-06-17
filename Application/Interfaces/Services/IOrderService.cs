@@ -4,11 +4,11 @@ namespace EcommerceApp.Application.Interfaces.Services
 {
     public interface IOrderService
     {
-        Task<OrderDto> CreateOrderAsync(int userId, CreateOrderDto createOrderDto);
-        Task<List<OrderDto>> GetOrdersByUserIdAsync(int userId);
-        Task<OrderDto?> GetOrderByIdAsync(int orderId);
+        Task<OrderDto> CreateOrderAsync(Guid userId, CreateOrderDto createOrderDto);
+        Task<List<OrderDto>> GetOrdersByUserIdAsync(Guid userId);
+        Task<OrderDto?> GetOrderByIdAsync(Guid orderId);
         Task<List<OrderDto>> GetAllOrdersAsync();
-        Task UpdateOrderStatusAsync(int orderId, EcommerceApp.Enums.OrderStatus status);
-        Task UpdateOrderAsync(int orderId, OrderDto orderDto);
+        Task UpdateOrderStatusAsync(Guid orderId, EcommerceApp.Enums.OrderStatus status);
+        Task UpdateOrderAsync(Guid orderId, OrderDto orderDto);
     }
 }

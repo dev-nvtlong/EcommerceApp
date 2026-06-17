@@ -5,7 +5,7 @@ namespace EcommerceApp.Application.DTOs.Blog
 {
     public class BlogPostDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Title { get; set; }
         public string? Content { get; set; }
         public string? Thumbnail { get; set; }
@@ -13,7 +13,7 @@ namespace EcommerceApp.Application.DTOs.Blog
         public BlogCategory Category { get; set; }
         public string? Tags { get; set; }
 
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string? AuthorName { get; set; }
         public bool IsPublished { get; set; }
         public DateTime? CreatedAt { get; set; }
@@ -26,9 +26,9 @@ namespace EcommerceApp.Application.DTOs.Blog
 
     public class CommentDto
     {
-        public int Id { get; set; }
-        public int BlogPostId { get; set; }
-        public int UserId { get; set; }
+        public Guid Id { get; set; }
+        public Guid BlogPostId { get; set; }
+        public Guid UserId { get; set; }
         public string? UserName { get; set; }
         public string? UserAvatar { get; set; }
         public string Content { get; set; }
