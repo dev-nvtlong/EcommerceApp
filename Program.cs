@@ -1,11 +1,16 @@
+using EcommerceApp.Application.Interfaces.Services;
 using EcommerceApp.Data;
-using EcommerceApp.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region ================== SERVICES ==================
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllersWithViews();
 
 // Session
@@ -17,36 +22,92 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// DbContext + Identity (bạn phải có AddInfrastructure)
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+// Swagger
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new    OpenApiInfo
+    {
+        Title = "EcommerceApp API",
+        Version = "v1",
+        Description = "API documentation for EcommerceApp"
+    });
+
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "JWT Authorization header using the Bearer scheme.",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+    options.AddSecurityDefinition("Bearer", securityScheme);
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            securityScheme,
+            new string[] {""}
+        }
+    });
+});
+
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var secretKey = jwtSettings["SecretKey"]!;
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme =
+            CookieAuthenticationDefaults.AuthenticationScheme;
+
+        options.DefaultChallengeScheme =
+            CookieAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+    {
+        options.LoginPath = "/Admin/Auth/Login";
+        options.AccessDeniedPath = "/Home/AccessDenied";
+    })
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(secretKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+builder.Services.AddAuthorization();
 
 // AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// Cookie
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Account/Auth";
-    options.AccessDeniedPath = "/Account/AccessDenied";
-    options.LogoutPath = "/Account/Auth";
-
-    options.Cookie.Name = "CayCanhAuth";
-});
-
 #endregion
 var app = builder.Build();
 #region ================== SEED DATA ==================
-
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
+    var context = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+    var passwordHasher = scope.ServiceProvider
+        .GetRequiredService<IPasswordHasher>();
 
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
-
-    await ApplicationDbContext.SeedAsync(userManager, roleManager);
+    await context.Database.MigrateAsync();
+    await DataSeedInitializer.ExecuteAsync(context, passwordHasher);
 }
-
 #endregion
 
 #region ================== MIDDLEWARE ==================
@@ -57,6 +118,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -64,7 +127,6 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 
-// QUAN TR?NG: Authentication phải trước Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

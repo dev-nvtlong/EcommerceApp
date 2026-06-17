@@ -4,52 +4,37 @@
     ViewData["Title"] = "Thông tin cá nhân";
 }
 
-<div class="py-5 bg-white border-bottom">
-    <div class="container">
-        <h1 class="fw-bold mb-0">Tài khoản của tôi</h1>
-        <p class="text-muted mt-2">Quản lý thông tin hồ sơ của bạn để bảo mật tài khoản</p>
-    </div>
-</div>
-
-<div class="container py-5">
-    <div class="row g-5">
-        <!-- Sidebar Navigation -->
-        <div class="col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                <div class="text-center mb-4">
-                    <div class="position-relative d-inline-block">
-                        <img src="@(string.IsNullOrEmpty(Model.Avatar) ? "https://ui-avatars.com/api/?name=" + Model.FullName + "&background=74b49b&color=fff&size=128" : Model.Avatar)" 
-                             id="avatarPreview"
-                             class="rounded-circle border border-4 border-white shadow-sm" 
-                             style="width: 120px; height: 120px; object-fit: cover;">
-                        <label for="avatarInput" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm cursor-pointer" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-camera"></i>
-                        </label>
-                    </div>
-                    <h5 class="fw-bold mt-3 mb-1">@Model.FullName</h5>
-                    <p class="text-muted small mb-0">@Model.Email</p>
+<div class="account-dashboard-wrapper bg-light min-vh-100 pb-5">
+    <div class="account-header py-5 bg-white border-bottom mb-5">
+        <div class="container">
+            <div class="d-flex align-items-center gap-3">
+                <div class="account-welcome-icon shadow-sm bg-emerald-light-50 text-emerald-primary rounded-4 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="fa-solid fa-user-circle fs-4"></i>
                 </div>
-                
-                <div class="nav flex-column nav-pills">
-                    <a class="nav-link active rounded-3 mb-2" href="@Url.Action("Profile", "Account")">
-                        <i class="fa-solid fa-user me-2"></i> Hồ sơ cá nhân
-                    </a>
-                    <a class="nav-link text-dark rounded-3 mb-2" href="@Url.Action("Index", "Order")">
-                        <i class="fa-solid fa-box me-2"></i> Đơn hàng của tôi
-                    </a>
-                    <form asp-action="Logout" method="post" class="d-inline">
-                        <button type="submit" class="nav-link text-danger w-100 text-start rounded-3">
-                            <i class="fa-solid fa-right-from-bracket me-2"></i> Đăng xuất
-                        </button>
-                    </form>
+                <div>
+                    <h1 class="fw-800 mb-0 h3 text-dark">Hồ sơ cá nhân</h1>
+                    <p class="text-muted small mb-0">Chào mừng bạn quay trở lại, <span class="fw-bold text-dark">@Model.FullName</span></p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Setting Content -->
-        <div class="col-lg-9">
-            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
-                <h4 class="fw-bold mb-4">Thông tin hồ sơ</h4>
+    <div class="container">
+        <div class="row g-4">
+            <!-- Sidebar -->
+            <div class="col-lg-4 col-xl-3">
+                <partial name="_AccountSidebar" />
+            </div>
+
+            <!-- Content Area -->
+            <div class="col-lg-8 col-xl-9">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white" style="min-height: 600px;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-800 mb-0 text-dark">Thông tin tài khoản</h4>
+                        <span class="badge bg-emerald-light-50 text-emerald-primary border border-emerald-100 rounded-pill px-3 py-2 fs-xs">
+                            <i class="fa-solid fa-shield-check me-1"></i> TÀI KHOẢN ĐÃ XÁC MINH
+                        </span>
+                    </div>
                 
                 @if (TempData["Success"] != null)
                 {

@@ -10,9 +10,9 @@
             <h1 class="h3 fw-bold mb-0 text-success"><i class="fa-solid fa-newspaper me-2"></i>Quản lý bài viết</h1>
             <p class="text-muted mb-0">Danh sách các tin tức và bài blog của hệ thống.</p>
         </div>
-        <a asp-action="Create" class="btn btn-success rounded-pill px-4 shadow-sm">
+        <button class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#createBlogModal" onclick="prepareCreate()">
             <i class="fa-solid fa-plus me-2"></i> Viết bài mới
-        </a>
+        </button>
     </div>
 
     @if (TempData["Success"] != null)
@@ -95,9 +95,9 @@
                                             <i class="fa-solid fa-ellipsis-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
-                                            <li><a class="dropdown-item py-2" asp-action="Edit" asp-route-id="@item.Id"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i> Chỉnh sửa</a></li>
+                                            <li><button class="dropdown-item py-2" onclick="prepareEdit('@item.Id')"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i> Chỉnh sửa</button></li>
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><button class="dropdown-item py-2 text-danger" onclick="deletePost(@item.Id)"><i class="fa-solid fa-trash-can me-2"></i> Xóa bài</button></li>
+                                            <li><button class="dropdown-item py-2 text-danger" onclick="deletePost('@item.Id')"><i class="fa-solid fa-trash-can me-2"></i> Xóa bài</button></li>
                                         </ul>
                                     </div>
                                 </td>
@@ -110,8 +110,334 @@
     </div>
 </div>
 
+<!-- Create/Edit Blog Modal -->
+<div class="modal fade" id="createBlogModal" tabindex="-1" aria-labelledby="createBlogModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 bg-success text-white py-3 px-4">
+                <h5 class="modal-title fw-bold" id="createBlogModalLabel"><i class="fa-solid fa-newspaper me-2"></i>Tạo bài viết mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="postForm" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" id="postId" />
+                    <input type="hidden" name="Thumbnail" id="postThumbnail" />
+                    
+                    <div class="row g-4 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fa-solid fa-list-ul me-2"></i>Danh mục bài viết</label>
+                            <select name="Category" id="postCategory" class="form-select border-0 bg-light rounded-3 shadow-none focus-ring-success">
+                                <option value="1">Bài viết</option>
+                                <option value="2">Kinh nghiệm</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fa-solid fa-tags me-2"></i>Thẻ (Tags)</label>
+                            <input name="Tags" id="postTags" class="form-control border-0 bg-light rounded-3 shadow-none focus-ring-success" placeholder="Ví dụ: cây cảnh, mẹo vặt...">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="fa-solid fa-heading me-2"></i>Tiêu đề bài viết</label>
+                        <input name="Title" id="postTitle" class="form-control form-control-lg border-0 bg-light rounded-3 shadow-none focus-ring-success" placeholder="Nhập tiêu đề ấn tượng..." required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Nội dung chi tiết (Có thể nhúng ảnh vào giữa văn bản)</label>
+                        <div class="rounded-3 overflow-hidden border">
+                            <textarea id="editor" name="Content" class="form-control" rows="15"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fa-solid fa-image me-2"></i>Ảnh đại diện bài viết</label>
+                            <div class="p-3 bg-light rounded-4 text-center border">
+                                <div id="thumbnailPreviewContainer" class="mb-3 d-none">
+                                    <img id="thumbnailPreview" src="" class="rounded-3 shadow-sm border mx-auto" style="max-height: 150px; object-fit: cover;">
+                                </div>
+                                <input name="ThumbnailFile" type="file" class="form-control border-0 bg-white rounded-pill px-3 py-2" onchange="previewImage(this)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold"><i class="fa-solid fa-images me-2"></i>Hình ảnh bổ sung (nếu có)</label>
+                            <div class="p-3 border rounded-4 bg-light text-center">
+                                <input id="multiFilesInput" type="file" multiple class="form-control border-0 bg-white rounded-pill px-3 py-2" onchange="handleMultiFiles(this)">
+                                <p class="text-muted small mt-2 mb-0">Các hình ảnh này sẽ hiện trong album của bài viết.</p>
+                                <div id="multiImagePreview" class="row g-2 mt-3 overflow-auto" style="max-height: 200px;">
+                                    <!-- Previews will show here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch p-2 bg-light rounded-3 d-inline-flex align-items-center gap-3 ps-5">
+                           <input class="form-check-input ms-0 mt-0" type="checkbox" name="IsPublished" id="postIsPublished" value="true" checked style="width: 45px; height: 23px;">
+                           <label class="form-check-label fw-bold" for="postIsPublished">Công khai ngay</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 p-4">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success rounded-pill px-5 fw-bold shadow" onclick="saveBlog()">
+                    <i class="fa-solid fa-save me-2"></i> LƯU BÀI VIẾT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
+        let editor;
+
+        // Configuration for image upload adapter
+        class MyUploadAdapter {
+            constructor(loader) {
+                this.loader = loader;
+            }
+
+            upload() {
+                return this.loader.file
+                    .then(file => new Promise((resolve, reject) => {
+                        this._initRequest();
+                        this._initListeners(resolve, reject, file);
+                        this._sendRequest(file);
+                    }));
+            }
+
+            abort() {
+                if (this.xhr) {
+                    this.xhr.abort();
+                }
+            }
+
+            _initRequest() {
+                const xhr = this.xhr = new XMLHttpRequest();
+                xhr.open('POST', '/Admin/Blog/UploadImage', true);
+                
+                // Anti-Forgery Token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                xhr.setRequestHeader('RequestVerificationToken', token);
+                
+                xhr.responseType = 'json';
+            }
+
+            _initListeners(resolve, reject, file) {
+                const xhr = this.xhr;
+                const loader = this.loader;
+                const genericErrorText = `Couldn't upload file: ${file.name}.`;
+
+                xhr.addEventListener('error', () => reject(genericErrorText));
+                xhr.addEventListener('abort', () => reject());
+                xhr.addEventListener('load', () => {
+                    const response = xhr.response;
+                    if (!response || response.error) {
+                        return reject(response && response.error ? response.error.message : genericErrorText);
+                    }
+                    resolve({
+                        default: response.url
+                    });
+                });
+
+                if (xhr.upload) {
+                    xhr.upload.addEventListener('progress', evt => {
+                        if (evt.lengthComputable) {
+                            loader.uploadTotal = evt.total;
+                            loader.uploaded = evt.loaded;
+                        }
+                    });
+                }
+            }
+
+            _sendRequest(file) {
+                const data = new FormData();
+                data.append('upload', file);
+                this.xhr.send(data);
+            }
+        }
+
+        function MyCustomUploadAdapterPlugin(editor) {
+            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                return new MyUploadAdapter(loader);
+            };
+        }
+
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                extraPlugins: [MyCustomUploadAdapterPlugin],
+                toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'blockQuote', 'insertTable', 'undo', 'redo' ]
+            })
+            .then(newEditor => {
+                editor = newEditor;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        function previewImage(input) {
+            const container = document.getElementById('thumbnailPreviewContainer');
+            const preview = document.getElementById('thumbnailPreview');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    container.classList.remove('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function prepareCreate() {
+            document.getElementById('postForm').reset();
+            document.getElementById('postId').value = '';
+            document.getElementById('postThumbnail').value = '';
+            document.getElementById('thumbnailPreviewContainer').classList.add('d-none');
+            document.getElementById('createBlogModalLabel').innerHTML = '<i class="fa-solid fa-newspaper me-2"></i>Tạo bài viết mới';
+            if (editor) editor.setData('');
+            
+            // Clear multi-file array
+            selectedMultiFiles = [];
+            renderMultiPreviews();
+        }
+
+        let selectedMultiFiles = [];
+
+        function handleMultiFiles(input) {
+            if (input.files) {
+                const newFiles = Array.from(input.files);
+                selectedMultiFiles = [...selectedMultiFiles, ...newFiles];
+                renderMultiPreviews();
+                // Clear input so same file can be selected again
+                input.value = '';
+            }
+        }
+
+        function removeSelectedFile(index) {
+            selectedMultiFiles.splice(index, 1);
+            renderMultiPreviews();
+        }
+
+        function renderMultiPreviews() {
+            const container = document.getElementById('multiImagePreview');
+            container.innerHTML = '';
+            
+            selectedMultiFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const col = document.createElement('div');
+                    col.className = 'col-4 col-md-3 position-relative';
+                    col.innerHTML = `
+                        <div class="preview-img-wrapper rounded-3 border overflow-hidden" style="height: 60px;">
+                            <img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <button type="button" onclick="removeSelectedFile(${index})" class="btn btn-danger btn-sm rounded-circle position-absolute top-0 end-0 p-0 shadow-sm" style="width: 18px; height: 18px; line-height: 14px; font-size: 10px; margin: -5px -5px 0 0;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(col);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function prepareEdit(id) {
+            Swal.fire({
+                title: 'Đang tải dữ liệu...',
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.get('/Admin/Blog/Edit/' + id, function(data) {
+                Swal.close();
+                document.getElementById('postForm').reset();
+                document.getElementById('postId').value = data.id;
+                document.getElementById('postTitle').value = data.title;
+                document.getElementById('postCategory').value = data.category;
+                document.getElementById('postTags').value = data.tags || '';
+                document.getElementById('postIsPublished').checked = data.isPublished;
+                document.getElementById('postThumbnail').value = data.thumbnail || '';
+                
+                if (data.thumbnail) {
+                    document.getElementById('thumbnailPreview').src = data.thumbnail;
+                    document.getElementById('thumbnailPreviewContainer').classList.remove('d-none');
+                } else {
+                    document.getElementById('thumbnailPreviewContainer').classList.add('d-none');
+                }
+
+                if (editor) {
+                    editor.setData(data.content || '');
+                }
+
+                // In edit, we might want to clear multi-file array too or load existing? 
+                // For now, let's just clear selected for new upload
+                selectedMultiFiles = [];
+                renderMultiPreviews();
+
+                document.getElementById('createBlogModalLabel').innerHTML = '<i class="fa-solid fa-pen-nib me-2"></i>Chỉnh sửa bài viết';
+                var modal = new bootstrap.Modal(document.getElementById('createBlogModal'));
+                modal.show();
+            });
+        }
+
+        function saveBlog() {
+            const form = document.getElementById('postForm');
+            const formData = new FormData(form);
+            
+            // Sync CKEditor content
+            if (editor) {
+                formData.set('Content', editor.getData());
+            }
+
+            // Append multi-images manually
+            formData.delete('ImageFiles');
+            selectedMultiFiles.forEach(file => {
+                formData.append('ImageFiles', file);
+            });
+
+            const id = document.getElementById('postId').value;
+            const url = id ? '/Admin/Blog/Edit/' + id : '/Admin/Blog/Create';
+
+            // Get anti-forgery token and send as REQUEST HEADER (required for AJAX + FormData)
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            Swal.fire({
+                title: 'Đang lưu bài viết...',
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                success: function(response) {
+                    if (response && response.success === false) {
+                        Swal.fire('Lỗi!', response.message || 'Có lỗi xảy ra khi lưu bài viết.', 'error');
+                    } else {
+                        Swal.fire('Thành công!', 'Bài viết đã được lưu thành công!', 'success')
+                            .then(() => location.reload());
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Save blog error:', xhr.status, xhr.responseText);
+                    Swal.fire('Lỗi!', 'Có lỗi xảy ra (HTTP ' + xhr.status + '). Vui lòng thử lại.', 'error');
+                }
+            });
+        }
+
         function deletePost(id) {
             Swal.fire({
                 title: 'Xóa bài viết?',

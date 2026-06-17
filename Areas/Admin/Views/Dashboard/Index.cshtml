@@ -6,74 +6,177 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/Admin/css/dashboard.css" asp-append-version="true" />
+    <style>
+        .revenue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .rev-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #f1f5f9;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+        .rev-card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+        .rev-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+        }
+        .rev-card-today::after { background: #10b981; }
+        .rev-card-month::after { background: #3b82f6; }
+        .rev-card-year::after { background: #f59e0b; }
+        .rev-card-filtered::after { background: #6366f1; }
+        
+        .rev-label { font-size: 12px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em; }
+        .rev-value { font-size: 22px; font-weight: 800; color: #0f172a; margin: 4px 0; }
+        .rev-sub { font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+        
+        .chart-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-wrapper {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+        }
+        
+        .quick-stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .low-stock-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 12px;
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            margin-bottom: 10px;
+        }
+        
+        .top-product-img {
+            width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
+        }
+
+        .filter-panel {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .icon-stockout { background: #fff1f2; color: #f43f5e; }
+    </style>
 }
 
-<div class="mb-4">
-    <div class="admin-layout__nav-label mb-3 mt-0">Thống kê Cửa hàng</div>
-    <div class="dashboard-stats">
-        <!-- Revenue -->
-        <div class="stat-card">
-            <div class="stat-icon icon-revenue"><i class="fa-solid fa-wallet"></i></div>
-            <div>
-                <div class="stat-label">Doanh thu</div>
-                <div class="stat-value">@Model.TotalRevenue.ToString("N0")₫</div>
-            </div>
+<!-- Filter Panel -->
+<div class="filter-panel shadow-sm">
+    <form asp-action="Index" method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small fw-bold text-muted mb-1">Từ ngày</label>
+            <input type="date" name="startDate" class="form-control form-control-sm rounded-3" value="@Model.StartDate?.ToString("yyyy-MM-dd")">
         </div>
-        <!-- Orders -->
-        <div class="stat-card">
-            <div class="stat-icon icon-orders"><i class="fa-solid fa-cart-shopping"></i></div>
-            <div>
-                <div class="stat-label">Đơn hàng</div>
-                <div class="stat-value">@Model.TotalOrders</div>
-            </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold text-muted mb-1">Đến ngày</label>
+            <input type="date" name="endDate" class="form-control form-control-sm rounded-3" value="@Model.EndDate?.ToString("yyyy-MM-dd")">
         </div>
-        <!-- Customers -->
-        <div class="stat-card">
-            <div class="stat-icon icon-users"><i class="fa-solid fa-users"></i></div>
-            <div>
-                <div class="stat-label">Khách hàng</div>
-                <div class="stat-value">@Model.TotalCustomers</div>
-            </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">
+                <i class="fa-solid fa-filter me-1"></i> Lọc
+            </button>
+            <a asp-action="Index" class="btn btn-light btn-sm rounded-pill px-3 fw-bold">Làm mới</a>
         </div>
-        <!-- Products -->
-        <div class="stat-card">
-            <div class="stat-icon icon-products"><i class="fa-solid fa-leaf"></i></div>
-            <div>
-                <div class="stat-label">Sản phẩm</div>
-                <div class="stat-value">@Model.TotalProducts</div>
-            </div>
-        </div>
-    </div>
+    </form>
+</div>
 
-    <div class="admin-layout__nav-label mb-3">Tương tác khách hàng</div>
-    <div class="interaction-stats">
-        <!-- Reviews -->
-        <a asp-controller="Review" asp-action="Index" class="stat-card text-decoration-none shadow-hover">
-            <div class="stat-icon icon-reviews"><i class="fa-solid fa-star"></i></div>
-            <div>
-                <div class="stat-label text-muted small">Đánh giá</div>
-                <div class="stat-value text-dark fs-5">@Model.TotalReviews</div>
-            </div>
-        </a>
-        <!-- Comments -->
-        <a asp-controller="Social" asp-action="Comments" class="stat-card text-decoration-none shadow-hover">
-            <div class="stat-icon icon-comments"><i class="fa-solid fa-comment-dots"></i></div>
-            <div>
-                <div class="stat-label text-muted small">Bình luận</div>
-                <div class="stat-value text-dark fs-5">@Model.TotalComments</div>
-            </div>
-        </a>
-        <!-- Likes -->
-        <a asp-controller="Social" asp-action="Likes" class="stat-card text-decoration-none shadow-hover">
-            <div class="stat-icon icon-likes"><i class="fa-solid fa-heart"></i></div>
-            <div>
-                <div class="stat-label text-muted small">Lượt thích</div>
-                <div class="stat-value text-dark fs-5">@Model.TotalLikes</div>
-            </div>
-        </a>
+<!-- Revenue Section -->
+<div class="revenue-grid">
+    @if (Model.StartDate.HasValue)
+    {
+        <div class="rev-card rev-card-filtered">
+            <div class="rev-label text-indigo">SỐ LIỆU ĐÃ LỌC</div>
+            <div class="rev-value">@Model.RevenueFiltered.ToString("N0")₫</div>
+            <div class="rev-sub text-indigo fw-medium"><i class="fa-solid fa-clock-rotate-left"></i> @Model.StartDate?.ToString("dd/MM") - @(Model.EndDate?.ToString("dd/MM") ?? "Nay")</div>
+        </div>
+    }
+    <div class="rev-card rev-card-today">
+        <div class="rev-label">HÔM NAY</div>
+        <div class="rev-value">@Model.RevenueToday.ToString("N0")₫</div>
+        <div class="rev-sub text-success"><i class="fa-solid fa-calendar-day"></i> Cập nhật thời gian thực</div>
+    </div>
+    <div class="rev-card rev-card-month">
+        <div class="rev-label">THÁNG NÀY</div>
+        <div class="rev-value">@Model.RevenueThisMonth.ToString("N0")₫</div>
+        <div class="rev-sub text-primary"><i class="fa-solid fa-calendar-days"></i> Tháng @DateTime.Now.Month / @DateTime.Now.Year</div>
+    </div>
+    <div class="rev-card rev-card-year">
+        <div class="rev-label">NĂM NAY</div>
+        <div class="rev-value">@Model.RevenueThisYear.ToString("N0")₫</div>
+        <div class="rev-sub text-warning"><i class="fa-solid fa-chart-line"></i> Năm @DateTime.Now.Year</div>
     </div>
 </div>
 
+<!-- Quick Stats Row -->
+<div class="quick-stats-row">
+    <div class="stat-card py-3">
+        <div class="stat-icon icon-orders" style="width:36px; height:36px; font-size:14px;"><i class="fa-solid fa-cart-shopping"></i></div>
+        <div>
+            <div class="stat-label small mb-0">Đơn hàng</div>
+            <div class="fw-bold small">@Model.TotalOrders</div>
+        </div>
+    </div>
+    <div class="stat-card py-3">
+        <div class="stat-icon icon-users" style="width:36px; height:36px; font-size:14px;"><i class="fa-solid fa-users"></i></div>
+        <div>
+            <div class="stat-label small mb-0">Khách hàng</div>
+            <div class="fw-bold small">@Model.TotalCustomers</div>
+        </div>
+    </div>
+    <div class="stat-card py-3">
+        <div class="stat-icon icon-products" style="width:36px; height:36px; font-size:14px;"><i class="fa-solid fa-leaf"></i></div>
+        <div>
+            <div class="stat-label small mb-1">Tổng sản phẩm</div>
+            <div class="fw-bold small">@Model.TotalProducts</div>
+        </div>
+    </div>
+    <div class="stat-card py-3 border-danger-subtle bg-danger-subtle bg-opacity-10">
+        <div class="stat-icon icon-stockout" style="width:36px; height:36px; font-size:14px;"><i class="fa-solid fa-ban"></i></div>
+        <div>
+            <div class="stat-label small mb-1 text-danger">Đã hết hàng</div>
+            <div class="fw-bold small text-danger">@Model.TotalOutOfStock</div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Section -->
+<div class="chart-container">
+    <div class="panel-header mb-3">
+        <h2 class="panel-title fs-6">Biểu đồ doanh thu 7 ngày gần nhất</h2>
+    </div>
+    <div class="chart-wrapper">
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
 
 <div class="dashboard-grid">
     <!-- Recent Orders -->
@@ -139,57 +242,126 @@
         </div>
     </div>
 
-    <!-- Recent Notifications -->
-    <div class="dashboard-panel">
-        <div class="panel-header">
-            <h2 class="panel-title">Thông báo mới nhất</h2>
-            <div id="quickBadge" class="badge bg-danger rounded-pill">@Model.RecentNotifications.Count(n => !n.IsRead) mới</div>
-        </div>
-        <div class="recent-list">
-            @foreach (var note in Model.RecentNotifications)
-            {
-                <div class="notification-brief @(note.IsRead ? "" : "notification-brief--unread") cursor-pointer handle-notification" 
-                     data-url="@note.RedirectUrl" 
-                     data-id="@note.Id">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="fw-bold small text-dark">@note.Title</span>
-                        <span class="text-muted" style="font-size: 10px;">@note.CreatedAt.ToString("HH:mm")</span>
+    <!-- Right Sidebar Stack -->
+    <div class="d-flex flex-column gap-4">
+        <!-- Low Stock Alert -->
+        <div class="dashboard-panel" style="height: auto;">
+            <div class="panel-header">
+                <h2 class="panel-title text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Sắp hết hàng</h2>
+                <span class="badge bg-danger rounded-pill">@Model.LowStockProducts.Count</span>
+            </div>
+            <div class="low-stock-list">
+                @foreach (var prod in Model.LowStockProducts)
+                {
+                    <div class="low-stock-item">
+                        <img src="@(prod.ImageUrls != null && prod.ImageUrls.Count > 0 ? prod.ImageUrls[0] : "")" class="top-product-img" alt="">
+                        <div class="flex-grow-1">
+                            <div class="fw-bold small text-truncate" style="max-width: 150px;">@prod.Name</div>
+                            <div class="text-danger fw-bold" style="font-size: 11px;">Còn lại: @prod.StockQuantity</div>
+                        </div>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-sm btn-light rounded-circle"><i class="fa-solid fa-plus"></i></a>
                     </div>
-                    <div class="text-muted small text-truncate">@note.Message</div>
-                </div>
-            }
-            @if (!Model.RecentNotifications.Any())
-            {
-                <div class="text-center py-4 text-muted small">Không có thông báo mới</div>
-            }
+                }
+                @if (!Model.LowStockProducts.Any())
+                {
+                    <div class="text-center py-4 text-muted small">Mọi thứ đều ổn ổn</div>
+                }
+            </div>
+        </div>
+
+        <!-- Top Selling -->
+        <div class="dashboard-panel" style="height: auto;">
+            <div class="panel-header">
+                <h2 class="panel-title text-success"><i class="fa-solid fa-fire me-2"></i>Bán chạy nhất</h2>
+            </div>
+            <div class="top-selling-list">
+                @foreach (var top in Model.TopSellingProducts)
+                {
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-light">
+                        <img src="@top.Thumbnail" class="top-product-img shadow-sm" alt="">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="fw-bold small text-truncate">@top.Name</div>
+                            <div class="text-muted" style="font-size: 11px;">Đã bán: @top.SalesCount sản phẩm</div>
+                        </div>
+                        <div class="text-success fw-bold small">@top.Revenue.ToString("N0")₫</div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         $(document).ready(function () {
-            // Handle Order Details click
+            // Chart.js init
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const chartData = @Html.Raw(Json.Serialize(Model.RevenueChartData));
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.map(d => d.label),
+                    datasets: [{
+                        label: 'Doanh thu (₫)',
+                        data: chartData.map(d => d.value),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#10b981',
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.parsed.y.toLocaleString() + '₫';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#94a3b8',
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    if (value >= 1000000) return (value/1000000).toFixed(1) + 'M';
+                                    if (value >= 1000) return (value/1000).toFixed(0) + 'k';
+                                    return value;
+                                }
+                            },
+                            grid: { color: '#f1f5f9', drawBorder: false }
+                        },
+                        x: { 
+                            ticks: { color: '#94a3b8', font: { size: 11 } },
+                            grid: { display: false } 
+                        }
+                    }
+                }
+            });
+
+            // Original event handlers
             $('.view-order-details').on('click', function () {
                 const id = $(this).data('id');
                 window.loadGlobalOrderDetails(id);
-            });
-
-            // Handle Notification click
-            $('.handle-notification').on('click', function () {
-                const url = $(this).data('url');
-                const noteId = $(this).data('id');
-                
-                // Mark as read (optional, can call API)
-                $(this).removeClass('notification-brief--unread');
-                
-                // If the URL is for an order detail, show popup
-                const orderIdMatch = url.match(/\/Order\/Details\/(\d+)/i);
-                if (orderIdMatch && orderIdMatch[1]) {
-                    window.loadGlobalOrderDetails(orderIdMatch[1]);
-                } else {
-                    window.location.href = url;
-                }
             });
         });
     </script>

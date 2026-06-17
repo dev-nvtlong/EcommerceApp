@@ -1,0 +1,140 @@
+@using EcommerceApp.Application.Interfaces.Services
+@using EcommerceApp.Enums
+@using System.Security.Claims
+@using EcommerceApp.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext DbContext
+@inject IOrderService OrderService
+
+@{
+    var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var userId = Guid.Parse(userIdString ?? Guid.Empty.ToString());
+    var user = await DbContext.Users.Include(u => u.Profile).FirstOrDefaultAsync(u => u.Id == userId);
+    
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var activeStatus = ViewBag.ActiveStatus as string;
+
+    var allOrders = await OrderService.GetOrdersByUserIdAsync(userId) ?? new List<EcommerceApp.Application.DTOs.Order.OrderDto>();
+    var pendingCount = allOrders.Count(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Confirmed);
+    var shippingCount = allOrders.Count(o => o.Status == OrderStatus.Shipping);
+    var completedCount = allOrders.Count(o => o.Status == OrderStatus.Completed);
+    var cancelledCount = allOrders.Count(o => o.Status == OrderStatus.Cancelled);
+}
+
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4 account-sidebar bg-white">
+    <!-- Avatar Section -->
+    <div class="text-center mb-4 pb-4 border-bottom">
+        <form id="avatarForm" asp-controller="Account" asp-action="UpdateAvatar" method="post" enctype="multipart/form-data" class="d-none">
+            <input type="file" name="avatarFile" id="sidebarAvatarInput" accept="image/*" onchange="document.getElementById('avatarForm').submit()">
+        </form>
+        
+        <div class="position-relative d-inline-block avatar-container" onclick="document.getElementById('sidebarAvatarInput').click()">
+            <img src="@(string.IsNullOrEmpty(user?.Profile?.AvatarUrl) ? "https://ui-avatars.com/api/?name=" + Uri.EscapeDataString(user?.Profile?.FullName ?? user?.UserName ?? "User") + "&background=16a34a&color=fff&size=128" : user.Profile.AvatarUrl)"
+                 id="sidebarAvatar"
+                 class="rounded-circle border border-4 border-white shadow-sm"
+                 style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;">
+            <div class="avatar-hover-overlay rounded-circle">
+                <i class="fa-solid fa-camera text-white"></i>
+            </div>
+        </div>
+        <h6 class="fw-bold mt-3 mb-1 text-dark">@(user?.Profile?.FullName ?? user?.UserName)</h6>
+        <p class="text-muted small mb-0 opacity-75">@user?.Email</p>
+    </div>
+    
+    <!-- Navigation Section -->
+    <div class="nav flex-column nav-pills custom-account-nav">
+        <a class="nav-link rounded-3 mb-2 d-flex align-items-center @(currentController == "Account" && currentAction == "Profile" ? "active shadow-azure" : "text-dark")" 
+           href="@Url.Action("Profile", "Account")">
+            <i class="fa-solid fa-user-gear me-3 opacity-75"></i> 
+            <span>Thông tin cá nhân</span>
+        </a>
+
+        <div class="my-3 border-top border-light"></div>
+        <label class="small text-muted text-uppercase fw-bold mb-2 ps-2" style="font-size: 0.65rem; letter-spacing: 1px;">QUẢN LÝ ĐƠN HÀNG</label>
+
+        <a class="nav-link rounded-3 mb-1 d-flex align-items-center justify-content-between @(activeStatus == "pending" ? "active shadow-azure" : "text-dark")" 
+           href="@Url.Action("Index", "Order", new { status = "pending" })">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-clock-rotate-left me-3 opacity-75"></i> 
+                <span>Đơn hàng đã đặt</span>
+            </div>
+            <span class="badge @(activeStatus == "pending" ? "bg-white text-primary" : "bg-blue-light-50 text-primary") rounded-pill ms-2">@pendingCount</span>
+        </a>
+
+        <a class="nav-link rounded-3 mb-1 d-flex align-items-center justify-content-between @(activeStatus == "shipping" ? "active shadow-azure" : "text-dark")" 
+           href="@Url.Action("Index", "Order", new { status = "shipping" })">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-truck-fast me-3 opacity-75"></i> 
+                <span>Đơn hàng đang giao</span>
+            </div>
+            <span class="badge @(activeStatus == "shipping" ? "bg-white text-primary" : "bg-blue-light-50 text-primary") rounded-pill ms-2">@shippingCount</span>
+        </a>
+
+        <a class="nav-link rounded-3 mb-1 d-flex align-items-center justify-content-between @(activeStatus == "completed" ? "active shadow-azure" : "text-dark")" 
+           href="@Url.Action("Index", "Order", new { status = "completed" })">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-receipt me-3 opacity-75"></i> 
+                <span>Lịch sử mua hàng</span>
+            </div>
+            <span class="badge @(activeStatus == "completed" ? "bg-white text-primary" : "bg-blue-light-50 text-primary") rounded-pill ms-2">@completedCount</span>
+        </a>
+
+        <a class="nav-link rounded-3 mb-1 d-flex align-items-center justify-content-between @(activeStatus == "cancelled" ? "active shadow-azure" : "text-dark")" 
+           href="@Url.Action("Index", "Order", new { status = "cancelled" })">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid fa-rectangle-xmark me-3 opacity-75"></i> 
+                <span>Đơn hàng đã hủy</span>
+            </div>
+            <span class="badge @(activeStatus == "cancelled" ? "bg-white text-primary" : "bg-blue-light-50 text-primary") rounded-pill ms-2">@cancelledCount</span>
+        </a>
+
+        <div class="my-3 border-top border-light"></div>
+        
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="nav-link text-danger w-100 text-start rounded-3 d-flex align-items-center logout-btn">
+                <i class="fa-solid fa-right-from-bracket me-3 opacity-75"></i> 
+                <span>Đăng xuất</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .custom-account-nav .nav-link { 
+        padding: 12px 18px; 
+        font-weight: 600; 
+        font-size: 0.9rem; 
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+    }
+    .custom-account-nav .nav-link:not(.active):not(.logout-btn):hover { 
+        background: #f0f9ff; 
+        color: #0284c7 !important;
+        transform: translateX(5px);
+        border-color: #e0f2fe;
+    }
+    .custom-account-nav .nav-link.active { 
+        background: #0ea5e9 !important; 
+        color: white !important; 
+    }
+    .shadow-azure {
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3) !important;
+    }
+    .bg-blue-light-50 { background-color: #eff6ff; }
+    
+    .avatar-container {
+        position: relative;
+        overflow: hidden;
+    }
+    .avatar-hover-overlay {
+        position: absolute;
+        top: 4px; left: 4px; bottom: 4px; right: 4px;
+        background: rgba(14, 165, 233, 0.6);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.3s;
+        pointer-events: none;
+    }
+    .avatar-container:hover .avatar-hover-overlay { opacity: 1; }
+    .avatar-container:hover #sidebarAvatar { filter: blur(1px); }
+</style>

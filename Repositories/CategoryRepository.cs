@@ -1,4 +1,4 @@
-﻿using EcommerceApp.Application.Interfaces.Repositories;
+using EcommerceApp.Application.Interfaces.Repositories;
 using EcommerceApp.Data;
 using EcommerceApp.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,7 @@ namespace EcommerceApp.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var entity = await _context.Categories.FindAsync(id);
             if (entity != null)
@@ -32,7 +32,7 @@ namespace EcommerceApp.Repositories
             return await _context.Categories.ToListAsync();
         }
 
-        public async Task<Category?> GetByIdAsync(int id)
+        public async Task<Category?> GetByIdAsync(Guid id)
         {
             return await _context.Categories.FindAsync(id);
         }

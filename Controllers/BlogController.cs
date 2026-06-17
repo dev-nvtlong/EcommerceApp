@@ -16,8 +16,8 @@ namespace EcommerceApp.Controllers
             _blogService = blogService;
         }
 
-        private int? UserId => User.Identity?.IsAuthenticated == true 
-            ? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) 
+        private Guid? UserId => User.Identity?.IsAuthenticated == true 
+            ? Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) 
             : null;
 
         public async Task<IActionResult> Index(string? searchTerm = null, BlogCategory? category = null)
@@ -28,7 +28,7 @@ namespace EcommerceApp.Controllers
             return View(posts);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
             var post = await _blogService.GetPostDetailsAsync(id, UserId);
             if (post == null) return NotFound();
@@ -38,7 +38,7 @@ namespace EcommerceApp.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> ToggleLike(int postId)
+        public async Task<IActionResult> ToggleLike(Guid postId)
         {
             if (!UserId.HasValue) return Unauthorized();
 
@@ -48,7 +48,7 @@ namespace EcommerceApp.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> AddComment(int postId, string content)
+        public async Task<IActionResult> AddComment(Guid postId, string content)
         {
             if (!UserId.HasValue) return Unauthorized();
             if (string.IsNullOrWhiteSpace(content)) return Json(new { success = false, message = "Nội dung bình luận không được để trống" });

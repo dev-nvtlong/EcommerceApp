@@ -1,201 +1,252 @@
 using EcommerceApp.Application.DTOs.Account;
-using EcommerceApp.Models;
+using EcommerceApp.Application.Features.Auth.Login;
+using EcommerceApp.Application.Features.Auth.Register;
+using EcommerceApp.Application.Interfaces.Services;
 using EcommerceApp.Models.ViewModels;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EcommerceApp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<IdentityRole<int>> _roleManager;
-        private readonly AutoMapper.IMapper _mapper;
-        private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly LoginHandler _loginHandler;
+        private readonly RegisterHandler _registerHandler;
+        private readonly IUserService _userService;
 
         public AccountController(
-            UserManager<ApplicationUser> userManager, 
-            SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole<int>> roleManager,
-            AutoMapper.IMapper mapper,
-            IWebHostEnvironment hostEnvironment)
+            LoginHandler loginHandler,
+            RegisterHandler registerHandler,
+            IUserService userService)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _roleManager = roleManager;
-            _mapper = mapper;
-            _hostEnvironment = hostEnvironment;
+            _loginHandler = loginHandler;
+            _registerHandler = registerHandler;
+            _userService = userService;
         }
 
+
+
+        //// POST: Đăng nhập từ trang Auth
+        //[HttpPost]
+        //[ActionName("Login")]
+        //public async Task<IActionResult> AuthLogin(
+        //    AuthViewModel vm,
+        //    CancellationToken cancellationToken)
+        //{
+        //    ModelState.Clear();
+        //    if (!TryValidateModel(vm.LoginModel, nameof(vm.LoginModel)))
+        //    {
+        //        vm.IsRegisterActive = false;
+        //        return View("Auth", vm);
+        //    }
+
+        //    var request = new LoginRequest
+        //    {
+        //        Email = vm.LoginModel.Email,
+        //        Password = vm.LoginModel.Password
+        //    };
+
+        //    var result = await _loginHandler.HandleAsync(request, cancellationToken);
+
+        //    if (!result.Success)
+        //    {
+        //        ModelState.AddModelError("", result.Message ?? "Đăng nhập thất bại.");
+        //        vm.IsRegisterActive = false;
+        //        return View("Auth", vm);
+        //    }
+
+        //    var claims = new List<Claim>
+        //    {
+        //        new Claim(ClaimTypes.NameIdentifier, result.Data.UserId.ToString()),
+        //        new Claim(ClaimTypes.Email, result.Data.Email),
+        //    };
+
+        //    foreach (var role in result.Data.Roles)
+        //        claims.Add(new Claim(ClaimTypes.Role, role));
+
+        //    var claimsIdentity = new ClaimsIdentity(
+        //        claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+        //    var authProperties = new AuthenticationProperties
+        //    {
+        //        IsPersistent = vm.LoginModel.RememberMe,
+        //        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+        //    };
+
+        //    await HttpContext.SignInAsync(
+        //        CookieAuthenticationDefaults.AuthenticationScheme,
+        //        new ClaimsPrincipal(claimsIdentity), authProperties);
+
+        //    return RedirectToAction("Index", "Home");
+        //}
+
+        // GET: Đăng nhập
         [HttpGet]
-        public async Task<IActionResult> Profile()
+        public IActionResult Login(string? returnUrl = null)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Auth");
-            
-            var model = _mapper.Map<UserDto>(user);
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateProfile(UpdateProfileDto model, IFormFile? avatarFile)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Auth");
-
-            if (ModelState.IsValid)
-            {
-                if (avatarFile != null)
-                {
-                    string wwwRootPath = _hostEnvironment.WebRootPath;
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
-                    string avatarPath = Path.Combine(wwwRootPath, @"uploads\avatars");
-
-                    if (!Directory.Exists(avatarPath))
-                    {
-                        Directory.CreateDirectory(avatarPath);
-                    }
-
-                    // Delete old avatar
-                    if (!string.IsNullOrEmpty(user.Avatar))
-                    {
-                        var oldPath = Path.Combine(wwwRootPath, user.Avatar.TrimStart('/'));
-                        if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
-                    }
-
-                    using (var fileStream = new FileStream(Path.Combine(avatarPath, fileName), FileMode.Create))
-                    {
-                        await avatarFile.CopyToAsync(fileStream);
-                    }
-                    user.Avatar = "/uploads/avatars/" + fileName;
-                }
-
-                user.FullName = model.FullName;
-                user.PhoneNumber = model.PhoneNumber;
-                user.Address = model.Address;
-                user.DateOfBirth = model.DateOfBirth;
-                user.Gender = model.Gender;
-
-                var result = await _userManager.UpdateAsync(user);
-                if (result.Succeeded)
-                {
-                    TempData["Success"] = "Cập nhật thông tin cá nhân thành công!";
-                    return RedirectToAction(nameof(Profile));
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError("", error.Description);
-                }
-            }
-
-            var userDto = _mapper.Map<UserDto>(user);
-            return View("Profile", userDto);
-        }
-
-        [HttpGet]
-        public IActionResult Auth(string mode = "login")
-        {
-            if (User.Identity?.IsAuthenticated == true) return RedirectToAction("Index", "Home");
-            var model = new AuthViewModel { IsRegisterActive = mode == "register" };
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Register(AuthViewModel model)
-        {
-            // Chỉ validate RegisterModel khi post Register
-            var registerErrors = ModelState.Where(x => x.Key.StartsWith("RegisterModel")).SelectMany(x => x.Value.Errors);
-            if (registerErrors.Any())
-            {
-                model.IsRegisterActive = true;
-                return View("Auth", model);
-            }
-
-            var user = new ApplicationUser
-            {
-                UserName = model.RegisterModel.Email,
-                Email = model.RegisterModel.Email,
-                FullName = model.RegisterModel.FullName
-            };
-
-            var result = await _userManager.CreateAsync(user, model.RegisterModel.Password);
-
-            if (result.Succeeded)
-            {
-                // Gán role Customer
-                if (!await _roleManager.RoleExistsAsync("Customer"))
-                {
-                    await _roleManager.CreateAsync(new IdentityRole<int>("Customer"));
-                }
-                await _userManager.AddToRoleAsync(user, "Customer");
-
-                await _signInManager.SignInAsync(user, isPersistent: false);
+            if (User.Identity?.IsAuthenticated == true)
                 return RedirectToAction("Index", "Home");
-            }
 
-            foreach (var error in result.Errors)
-            {
-                if (error.Code.Contains("Email"))
-                    ModelState.AddModelError("RegisterModel.Email", error.Description);
-                else if (error.Code.Contains("Password"))
-                    ModelState.AddModelError("RegisterModel.Password", error.Description);
-                else
-                    ModelState.AddModelError("RegisterModel", error.Description);
-            }
-
-            model.IsRegisterActive = true;
-            return View("Auth", model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Login(AuthViewModel model)
-        {
-            // Chỉ validate LoginModel khi post Login
-            var loginErrors = ModelState.Where(x => x.Key.StartsWith("LoginModel")).SelectMany(x => x.Value.Errors);
-            if (loginErrors.Any())
-            {
-                model.IsRegisterActive = false;
-                return View("Auth", model);
-            }
-
-            var result = await _signInManager.PasswordSignInAsync(model.LoginModel.Email, model.LoginModel.Password, model.LoginModel.RememberMe, lockoutOnFailure: false);
-
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            ModelState.AddModelError("LoginModel", "Email hoặc mật khẩu không chính xác.");
-            model.IsRegisterActive = false;
-            return View("Auth", model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
-        }
-
-        public IActionResult AccessDenied()
-        {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
-        [HttpGet]
-        public async Task<IActionResult> CheckProfileStatus()
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginRequest loginRequest, string? returnUrl, CancellationToken cancellationToken)
         {
-            if (User.Identity?.IsAuthenticated != true) return Json(new { isAuthenticated = false });
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Json(new { isAuthenticated = false });
+            ViewData["ReturnUrl"] = returnUrl;
 
-            bool isMissingInfo = string.IsNullOrEmpty(user.Address) || string.IsNullOrEmpty(user.PhoneNumber);
-            return Json(new { 
-                isAuthenticated = true, 
-                isMissingInfo = isMissingInfo
-            });
+            if (!ModelState.IsValid)
+                return View(loginRequest);
+
+            var result = await _userService.LoginAsync(loginRequest, cancellationToken);
+
+            if (!result.Success || result.Data == null)
+            {
+                ModelState.AddModelError("", result.Message ?? "Đăng nhập thất bại");
+                return View(loginRequest);
+            }
+
+            Response.Cookies.Append(
+                "access_token",
+                result.Data.AccessToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    Expires = DateTimeOffset.UtcNow.AddDays(1)
+                });
+
+            Response.Cookies.Append(
+                "refresh_token",
+                result.Data.RefreshToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    Expires = DateTimeOffset.UtcNow.AddDays(30)
+                });
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, result.Data.UserId.ToString()),
+                new Claim(ClaimTypes.Email, result.Data.Email),
+            };
+
+            if (result.Data.Roles != null)
+            {
+                foreach (var role in result.Data.Roles)
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity), authProperties);
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // GET: Đăng ký
+        [HttpGet]
+        public IActionResult Register()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
+
+            return View();
+        }
+
+        // POST: Đăng ký
+        [HttpPost]
+        public async Task<IActionResult> Register(
+            RegisterRequest request,
+            CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(request);
+            }
+
+            var result = await _registerHandler.HandleAsync(request, cancellationToken);
+
+            if (!result.Success)
+            {
+                ModelState.AddModelError("", result.Message ?? "Đăng ký thất bại.");
+                return View(request);
+            }
+
+            TempData["RegisterSuccess"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+            return RedirectToAction("Login");
+        }
+
+        // POST: Đăng xuất
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
+
+        // GET: Trang hồ sơ cá nhân
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out Guid userId))
+                return RedirectToAction("Login");
+
+            var userDto = await _userService.GetProfileAsync(userId);
+            if (userDto == null)
+                return RedirectToAction("Login");
+
+            return View(userDto);
+        }
+
+        // POST: Cập nhật thông tin cá nhân
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile(
+            UpdateProfileDto model,
+            IFormFile? avatarFile)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdStr, out Guid userId))
+                return RedirectToAction("Login");
+
+            await _userService.UpdateProfileAsync(userId, model);
+
+            return RedirectToAction("Profile");
+        }
+        // ========= Update avatar riêng biệt nếu muốn =========
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdateAvatar(IFormFile avatarFile)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!Guid.TryParse(userIdStr, out Guid userId))
+                return RedirectToAction("Login");
+
+            await _userService.UpdateAvatarAsync(userId, avatarFile);
+
+            return RedirectToAction("Profile");
         }
     }
 }

@@ -14,7 +14,7 @@ namespace EcommerceApp.Repositories
             _context = context;
         }
 
-        public async Task<Cart?> GetByUserIdAsync(int userId)
+        public async Task<Cart?> GetByUserIdAsync(Guid userId)
         {
             return await _context.Carts
                 .Include(c => c.Items!)
@@ -23,7 +23,7 @@ namespace EcommerceApp.Repositories
                 .FirstOrDefaultAsync(c => c.UserId == userId);
         }
 
-        public async Task<CartItem?> GetCartItemAsync(int cartId, int productId)
+        public async Task<CartItem?> GetCartItemAsync(Guid cartId, Guid productId)
         {
             return await _context.CartItems
                 .FirstOrDefaultAsync(ci => ci.CartId == cartId && ci.ProductId == productId);

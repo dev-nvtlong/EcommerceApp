@@ -6,9 +6,9 @@ namespace EcommerceApp.Application.Interfaces.Repositories
     {
         Task<Order> CreateAsync(Order order);
         Task UpdateAsync(Order order);
-        Task DeleteAsync(int id);
-        Task<Order?> GetByIdAsync(int id);
-        Task<List<Order>> GetAllByUserIdAsync(int userId);
+        Task DeleteAsync(Guid id);
+        Task<Order?> GetByIdAsync(Guid id);
+        Task<List<Order>> GetAllByUserIdAsync(Guid userId);
         Task<List<Order>> GetAllWithUserAsync();
     }
 }

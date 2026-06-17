@@ -58,9 +58,9 @@
                                         <td class="py-4">
                                             <div class="d-flex justify-content-center">
                                                 <div class="input-group input-group-sm rounded-pill overflow-hidden border shadow-sm" style="width: 110px; height: 35px;">
-                                                    <button class="btn btn-white border-0" onclick="updateQuantity(@item.ProductId, @(item.Quantity - 1))"><i class="fa-solid fa-minus fs-xs"></i></button>
+                                                    <button type="button" class="btn btn-white border-0" onclick="updateQuantity('@item.ProductId', @(item.Quantity - 1))"><i class="fa-solid fa-minus fs-xs"></i></button>
                                                     <input type="text" class="form-control text-center border-0 bg-white fw-bold px-0" value="@item.Quantity" readonly>
-                                                    <button class="btn btn-white border-0" onclick="updateQuantity(@item.ProductId, @(item.Quantity + 1))"><i class="fa-solid fa-plus fs-xs"></i></button>
+                                                    <button type="button" class="btn btn-white border-0" onclick="updateQuantity('@item.ProductId', @(item.Quantity + 1))"><i class="fa-solid fa-plus fs-xs"></i></button>
                                                 </div>
                                             </div>
                                         </td>
@@ -68,7 +68,7 @@
                                             @item.SubTotal.ToString("N0")₫
                                         </td>
                                         <td class="py-4 text-end pe-4">
-                                            <button onclick="removeItem(@item.ProductId)" class="btn btn-light btn-sm rounded-circle shadow-sm text-danger border-0 d-inline-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" title="Xóa khỏi giỏ">
+                                            <button type="button" onclick="removeItem('@item.ProductId')" class="btn btn-light btn-sm rounded-circle shadow-sm text-danger border-0 d-inline-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" title="Xóa khỏi giỏ">
                                                 <i class="fa-solid fa-trash-can"></i>
                                             </button>
                                         </td>

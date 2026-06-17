@@ -17,7 +17,7 @@ namespace EcommerceApp.Controllers
             _productService = productService;
         }
 
-        private int UserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        private Guid UserId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         public async Task<IActionResult> Index()
         {
@@ -26,8 +26,14 @@ namespace EcommerceApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
+        public async Task<IActionResult> AddToCart(Guid productId, int quantity = 1, string? address = null, string? phone = null)
         {
+            if (string.IsNullOrEmpty(address)) HttpContext.Session.Remove("TempShipAddress");
+            else HttpContext.Session.SetString("TempShipAddress", address);
+
+            if (string.IsNullOrEmpty(phone)) HttpContext.Session.Remove("TempShipPhone");
+            else HttpContext.Session.SetString("TempShipPhone", phone);
+
             await _cartService.AddToCartAsync(UserId, productId, quantity);
             var product = await _productService.GetByIdAsync(productId);
             
@@ -41,14 +47,14 @@ namespace EcommerceApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateQuantity(int productId, int quantity)
+        public async Task<IActionResult> UpdateQuantity(Guid productId, int quantity)
         {
             await _cartService.UpdateQuantityAsync(UserId, productId, quantity);
             return Json(new { success = true });
         }
 
         [HttpPost]
-        public async Task<IActionResult> RemoveItem(int productId)
+        public async Task<IActionResult> RemoveItem(Guid productId)
         {
             await _cartService.RemoveFromCartAsync(UserId, productId);
             return Json(new { success = true });

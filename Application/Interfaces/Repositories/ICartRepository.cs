@@ -4,8 +4,8 @@ namespace EcommerceApp.Application.Interfaces.Repositories
 {
     public interface ICartRepository
     {
-        Task<Cart?> GetByUserIdAsync(int userId);
-        Task<CartItem?> GetCartItemAsync(int cartId, int productId);
+        Task<Cart?> GetByUserIdAsync(Guid userId);
+        Task<CartItem?> GetCartItemAsync(Guid cartId, Guid productId);
         Task CreateCartAsync(Cart cart);
         Task AddCartItemAsync(CartItem item);
         Task UpdateCartItemAsync(CartItem item);

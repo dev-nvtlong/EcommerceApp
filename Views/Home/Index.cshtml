@@ -4,242 +4,107 @@
     var products = ViewBag.FeaturedProducts as List<EcommerceApp.Application.DTOs.Product.ProductDto>;
 }
 
-<style>
-    /* Premium Design Styles */
-    :root {
-        --primary-green: #10b981;
-        --dark-green: #064e3b;
-        --soft-green: #f0fdf4;
-        --glass-bg: rgba(255, 255, 255, 0.8);
-    }
+<link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
 
-    .hero-v2 {
-        position: relative;
-        padding: 100px 0;
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        overflow: hidden;
-    }
+<!-- ============================================
+     HERO SECTION
+     ============================================ -->
+<section class="home-hero">
+    <div class="home-hero__decor-circle home-hero__decor-circle--1"></div>
+    <div class="home-hero__decor-circle home-hero__decor-circle--2"></div>
+    <div class="home-hero__decor-circle home-hero__decor-circle--3"></div>
 
-    .hero-v2__badge {
-        display: inline-block;
-        padding: 8px 20px;
-        background: white;
-        color: var(--primary-green);
-        border-radius: 50px;
-        font-weight: 700;
-        font-size: 0.85rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 25px;
-    }
-
-    .hero-v2__title {
-        font-size: 4rem;
-        font-weight: 800;
-        line-height: 1.1;
-        color: var(--dark-green);
-        margin-bottom: 25px;
-    }
-
-    .hero-v2__image-container {
-        position: relative;
-        z-index: 2;
-    }
-
-    .hero-v2__image {
-        width: 110%;
-        filter: drop-shadow(20px 20px 50px rgba(0,0,0,0.1));
-        animation: float 6s ease-in-out infinite;
-    }
-
-    @@keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-20px); }
-    }
-
-    .section-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--dark-green);
-    }
-
-    .category-card {
-        height: 350px;
-        border-radius: 24px;
-        overflow: hidden;
-        position: relative;
-        cursor: pointer;
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .category-card img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.8s ease;
-    }
-
-    .category-card:hover img {
-        transform: scale(1.1);
-    }
-
-    .category-card__overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        padding: 30px;
-        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
-        color: white;
-    }
-
-    .product-card-v2 {
-        background: white;
-        border-radius: 20px;
-        padding: 15px;
-        transition: all 0.3s ease;
-        border: 1px solid #f1f5f9;
-        height: 100%;
-    }
-
-    .product-card-v2:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-        border-color: var(--primary-green);
-    }
-
-    .product-card-v2__image {
-        border-radius: 15px;
-        aspect-ratio: 1/1;
-        object-fit: cover;
-        margin-bottom: 15px;
-        width: 100%;
-    }
-
-    .feature-icon {
-        width: 60px;
-        height: 60px;
-        background: var(--soft-green);
-        color: var(--primary-green);
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-    }
-
-    .newsletter-section {
-        background: var(--dark-green);
-        border-radius: 40px;
-        padding: 60px;
-        color: white;
-        margin: 80px 0;
-        background-image: url('https://www.transparenttextures.com/patterns/leaf.png');
-    }
-
-    .btn-premium {
-        padding: 15px 35px;
-        border-radius: 50px;
-        font-weight: 700;
-        transition: all 0.3s ease;
-    }
-
-    .btn-premium-primary {
-        background: var(--primary-green);
-        color: white;
-        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
-    }
-
-    .btn-premium-primary:hover {
-        background: #059669;
-        transform: translateY(-3px);
-        box-shadow: 0 15px 25px rgba(16, 185, 129, 0.3);
-        color: white;
-    }
-</style>
-
-<!-- Hero Section -->
-<section class="hero-v2">
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
-                <div class="hero-v2__badge">🌿 Chất lượng từ thiên nhiên</div>
-                <h1 class="hero-v2__title">Biến Không Gian Của Bạn Thành <span class="text-primary">Tuyệt Tác Xanh</span></h1>
-                <p class="lead text-muted mb-5">
+                <div class="home-hero__badge">🌿 Chất lượng từ thiên nhiên</div>
+                <h1 class="home-hero__title">Biến Không Gian Của Bạn Thành <span>Tuyệt Tác Xanh</span></h1>
+                <p class="home-hero__desc">
                     Khám phá bộ sưu tập cây cảnh nghệ thuật và giải pháp trang trí không gian sống chuyên nghiệp. Chăm sóc tận tâm, giao hàng hỏa tốc.
                 </p>
-                <div class="d-flex gap-3">
-                    <a asp-controller="Shop" asp-action="Index" class="btn btn-premium btn-premium-primary px-5">Bắt đầu mua sắm</a>
-                    <a href="#featured" class="btn btn-outline-success btn-premium px-4">Xem xu hướng</a>
+                <div class="home-hero__actions">
+                    <a asp-controller="Shop" asp-action="Index" class="home-hero__btn home-hero__btn--primary">
+                        <i class="fa-solid fa-bag-shopping"></i> Bắt đầu mua sắm
+                    </a>
+                    <a href="#featured" class="home-hero__btn home-hero__btn--outline">
+                        <i class="fa-solid fa-fire-flame-curved"></i> Xem xu hướng
+                    </a>
                 </div>
-                <div class="mt-5 d-flex align-items-center gap-4">
-                    <div class="d-flex">
-                        <img src="https://i.pravatar.cc/40?img=1" class="rounded-circle border border-2 border-white" style="margin-right: -10px;">
-                        <img src="https://i.pravatar.cc/40?img=2" class="rounded-circle border border-2 border-white" style="margin-right: -10px;">
-                        <img src="https://i.pravatar.cc/40?img=3" class="rounded-circle border border-2 border-white">
+                <div class="home-hero__social">
+                    <div class="home-hero__avatars">
+                        <img src="https://i.pravatar.cc/40?img=1" alt="Customer">
+                        <img src="https://i.pravatar.cc/40?img=2" alt="Customer">
+                        <img src="https://i.pravatar.cc/40?img=3" alt="Customer">
                     </div>
-                    <div>
-                        <div class="fw-bold text-dark">5,000+ Khách hàng</div>
-                        <div class="small text-muted">Đã tin dùng sản phẩm của chúng tôi</div>
+                    <div class="home-hero__social-text">
+                        <strong>5,000+ Khách hàng</strong>
+                        <span>Đã tin dùng sản phẩm của chúng tôi</span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="hero-v2__image-container">
-                    <img src="https://cdn.pixabay.com/photo/2018/07/11/06/47/chlorophytum-3530413_1280.png" alt="Featured Plant" class="hero-v2__image">
+                <div class="home-hero__images">
+                    <img src="/images/hero-main.png"
+                         alt="Featured Plant" class="home-hero__img-main">
+                    <img src="/images/hero-secondary.png"
+                         alt="Plants Collection" class="home-hero__img-secondary">
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Features Section -->
-<section class="py-5 mt-5">
+<!-- ============================================
+     FEATURES SECTION
+     ============================================ -->
+<section class="home-features">
     <div class="container">
         <div class="row g-4">
-            <div class="col-md-3">
-                <div class="p-4 rounded-4 bg-light h-100 border-0 shadow-none">
-                    <div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div>
-                    <h5 class="fw-bold">Giao hàng miễn phí</h5>
-                    <p class="small text-muted mb-0">Cho mọi đơn hàng trên 500k tại khu vực nội thành.</p>
+            <div class="col-6 col-lg-3">
+                <div class="home-features__card reveal reveal-delay-1">
+                    <div class="home-features__icon"><i class="fa-solid fa-truck-fast"></i></div>
+                    <h5>Giao hàng miễn phí</h5>
+                    <p>Cho mọi đơn hàng trên 500k tại khu vực nội thành.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="p-4 rounded-4 bg-light h-100 border-0 shadow-none">
-                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                    <h5 class="fw-bold">Bảo hành 30 ngày</h5>
-                    <p class="small text-muted mb-0">Cam kết 1 đổi 1 nếu cây có vấn đề trong tháng đầu.</p>
+            <div class="col-6 col-lg-3">
+                <div class="home-features__card reveal reveal-delay-2">
+                    <div class="home-features__icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h5>Bảo hành 30 ngày</h5>
+                    <p>Cam kết 1 đổi 1 nếu cây có vấn đề trong tháng đầu.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="p-4 rounded-4 bg-light h-100 border-0 shadow-none">
-                    <div class="feature-icon"><i class="fa-solid fa-headset"></i></div>
-                    <h5 class="fw-bold">Hỗ trợ 24/7</h5>
-                    <p class="small text-muted mb-0">Đội ngũ chuyên gia sẵn sàng tư vấn cách chăm sóc.</p>
+            <div class="col-6 col-lg-3">
+                <div class="home-features__card reveal reveal-delay-3">
+                    <div class="home-features__icon"><i class="fa-solid fa-headset"></i></div>
+                    <h5>Hỗ trợ 24/7</h5>
+                    <p>Đội ngũ chuyên gia sẵn sàng tư vấn cách chăm sóc.</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="p-4 rounded-4 bg-light h-100 border-0 shadow-none">
-                    <div class="feature-icon"><i class="fa-solid fa-leaf"></i></div>
-                    <h5 class="fw-bold">Cây tuyển chọn</h5>
-                    <p class="small text-muted mb-0">Mọi cây đều được kiểm tra kỹ lưỡng trước khi đóng gói.</p>
+            <div class="col-6 col-lg-3">
+                <div class="home-features__card reveal reveal-delay-4">
+                    <div class="home-features__icon"><i class="fa-solid fa-leaf"></i></div>
+                    <h5>Cây tuyển chọn</h5>
+                    <p>Mọi cây đều được kiểm tra kỹ lưỡng trước khi đóng gói.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Categories Section -->
-<section class="py-5 mt-5">
+<!-- ============================================
+     CATEGORIES SECTION
+     ============================================ -->
+<section class="home-categories">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title mb-3">Danh mục nổi bật</h2>
-            <p class="text-muted">Lựa chọn phong cách xanh phù hợp với bạn</p>
+        <div class="home-section-header reveal">
+            <h2>Danh mục nổi bật</h2>
+            <p>Lựa chọn phong cách xanh phù hợp với bạn</p>
         </div>
         <div class="row g-4">
             @if (categories != null && categories.Any())
             {
-                var catImages = new string[] { 
+                var catImages = new string[] {
                     "https://images.unsplash.com/photo-1545241047-6083a3684587?q=80&w=600&auto=format&fit=crop",
                     "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?q=80&w=600&auto=format&fit=crop",
                     "https://images.unsplash.com/photo-1512428813833-df52167ad833?q=80&w=600&auto=format&fit=crop",
@@ -248,13 +113,13 @@
                 int i = 0;
                 foreach (var cat in categories)
                 {
-                    <div class="col-6 col-lg-3">
+                    <div class="col-6 col-lg-3 reveal reveal-delay-@(i + 1 > 4 ? 4 : i + 1)">
                         <a asp-controller="Shop" asp-action="Index" asp-route-categoryId="@cat.Id" class="text-decoration-none">
-                            <div class="category-card">
+                            <div class="home-categories__card">
                                 <img src="@(i < catImages.Length ? catImages[i++] : catImages[0])" alt="@cat.Name">
-                                <div class="category-card__overlay">
-                                    <h4 class="fw-bold mb-0">@cat.Name</h4>
-                                    <span class="small opacity-75">Xem thêm <i class="fa-solid fa-arrow-right ms-1"></i></span>
+                                <div class="home-categories__overlay">
+                                    <h4>@cat.Name</h4>
+                                    <span>Xem thêm <i class="fa-solid fa-arrow-right ms-1"></i></span>
                                 </div>
                             </div>
                         </a>
@@ -265,51 +130,69 @@
     </div>
 </section>
 
-<!-- Latest Sales Articles Section -->
-<section id="latest-news" class="py-5 mt-5">
+<!-- ============================================
+     FEATURED PRODUCTS SECTION
+     ============================================ -->
+<section id="featured" class="home-products">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-end mb-5">
+        <div class="home-section-header home-section-header--split reveal">
             <div>
-                <h2 class="section-title mb-2">Bài viết nổi bật</h2>
-                <p class="text-muted mb-0">Cập nhật những xu hướng và mẹo chăm sóc không gian sống mới nhất</p>
+                <h2>Sản phẩm nổi bật</h2>
+                <p>Những cây cảnh được yêu thích nhất tại Green Life</p>
             </div>
-            <a asp-controller="Blog" asp-action="Index" asp-route-category="Sales" class="btn btn-premium btn-soft-green text-primary px-4 fw-bold text-decoration-none">Khám phá Blog</a>
+            <a asp-controller="Shop" asp-action="Index" class="home-section-link">
+                Xem tất cả <i class="fa-solid fa-arrow-right"></i>
+            </a>
         </div>
-        
         <div class="row g-4">
-            @{
-                var latestPosts = ViewBag.LatestSalesPosts as List<EcommerceApp.Application.DTOs.Blog.BlogPostDto>;
-            }
-            @if (latestPosts != null && latestPosts.Any())
+            @if (products != null && products.Any())
             {
-                foreach (var post in latestPosts)
+                int pIdx = 0;
+                foreach (var product in products)
                 {
-                    <div class="col-md-6 col-lg-3">
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-transform hover-translate-y">
-                            <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="text-decoration-none">
-                                <div class="position-relative overflow-hidden" style="aspect-ratio: 16/9;">
-                                    @if (!string.IsNullOrEmpty(post.Thumbnail))
-                                    {
-                                        <img src="@post.Thumbnail" class="w-100 h-100 object-fit-cover transition-all duration-500 hover-scale" alt="@post.Title">
-                                    }
-                                    else
-                                    {
-                                        <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center text-muted">
-                                            <i class="fa-solid fa-newspaper h1 opacity-25"></i>
-                                        </div>
-                                    }
+                    pIdx++;
+                    <div class="col-6 col-lg-3 reveal reveal-delay-@(pIdx > 4 ? 4 : pIdx)">
+                        <div class="home-products__card">
+                            <div class="home-products__img-wrap">
+                                @if (product.IsFeatured)
+                                {
+                                    <span class="home-products__badge">Nổi bật</span>
+                                }
+                                <a asp-controller="Shop" asp-action="Detail" asp-route-id="@product.ProductId">
+                                    <img src="@(product.ImageUrls?.FirstOrDefault() ?? "/images/no-image.png")" alt="@product.Name">
+                                </a>
+                                <div class="home-products__quick-actions">
+                                    <button class="home-products__quick-btn" onclick="addToCart('@product.ProductId')" title="Thêm vào giỏ">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    </button>
+                                    <a asp-controller="Shop" asp-action="Detail" asp-route-id="@product.ProductId" class="home-products__quick-btn" title="Xem chi tiết">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
                                 </div>
-                            </a>
-                            <div class="card-body p-4 d-flex flex-column">
-                                <div class="mb-2">
-                                    <span class="text-muted small italic">@post.CreatedAt?.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="home-products__info">
+                                <a asp-controller="Shop" asp-action="Detail" asp-route-id="@product.ProductId" class="home-products__name">
+                                    @product.Name
+                                </a>
+                                <div class="home-products__rating">
+                                    <div class="home-products__stars">
+                                        @for (int s = 1; s <= 5; s++)
+                                        {
+                                            if (s <= (int)(product.AverageRating))
+                                            {
+                                                <i class="fa-solid fa-star"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa-solid fa-star empty"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <span class="home-products__review-count">(@product.ReviewCount)</span>
                                 </div>
-                                <h3 class="h6 fw-bold mb-3 line-clamp-2">
-                                    <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="text-dark text-decoration-none hover-text-success">@post.Title</a>
-                                </h3>
-                                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
-                                    <span class="small fw-bold text-success">@post.AuthorName</span>
-                                    <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="text-decoration-none small fw-bold">Xem thêm <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                                <div class="home-products__bottom">
+                                    <span class="home-products__price">@product.Price.ToString("N0")₫</span>
+                                    <span class="home-products__sold">Đã bán @product.SoldCount</span>
                                 </div>
                             </div>
                         </div>
@@ -318,35 +201,128 @@
             }
             else
             {
-                <div class="col-12 text-center py-5">
-                    <p class="text-muted">Đang cập nhật những bài viết mới nhất...</p>
+                <div class="home-empty-state">
+                    <i class="fa-solid fa-seedling"></i>
+                    <p>Đang cập nhật sản phẩm nổi bật...</p>
                 </div>
             }
         </div>
     </div>
 </section>
 
-<!-- Newsletter Section -->
+<!-- ============================================
+     LATEST BLOG POSTS SECTION
+     ============================================ -->
+<section class="home-blog">
+    <div class="container">
+        <div class="home-section-header home-section-header--split reveal">
+            <div>
+                <h2>Bài viết nổi bật</h2>
+                <p>Cập nhật những xu hướng và mẹo chăm sóc không gian sống mới nhất</p>
+            </div>
+            <a asp-controller="Blog" asp-action="Index" asp-route-category="Sales" class="home-section-link">
+                Khám phá Blog <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            @{
+                var latestPosts = ViewBag.LatestSalesPosts as List<EcommerceApp.Application.DTOs.Blog.BlogPostDto>;
+            }
+            @if (latestPosts != null && latestPosts.Any())
+            {
+                int bIdx = 0;
+                foreach (var post in latestPosts)
+                {
+                    bIdx++;
+                    <div class="col-md-6 col-lg-3 reveal reveal-delay-@(bIdx > 4 ? 4 : bIdx)">
+                        <div class="home-blog__card">
+                            <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="text-decoration-none">
+                                <div class="home-blog__thumb">
+                                    @if (!string.IsNullOrEmpty(post.Thumbnail))
+                                    {
+                                        <img src="@post.Thumbnail" alt="@post.Title">
+                                    }
+                                    else
+                                    {
+                                        <div class="home-blog__thumb-placeholder">
+                                            <i class="fa-solid fa-newspaper"></i>
+                                        </div>
+                                    }
+                                </div>
+                            </a>
+                            <div class="home-blog__body">
+                                <div class="home-blog__date">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    @post.CreatedAt?.ToString("dd/MM/yyyy")
+                                </div>
+                                <h3 class="home-blog__title">
+                                    <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
+                                </h3>
+                                <div class="home-blog__footer">
+                                    <span class="home-blog__author">@post.AuthorName</span>
+                                    <a asp-controller="Blog" asp-action="Details" asp-route-id="@post.Id" class="home-blog__read-more">
+                                        Xem thêm <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="home-empty-state">
+                    <i class="fa-solid fa-newspaper"></i>
+                    <p>Đang cập nhật những bài viết mới nhất...</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     NEWSLETTER SECTION
+     ============================================ -->
 <div class="container">
-    <section class="newsletter-section">
+    <section class="home-newsletter reveal">
+        <div class="home-newsletter__pattern"></div>
         <div class="row align-items-center">
             <div class="col-lg-6 mb-4 mb-lg-0">
-                <h2 class="fw-bold mb-3 display-6">Đăng ký để nhận bí quyết khơi nguồn sống xanh</h2>
-                <p class="opacity-75 mb-0">Nhận ngay ưu đãi 10% cho đơn hàng đầu tiên và cẩm nang chăm sóc cây cảnh đặc quyền.</p>
+                <h2>Đăng ký để nhận bí quyết khơi nguồn sống xanh</h2>
+                <p>Nhận ngay ưu đãi 10% cho đơn hàng đầu tiên và cẩm nang chăm sóc cây cảnh đặc quyền.</p>
             </div>
             <div class="col-lg-5 offset-lg-1">
-                <div class="d-flex gap-2 bg-white p-2 rounded-pill shadow-lg">
-                    <input type="email" class="form-control border-0 rounded-pill px-4" placeholder="Nhập email của bạn...">
-                    <button class="btn btn-premium btn-premium-primary rounded-pill px-4">Đăng ký</button>
+                <div class="home-newsletter__form">
+                    <input type="email" class="home-newsletter__input" placeholder="Nhập email của bạn...">
+                    <button class="home-newsletter__btn">Đăng ký</button>
                 </div>
             </div>
         </div>
     </section>
 </div>
 
-<style>
-    .btn-soft-green { background: #f0fdf4; color: #10b981; }
-    .btn-soft-green:hover { background: #dcfce7; }
-    .fw-extrabold { font-weight: 800; }
-    .text-sm { font-size: 0.85rem; }
-</style>
+@section Scripts {
+    <script>
+        // Scroll Reveal Animation
+        document.addEventListener('DOMContentLoaded', function () {
+            const revealElements = document.querySelectorAll('.reveal');
+
+            function checkReveal() {
+                const windowHeight = window.innerHeight;
+                revealElements.forEach(el => {
+                    const top = el.getBoundingClientRect().top;
+                    if (top < windowHeight - 80) {
+                        el.classList.add('revealed');
+                    }
+                });
+            }
+
+            // Initial check
+            checkReveal();
+
+            // Listen for scroll
+            window.addEventListener('scroll', checkReveal, { passive: true });
+        });
+    </script>
+}

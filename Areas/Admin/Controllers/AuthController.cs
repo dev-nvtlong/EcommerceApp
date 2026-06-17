@@ -1,65 +1,75 @@
+﻿using BCrypt.Net;
+using EcommerceApp.Application.Features.Auth.Login;
 using EcommerceApp.Areas.Admin.ViewModels;
-using EcommerceApp.Models;
-using Microsoft.AspNetCore.Identity;
+using EcommerceApp.Data;
+using EcommerceApp.Enums;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace EcommerceApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class AuthController : Controller
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly UserManager<ApplicationUser> _userManager;
-        public AuthController(SignInManager<ApplicationUser> signInManager,
-                                UserManager<ApplicationUser> userManager)
+        private readonly LoginHandler loginHandler;
+        public AuthController(LoginHandler loginHandler)
         {
-            _signInManager = signInManager;
-            _userManager = userManager;
+            this.loginHandler = loginHandler;
         }
+
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(
+    LoginRequest request,
+    CancellationToken cancellationToken)
         {
-            if (!ModelState.IsValid)
+            var result = await loginHandler.HandleAsync(request, cancellationToken);
+
+            if (!result.Success)
             {
-                return View(model);
+                ModelState.AddModelError("", result.Message);
+                return View(request);
             }
-            var user = await _userManager.FindByEmailAsync(model.Email);
 
-            if (user == null)
+            if (!result.Data.Roles.Contains("Admin"))
             {
-                ModelState.AddModelError("", "Đăng nhập không hợp lệ");
-                return View(model);
+                ModelState.AddModelError("", "Bạn không có quyền truy cập trang quản trị.");
+                return View(request);
             }
 
-            var roles = await _userManager.GetRolesAsync(user);
-            if (!roles.Contains("Admin"))
+            // Login Cookie
+            var claims = new List<Claim>
             {
-                ModelState.AddModelError("", "Bạn không có quyền truy cập");
-                return View(model);
+                new Claim(ClaimTypes.NameIdentifier, result.Data.UserId.ToString()),
+                new Claim(ClaimTypes.Email, result.Data.Email)
+            };
+
+            foreach (var role in result.Data.Roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                user, model.Password, false, false);
-            if (result.Succeeded)
-            {          
-                return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
-            }
+            var identity = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme);
 
-            ModelState.AddModelError("", "Đăng nhập không hợp lệ");
-            return View(model);
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Login", "Auth", new { area = "Admin" });
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity));
+
+            return RedirectToAction(
+                "Index",
+                "Dashboard",
+                new { area = "Admin" });
         }
     }
 }

@@ -10,13 +10,13 @@ namespace EcommerceApp.Mappings
         {
             CreateMap<Comment, CommentDto>()
                 .ForMember(dest => dest.BlogPostTitle, opt => opt.MapFrom(src => src.BlogPost.Title))
-                .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.FullName ?? src.User.UserName))
-                .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.Avatar));
+                .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.UserName));
+            //.ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.Avatar));
 
             CreateMap<Like, LikeDto>()
                 .ForMember(dest => dest.BlogPostTitle, opt => opt.MapFrom(src => src.BlogPost.Title))
-                .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.FullName ?? src.User.UserName))
-                .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.Avatar));
+                .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.UserName));
+                //.ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.Avatar));
         }
     }
 }

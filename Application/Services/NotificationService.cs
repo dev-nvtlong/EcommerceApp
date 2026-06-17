@@ -55,13 +55,25 @@ namespace EcommerceApp.Application.Services
 
         public async Task CreateNotificationAsync(string title, string message, NotificationType type, string? redirectUrl = null)
         {
+            var adminUser = await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserRoles.Any(ur => ur.Role.Name == "Admin"));
+                
+            if (adminUser == null) 
+            {
+                adminUser = await _context.Users.FirstOrDefaultAsync();
+                if (adminUser == null) return;
+            }
+
             var notification = new Notification
             {
                 Title = title,
                 Message = message,
                 Type = type,
                 RedirectUrl = redirectUrl,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                UserId = adminUser.Id
             };
 
             _context.Notifications.Add(notification);

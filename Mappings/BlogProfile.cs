@@ -9,7 +9,7 @@ namespace EcommerceApp.Mappings
         public BlogProfile()
         {
             CreateMap<BlogPost, BlogPostDto>()
-                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.User.FullName ?? src.User.UserName))
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.User.UserName))
                 .ForMember(dest => dest.LikeCount, opt => opt.MapFrom(src => src.Likes != null ? src.Likes.Count : 0))
                 .ForMember(dest => dest.ImageUrls, opt => opt.MapFrom(src => src.Images != null 
                     ? src.Images.OrderBy(i => i.SortOrder).Select(i => i.ImageUrl).ToList() 
@@ -17,10 +17,13 @@ namespace EcommerceApp.Mappings
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
 
             CreateMap<Comment, CommentDto>()
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.FullName ?? src.User.UserName))
-                .ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User.Avatar));
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
+                //.ForMember(dest => dest.UserAvatar, opt => opt.MapFrom(src => src.User));
 
-            CreateMap<CreateBlogPostDto, BlogPost>();
+            CreateMap<CreateBlogPostDto, BlogPost>()
+                .ForMember(dest => dest.Thumbnail, opt => opt.Condition(src => src.Thumbnail != null))
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }
 }

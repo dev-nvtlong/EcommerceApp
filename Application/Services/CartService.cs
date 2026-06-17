@@ -19,7 +19,7 @@ namespace EcommerceApp.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<CartDto> GetCartByUserIdAsync(int userId)
+        public async Task<CartDto> GetCartByUserIdAsync(Guid userId)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId);
             if (cart == null)
@@ -31,7 +31,7 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<CartDto>(cart);
         }
 
-        public async Task AddToCartAsync(int userId, int productId, int quantity)
+        public async Task AddToCartAsync(Guid userId, Guid productId, int quantity)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId);
             if (cart == null)
@@ -41,7 +41,7 @@ namespace EcommerceApp.Application.Services
                 await _cartRepository.SaveAsync();
             }
 
-            var cartItem = await _cartRepository.GetCartItemAsync(cart.ID, productId);
+            var cartItem = await _cartRepository.GetCartItemAsync(cart.Id, productId);
             if (cartItem != null)
             {
                 cartItem.Quantity += quantity;
@@ -51,7 +51,7 @@ namespace EcommerceApp.Application.Services
             {
                 cartItem = new CartItem
                 {
-                    CartId = cart.ID,
+                    CartId = cart.Id,
                     ProductId = productId,
                     Quantity = quantity
                 };
@@ -60,12 +60,12 @@ namespace EcommerceApp.Application.Services
             await _cartRepository.SaveAsync();
         }
 
-        public async Task UpdateQuantityAsync(int userId, int productId, int quantity)
+        public async Task UpdateQuantityAsync(Guid userId, Guid productId, int quantity)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId);
             if (cart == null) return;
 
-            var cartItem = await _cartRepository.GetCartItemAsync(cart.ID, productId);
+            var cartItem = await _cartRepository.GetCartItemAsync(cart.Id, productId);
             if (cartItem != null)
             {
                 if (quantity > 0)
@@ -81,12 +81,12 @@ namespace EcommerceApp.Application.Services
             }
         }
 
-        public async Task RemoveFromCartAsync(int userId, int productId)
+        public async Task RemoveFromCartAsync(Guid userId, Guid productId)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId);
             if (cart == null) return;
 
-            var cartItem = await _cartRepository.GetCartItemAsync(cart.ID, productId);
+            var cartItem = await _cartRepository.GetCartItemAsync(cart.Id, productId);
             if (cartItem != null)
             {
                 await _cartRepository.RemoveCartItemAsync(cartItem);
@@ -94,7 +94,7 @@ namespace EcommerceApp.Application.Services
             }
         }
 
-        public async Task ClearCartAsync(int userId)
+        public async Task ClearCartAsync(Guid userId)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId);
             if (cart != null && cart.Items != null)

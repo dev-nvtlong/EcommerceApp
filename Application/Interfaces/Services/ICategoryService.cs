@@ -1,13 +1,13 @@
-﻿using EcommerceApp.Application.DTOs.Category;
+using EcommerceApp.Application.DTOs.Category;
 
 namespace EcommerceApp.Application.Interfaces.Services
 {
     public interface ICategoryService
     {
         Task<List<CategoryDto>> GetAllAsync();
-        Task<CategoryDto?> GetByIdAsync(int id);
+        Task<CategoryDto?> GetByIdAsync(Guid id);
         Task CreateAsync(CategoryDto dto);
         Task UpdateAsync(CategoryDto dto);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(Guid id);
     }
 }

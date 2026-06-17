@@ -23,7 +23,7 @@ namespace EcommerceApp.Application.Services
             _notificationService = notificationService;
         }
 
-        public async Task<OrderDto> CreateOrderAsync(int userId, CreateOrderDto createOrderDto)
+        public async Task<OrderDto> CreateOrderAsync(Guid userId, CreateOrderDto createOrderDto)
         {
             var cart = await _cartRepository.GetByUserIdAsync(userId);
             if (cart == null || cart.Items == null || !cart.Items.Any())
@@ -40,6 +40,9 @@ namespace EcommerceApp.Application.Services
                 PaymentMethod = createOrderDto.PaymentMethod,
                 Status = Enums.OrderStatus.Pending,
                 TotalAmount = totalAmount,
+                ShipName = createOrderDto.ShipName,
+                ShipAddress = createOrderDto.ShipAddress,
+                ShipPhone = createOrderDto.ShipPhone,
                 Details = cart.Items.Select(item => new OrderDetail
                 {
                     ProductId = item.ProductId,
@@ -49,6 +52,32 @@ namespace EcommerceApp.Application.Services
             };
 
             var createdOrder = await _orderRepository.CreateAsync(order);
+            
+            // Subtract stock and update SoldCount immediately on order creation for reservation
+            foreach (var item in cart.Items)
+            {
+                var product = await _productRepository.GetByIdAsync(item.ProductId);
+                if (product != null)
+                {
+                    if (product.StockQuantity < item.Quantity)
+                    {
+                        throw new Exception($"Sản phẩm '{product.Name}' hiện chỉ còn {product.StockQuantity} cây, không đủ để đặt hàng.");
+                    }
+                    product.StockQuantity -= item.Quantity;
+                    product.SoldCount = (product.SoldCount ?? 0) + item.Quantity;
+                    await _productRepository.UpdateAsync(product);
+                    
+                    if (product.StockQuantity < 5)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            "Cảnh báo tồn kho", 
+                            $"Sản phẩm '{product.Name}' sắp hết hàng (còn {product.StockQuantity} cây).", 
+                            Enums.NotificationType.LowStock,
+                            $"/Admin/Product/Index"
+                        );
+                    }
+                }
+            }
 
             // Clear Cart
             foreach (var item in cart.Items.ToList())
@@ -60,21 +89,21 @@ namespace EcommerceApp.Application.Services
             // Create Notification for Admin
             await _notificationService.CreateNotificationAsync(
                 "Đơn hàng mới", 
-                $"Bạn có đơn hàng mới #{createdOrder.ID} với tổng tiền {createdOrder.TotalAmount.ToString("N0")}đ", 
+                $"Bạn có đơn hàng mới #{createdOrder.Id} với tổng tiền {createdOrder.TotalAmount.ToString("N0")}đ", 
                 Enums.NotificationType.NewOrder,
-                $"/Admin/Order/Details/{createdOrder.ID}"
+                $"/Admin/Order/Details/{createdOrder.Id}"
             );
 
             return _mapper.Map<OrderDto>(createdOrder);
         }
 
-        public async Task<OrderDto?> GetOrderByIdAsync(int orderId)
+        public async Task<OrderDto?> GetOrderByIdAsync(Guid orderId)
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
             return _mapper.Map<OrderDto>(order);
         }
 
-        public async Task<List<OrderDto>> GetOrdersByUserIdAsync(int userId)
+        public async Task<List<OrderDto>> GetOrdersByUserIdAsync(Guid userId)
         {
             var orders = await _orderRepository.GetAllByUserIdAsync(userId);
             return _mapper.Map<List<OrderDto>>(orders);
@@ -86,13 +115,13 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<List<OrderDto>>(orders);
         }
 
-        public async Task UpdateOrderStatusAsync(int orderId, EcommerceApp.Enums.OrderStatus status)
+        public async Task UpdateOrderStatusAsync(Guid orderId, EcommerceApp.Enums.OrderStatus status)
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order != null)
             {
-                // Subtract stock when order is completed
-                if (status == Enums.OrderStatus.Completed && order.Status != Enums.OrderStatus.Completed)
+                // If Cancelled and wasn't already Cancelled, return stock
+                if (status == Enums.OrderStatus.Cancelled && order.Status != Enums.OrderStatus.Cancelled)
                 {
                     if (order.Details != null)
                     {
@@ -101,19 +130,30 @@ namespace EcommerceApp.Application.Services
                             var product = await _productRepository.GetByIdAsync(detail.ProductId);
                             if (product != null)
                             {
+                                product.StockQuantity += detail.Quantity;
+                                product.SoldCount = Math.Max(0, (product.SoldCount ?? 0) - detail.Quantity);
+                                await _productRepository.UpdateAsync(product);
+                            }
+                        }
+                    }
+                }
+                // (Optional) If transitioning from Cancelled back to any active status:
+                else if (order.Status == Enums.OrderStatus.Cancelled && status != Enums.OrderStatus.Cancelled)
+                {
+                    if (order.Details != null)
+                    {
+                        foreach (var detail in order.Details)
+                        {
+                            var product = await _productRepository.GetByIdAsync(detail.ProductId);
+                            if (product != null)
+                            {
+                                if(product.StockQuantity < detail.Quantity)
+                                {
+                                     throw new Exception($"Không thể khôi phục đơn hàng. Sản phẩm '{product.Name}' không đủ tồn kho.");
+                                }
                                 product.StockQuantity -= detail.Quantity;
                                 product.SoldCount = (product.SoldCount ?? 0) + detail.Quantity;
                                 await _productRepository.UpdateAsync(product);
-                                
-                                if (product.StockQuantity < 5)
-                                {
-                                    await _notificationService.CreateNotificationAsync(
-                                        "Cảnh báo tồn kho", 
-                                        $"Sản phẩm '{product.Name}' sắp hết hàng (vừa giảm xuống {product.StockQuantity} cây).", 
-                                        Enums.NotificationType.LowStock,
-                                        $"/Admin/Product/Index"
-                                    );
-                                }
                             }
                         }
                     }
@@ -123,7 +163,7 @@ namespace EcommerceApp.Application.Services
                 await _orderRepository.UpdateAsync(order);
             }
         }
-        public async Task UpdateOrderAsync(int orderId, OrderDto orderDto)
+        public async Task UpdateOrderAsync(Guid orderId, OrderDto orderDto)
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order != null)

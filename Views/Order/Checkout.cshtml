@@ -111,6 +111,37 @@
                     <span class="fw-bold h5 mb-0 text-primary">@Model.TotalAmount.ToString("C0", new System.Globalization.CultureInfo("vi-VN"))</span>
                 </div>
                 
+                @{
+                    var finalAddress = ViewBag.TempAddress ?? ViewBag.ProfileAddress ?? "Chưa có địa chỉ";
+                    var finalPhone = ViewBag.TempPhone ?? ViewBag.ProfilePhone ?? "Chưa có SĐT";
+                    var isOverride = ViewBag.TempAddress != null || ViewBag.TempPhone != null;
+                }
+
+                <div class="mb-4 p-3 bg-light border rounded-4 animate__animated animate__fadeIn">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2 text-primary small fw-bold">
+                            <i class="fa-solid fa-location-dot"></i> THÔNG TIN NHẬN HÀNG:
+                        </div>
+                        @if (isOverride)
+                        {
+                            <span class="badge bg-emerald-light-50 text-emerald-primary border border-emerald-100" style="font-size: 0.65rem;">THAY ĐỔI RIÊNG</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-blue-light-50 text-primary border border-blue-100" style="font-size: 0.65rem;">MẶC ĐỊNH</span>
+                        }
+                    </div>
+                    <div class="small text-dark mb-1 fw-medium">@finalAddress</div>
+                    <div class="small fw-bold text-dark">SĐT: @finalPhone</div>
+                    
+                    @if (isOverride)
+                    {
+                        <div class="mt-2 pt-2 border-top border-light" style="font-size: 10px; color: #64748b; font-style: italic;">
+                            * Lưu ý: Thông tin này chỉ áp dụng cho đơn hàng hiện tại.
+                        </div>
+                    }
+                </div>
+
                 <button type="button" onclick="placeOrder()" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-lg transition-transform hover-scale">
                     XÁC NHẬN ĐẶT HÀNG
                 </button>

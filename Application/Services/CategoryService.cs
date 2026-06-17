@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using EcommerceApp.Application.DTOs.Category;
 using EcommerceApp.Application.Interfaces.Repositories;
 using EcommerceApp.Application.Interfaces.Services;
@@ -23,7 +23,7 @@ namespace EcommerceApp.Application.Services
             await _categoryRepository.SaveAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var entity = await _categoryRepository.GetByIdAsync(id);
             if (entity != null)
@@ -39,7 +39,7 @@ namespace EcommerceApp.Application.Services
             return _mapper.Map<List<CategoryDto>>(data);
         }
 
-        public async Task<CategoryDto?> GetByIdAsync(int id)
+        public async Task<CategoryDto?> GetByIdAsync(Guid id)
         {
             var entity = await _categoryRepository.GetByIdAsync(id);
             return _mapper?.Map<CategoryDto?>(entity);

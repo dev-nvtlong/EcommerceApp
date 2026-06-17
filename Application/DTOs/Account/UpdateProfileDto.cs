@@ -6,7 +6,7 @@ namespace EcommerceApp.Application.DTOs.Account
     public class UpdateProfileDto
     {
         [Required(ErrorMessage = "Vui lòng nhập họ tên")]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         public string? PhoneNumber { get; set; }
 

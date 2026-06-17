@@ -1,11 +1,12 @@
 using EcommerceApp.Base;
 using EcommerceApp.Enums;
+using EcommerceApp.Models.Entities;
 
 namespace EcommerceApp.Models
 {
-    public class BlogPost : AuditableEntity
+    public class BlogPost : BaseEntity
     {
-        public string Title { get; set; }
+        public string Title { get; set; } = null!;
         public string? Content { get; set; }
 
         public string? Thumbnail { get; set; }
@@ -13,8 +14,8 @@ namespace EcommerceApp.Models
         public BlogCategory Category { get; set; } = BlogCategory.Experience;
         public string? Tags { get; set; }
 
-        public int UserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public Guid UserId { get; set; }
+        public User User { get; set; }
 
         public bool IsPublished { get; set; }
 

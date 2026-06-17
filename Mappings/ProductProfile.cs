@@ -9,7 +9,7 @@ namespace EcommerceApp.Mappings
         public ProductProfile()
         {
             CreateMap<Product, ProductDto>()
-                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ID))
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.ImageUrls,
                     opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl)))
                 .ForMember(dest => dest.ReviewCount,
@@ -21,7 +21,7 @@ namespace EcommerceApp.Mappings
                     opt => opt.MapFrom(src => src.SoldCount ?? 0));
 
             CreateMap<ProductDto, Product>()
-                .ForMember(dest => dest.ID, opt => opt.MapFrom(src => src.ProductId))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ProductId))
                 .ForMember(dest => dest.Images,
                     opt => opt.MapFrom(src => src.ImageUrls != null 
                         ? src.ImageUrls.Select(url => new ProductImage { ImageUrl = url, IsMain = true }).ToList() 

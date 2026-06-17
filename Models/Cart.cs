@@ -1,11 +1,12 @@
 ﻿using EcommerceApp.Base;
+using EcommerceApp.Models.Entities;
 
 namespace EcommerceApp.Models
 {
     public class Cart : BaseEntity
     {
-        public int UserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public Guid UserId { get; set; }
+        public User User { get; set; }
 
         public ICollection<CartItem>? Items { get; set; }
     }

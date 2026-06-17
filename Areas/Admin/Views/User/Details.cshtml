@@ -23,9 +23,7 @@
                  class="rounded-circle border border-4 border-white shadow-sm mx-auto mb-4" 
                  style="width: 150px; height: 150px; object-fit: cover;">
             
-            <h4 class="fw-bold mb-1">@Model.FullName</h4>
-            <p class="text-muted mb-4">@@@Model.UserName</p>
-            
+            <h4 class="fw-bold mb-1">@Model.FullName</h4>            
             <div class="d-flex justify-content-center gap-2 mb-4">
                 @foreach (var role in Model.Roles)
                 {
@@ -36,7 +34,7 @@
             <div class="text-start">
                 <div class="mb-3">
                     <label class="text-muted small fw-bold text-uppercase d-block mb-1">Ngày đăng ký</label>
-                    <div class="fw-semibold">@Model.CreateAt?.ToString("dd/MM/yyyy HH:mm")</div>
+                    <div class="fw-semibold">@Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</div>
                 </div>
                 <div class="mb-0">
                     <label class="text-muted small fw-bold text-uppercase d-block mb-1">Email</label>

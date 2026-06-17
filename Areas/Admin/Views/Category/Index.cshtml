@@ -169,12 +169,12 @@
                                     </td>
                                     <td class="text-end px-4">
                                         <div class="d-flex justify-content-end gap-2 text-nowrap">
-                                            <button class="btn btn-action btn-action--edit" onclick="openModal(@item.Id)" title="Chỉnh sửa">
+                                            <button class="btn btn-action btn-action--edit" onclick="openModal('@item.Id')" title="Chỉnh sửa">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
                                             <form id="deleteForm-@item.Id" asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:none;"></form>
                                             <button type="button" class="btn btn-action btn-action--delete" 
-                                                    onclick="confirmDelete(@item.Id, '@item.Name')" title="Xóa">
+                                                    onclick="confirmDelete('@item.Id', '@item.Name')" title="Xóa">
                                                 <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </div>
@@ -208,7 +208,7 @@
             </div>
             <form asp-action="Upsert" method="post">
                 <div class="modal-body px-4 pb-4">
-                    <input type="hidden" id="categoryId" name="Id" value="0" />
+                    <input type="hidden" id="categoryId" name="Id" value="00000000-0000-0000-0000-000000000000" />
                     <div class="mb-3">
                         <label for="categoryName" class="form-label fw-medium">Tên danh mục</label>
                         <input type="text" class="form-control rounded-3 py-2" id="categoryName" name="Name" required placeholder="VD: Điện thoại, Laptop...">
@@ -230,11 +230,11 @@
         const categoryId = document.getElementById('categoryId');
         const categoryName = document.getElementById('categoryName');
 
-        function openModal(id = 0) {
-            if (id === 0) {
+        function openModal(id = '') {
+            if (!id || id === '0' || id === '00000000-0000-0000-0000-000000000000') {
                 // Add new
                 modalTitle.innerText = 'Thêm danh mục mới';
-                categoryId.value = 0;
+                categoryId.value = '00000000-0000-0000-0000-000000000000';
                 categoryName.value = '';
                 modal.show();
             } else {

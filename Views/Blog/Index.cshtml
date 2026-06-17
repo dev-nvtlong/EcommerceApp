@@ -2,10 +2,17 @@
 @model IEnumerable<EcommerceApp.Application.DTOs.Blog.BlogPostDto>
 @{
     var category = (BlogCategory?)ViewData["Category"];
-    var title = category == BlogCategory.Sales ? "Bài viết sản phẩm" : "Kinh nghiệm & Bí quyết";
-    var description = category == BlogCategory.Sales 
-        ? "Khám phá các sản phẩm nổi bật và tin tức ưu đãi mới nhất từ Green Life." 
-        : "Nơi chia sẻ những kiến thức hữu ích về chăm sóc cây cảnh và không gian sống xanh.";
+    var title = "Blog Green Life";
+    var description = "Nơi chia sẻ tình yêu cây xanh và không gian sống bền vững.";
+    
+    if (category == BlogCategory.Sales) {
+        title = "Bài viết sản phẩm";
+        description = "Khám phá các sản phẩm nổi bật và tin tức ưu đãi mới nhất từ Green Life.";
+    } else if (category == BlogCategory.Experience) {
+        title = "Kinh nghiệm & Bí quyết";
+        description = "Nơi chia sẻ những kiến thức hữu ích về chăm sóc cây cảnh và không gian sống xanh.";
+    }
+    
     ViewData["Title"] = title;
 }
 
@@ -80,7 +87,7 @@
                             <div class="mb-3 d-flex flex-wrap gap-2">
                                 @foreach (var tag in post.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries))
                                 {
-                                    <a asp-action="Index" asp-route-searchTerm="@tag.Trim()" class="text-decoration-none small text-muted bg-light px-2 py-1 rounded-pill hover-bg-success-subtle">
+                                    <a asp-action="Index" asp-route-searchTerm="@tag.Trim()" asp-route-category="@post.Category" class="text-decoration-none small text-muted bg-light px-2 py-1 rounded-pill hover-bg-success-subtle">
                                         <i class="fa-solid fa-hashtag small opacity-50"></i>@tag.Trim()
                                     </a>
                                 }

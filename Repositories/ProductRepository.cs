@@ -18,7 +18,7 @@ namespace EcommerceApp.Repositories
             await _context.Products.AddAsync(product);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Guid id)
         {
             var entity = await _context.Products.FindAsync(id);
             if (entity != null)
@@ -32,14 +32,14 @@ namespace EcommerceApp.Repositories
             return await _context.Products.Include(p => p.Images).Include(p => p.Reviews).ToListAsync();
         }
 
-        public async Task<Product?> GetByIdAsync(int id)
+        public async Task<Product?> GetByIdAsync(Guid id)
         {
-            return await _context.Products.Include(p => p.Images).Include(p => p.Reviews).FirstOrDefaultAsync(p => p.ID == id);
+            return await _context.Products.Include(p => p.Images).Include(p => p.Reviews).FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<Product?> GetByIdAsNoTrackingAsync(int id)
+        public async Task<Product?> GetByIdAsNoTrackingAsync(Guid id)
         {
-            return await _context.Products.AsNoTracking().Include(p => p.Images).Include(p => p.Reviews).FirstOrDefaultAsync(p => p.ID == id);
+            return await _context.Products.AsNoTracking().Include(p => p.Images).Include(p => p.Reviews).FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task SaveAsync()

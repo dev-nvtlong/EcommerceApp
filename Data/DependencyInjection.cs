@@ -1,7 +1,13 @@
+using EcommerceApp.Application;
+using EcommerceApp.Application.Features.Auth.Login;
+using EcommerceApp.Application.Features.Auth.RefreshToken;
+using EcommerceApp.Application.Features.Auth.Register;
 using EcommerceApp.Application.Interfaces.Repositories;
 using EcommerceApp.Application.Interfaces.Services;
+using EcommerceApp.Application.Interfaces.UnitOfWork;
 using EcommerceApp.Application.Services;
 using EcommerceApp.Models;
+using EcommerceApp.Models.Entities;
 using EcommerceApp.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,16 +27,14 @@ namespace EcommerceApp.Data
                 options.UseSqlServer(connectionString,
                     b => b.MigrationsAssembly(
                         typeof(ApplicationDbContext).Assembly.FullName)));
-
-            services.AddIdentity<ApplicationUser, IdentityRole<int>>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
             #region ============== Đăng ký Repository =====================
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICartRepository, CartRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             #endregion
 
             #region ============== Đăng ký Service =====================
@@ -41,7 +45,15 @@ namespace EcommerceApp.Data
             services.AddScoped<IBlogService, BlogService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IJwtService, JwtService>();
             #endregion
+
+            services.AddScoped<RegisterHandler>();
+            services.AddScoped<LoginHandler>();
+            services.AddScoped<RefreshTokenHandler>();
             return services;
         }
     }

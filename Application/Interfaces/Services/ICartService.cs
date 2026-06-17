@@ -4,10 +4,10 @@ namespace EcommerceApp.Application.Interfaces.Services
 {
     public interface ICartService
     {
-        Task<CartDto> GetCartByUserIdAsync(int userId);
-        Task AddToCartAsync(int userId, int productId, int quantity);
-        Task UpdateQuantityAsync(int userId, int productId, int quantity);
-        Task RemoveFromCartAsync(int userId, int productId);
-        Task ClearCartAsync(int userId);
+        Task<CartDto> GetCartByUserIdAsync(Guid userId);
+        Task AddToCartAsync(Guid userId, Guid productId, int quantity);
+        Task UpdateQuantityAsync(Guid userId, Guid productId, int quantity);
+        Task RemoveFromCartAsync(Guid userId, Guid productId);
+        Task ClearCartAsync(Guid userId);
     }
 }

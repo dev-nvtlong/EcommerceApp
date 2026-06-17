@@ -18,7 +18,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var category = await _categoryService.GetByIdAsync(id);
             if (category == null) return NotFound();
@@ -30,7 +30,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (dto.Id == 0)
+                if (dto.Id == Guid.Empty)
                 {
                     await _categoryService.CreateAsync(dto);
                     TempData["Success"] = "Thêm danh mục thành công!";
@@ -46,7 +46,7 @@ namespace EcommerceApp.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _categoryService.DeleteAsync(id);
             TempData["Success"] = "Xóa danh mục thành công!";
